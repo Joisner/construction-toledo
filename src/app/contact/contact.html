@@ -1,0 +1,45 @@
+<section id="contact" class="py-20 animate-fade-in">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center mb-12">Contacto</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h3 class="text-2xl font-bold mb-4">Envíanos un Mensaje</h3>
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+          <div class="mb-4">
+            <label for="name" class="block text-gray-700 font-bold mb-2">Nombre</label>
+            <input type="text" id="name" formControlName="name" class="w-full px-3 py-2 border rounded-lg" placeholder="Tu Nombre">
+            <div *ngIf="contactForm.controls['name'].invalid && (contactForm.controls['name'].dirty || contactForm.controls['name'].touched)" class="text-red-500 mt-1">
+              El nombre es requerido.
+            </div>
+          </div>
+          <div class="mb-4">
+            <label for="email" class="block text-gray-700 font-bold mb-2">Correo Electrónico</label>
+            <input type="email" id="email" formControlName="email" class="w-full px-3 py-2 border rounded-lg" placeholder="tu@correo.com">
+            <div *ngIf="contactForm.controls['email'].invalid && (contactForm.controls['email'].dirty || contactForm.controls['email'].touched)" class="text-red-500 mt-1">
+              Ingresa un correo válido.
+            </div>
+          </div>
+          <div class="mb-4">
+            <label for="message" class="block text-gray-700 font-bold mb-2">Mensaje</label>
+            <textarea id="message" formControlName="message" rows="4" class="w-full px-3 py-2 border rounded-lg" placeholder="Tu mensaje"></textarea>
+            <div *ngIf="contactForm.controls['message'].invalid && (contactForm.controls['message'].dirty || contactForm.controls['message'].touched)" class="text-red-500 mt-1">
+              El mensaje es requerido.
+            </div>
+          </div>
+          <button type="submit" [disabled]="contactForm.invalid" class="bg-primary text-white py-3 px-6 rounded-full font-bold disabled:bg-gray-400">Enviar</button>
+        </form>
+      </div>
+      <div>
+        <h3 class="text-2xl font-bold mb-4">Solicita una Cotización</h3>
+        <p class="text-gray-600 mb-4">
+          Haz clic en el botón para enviarnos un mensaje de WhatsApp y solicitar una cotización para tu proyecto.
+        </p>
+        <a href="https://wa.me/34600000000?text=Hola,%20me%20gustaría%20recibir%20una%20cotización%20para%20un%20proyecto%20de%20construcción."
+           target="_blank"
+           class="inline-block bg-green-500 text-white py-3 px-6 rounded-full font-bold">
+          <i class="fab fa-whatsapp mr-2"></i> WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
