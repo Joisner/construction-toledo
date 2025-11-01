@@ -1,0 +1,28 @@
+<section class="container mx-auto px-4 py-8">
+  <h2 class="text-3xl font-bold mb-6">Servicios</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div *ngFor="let s of services" class="bg-white rounded shadow overflow-hidden">
+      <img [src]="s.image" [alt]="s.title" class="w-full h-40 object-cover">
+      <div class="p-4">
+        <h3 class="font-bold text-lg">{{ s.title }}</h3>
+        <p class="text-gray-600">{{ s.description }}</p>
+        <div class="mt-4">
+          <button (click)="showDetails(s)" class="px-4 py-2 bg-blue-600 text-white rounded">Ver más</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="selected()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-2xl w-full p-6">
+      <div class="flex justify-between items-start">
+        <h3 class="text-xl font-bold">{{ selected()?.title }}</h3>
+        <button (click)="close()" class="text-gray-500">✕</button>
+      </div>
+      <img [src]="selected()?.image" [alt]="selected()?.title" class="w-full h-56 object-cover my-4 rounded">
+      <p class="text-gray-700">{{ selected()?.details }}</p>
+    </div>
+  </div>
+</section>

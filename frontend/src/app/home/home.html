@@ -1,0 +1,195 @@
+<!-- Hero Section -->
+<section class="hero relative bg-cover bg-center min-h-screen flex items-center" style="background-image: url('https://via.placeholder.com/1600x800.png?text=Construcciones+Toledo');">
+  <!-- Overlay with gradient -->
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-blue-950/90 to-slate-900/95"></div>
+  
+  <!-- Animated background pattern -->
+  <div class="absolute inset-0 opacity-10">
+    <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px);"></div>
+  </div>
+
+  <div class="container mx-auto px-4 relative z-10">
+    <br>
+    <div class="max-w-4xl mx-auto text-center">
+      <!-- Badge -->
+      <div class="inline-flex items-center bg-cyan-400/20 backdrop-blur-sm border border-cyan-400/50 text-cyan-300 px-4 py-2 rounded-full text-sm font-semibold mb-6 animate-fade-in">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+        +15 años de experiencia
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="text-5xl md:text-7xl font-bold mb-6 text-white leading-tight">
+        <span class="block">Construcciones</span>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500">Toledo</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-xl md:text-2xl mb-8 text-gray-300 leading-relaxed max-w-3xl mx-auto">
+        Expertos en <span class="text-cyan-400 font-semibold">rehabilitación</span>, 
+        <span class="text-cyan-400 font-semibold">reformas</span> y 
+        <span class="text-cyan-400 font-semibold">acabados</span>. 
+        Calidad y confianza en cada proyecto.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row justify-center gap-4 mb-12">
+        <a routerLink="/services" 
+           class="group px-8 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center">
+          <span>Nuestros Servicios</span>
+          <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </a>
+        
+        <a routerLink="/projects" 
+           class="group px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold rounded-xl border-2 border-white/30 hover:border-cyan-400 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>Ver Proyectos</span>
+        </a>
+        
+        <a routerLink="/contact" 
+           class="group px-8 py-4 bg-slate-900/50 backdrop-blur-sm hover:bg-slate-900/70 text-white font-bold rounded-xl border-2 border-cyan-400 hover:border-cyan-300 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span>Solicitar Cotización</span>
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+          <div class="text-3xl font-bold text-cyan-400 mb-1">500+</div>
+          <div class="text-sm text-gray-300">Proyectos completados</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+          <div class="text-3xl font-bold text-cyan-400 mb-1">15+</div>
+          <div class="text-sm text-gray-300">Años de experiencia</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+          <div class="text-3xl font-bold text-cyan-400 mb-1">100%</div>
+          <div class="text-sm text-gray-300">Satisfacción garantizada</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+          <div class="text-3xl font-bold text-cyan-400 mb-1">24/7</div>
+          <div class="text-sm text-gray-300">Atención al cliente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+    <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+    </svg>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section class="py-20 bg-gradient-to-b from-white to-gray-50">
+  <div class="container mx-auto px-4">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <div class="inline-block mb-4">
+        <span class="text-cyan-400 font-semibold text-sm tracking-wider uppercase">Lo que hacemos</span>
+      </div>
+      <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+        Servicios <span class="text-cyan-400">Destacados</span>
+      </h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Ofrecemos soluciones integrales en construcción con los más altos estándares de calidad
+      </p>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <!-- Service Card 1 -->
+      <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+        <div class="h-2 bg-gradient-to-r from-cyan-400 to-cyan-500"></div>
+        <div class="p-8">
+          <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3 group-hover:text-cyan-400 transition-colors">
+            Enpisado
+          </h3>
+          <p class="text-gray-600 mb-6 leading-relaxed">
+            Suelos resistentes con acabado profesional. Utilizamos materiales de primera calidad para garantizar durabilidad.
+          </p>
+          <a routerLink="/services" class="inline-flex items-center text-cyan-400 font-semibold group-hover:text-cyan-500 transition-colors">
+            <span>Más información</span>
+            <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Service Card 2 -->
+      <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+        <div class="h-2 bg-gradient-to-r from-cyan-400 to-cyan-500"></div>
+        <div class="p-8">
+          <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3 group-hover:text-cyan-400 transition-colors">
+            Enlucido
+          </h3>
+          <p class="text-gray-600 mb-6 leading-relaxed">
+            Paredes lisas y perfectamente preparadas para pintar. Técnicas profesionales para un acabado impecable.
+          </p>
+          <a routerLink="/services" class="inline-flex items-center text-cyan-400 font-semibold group-hover:text-cyan-500 transition-colors">
+            <span>Más información</span>
+            <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Service Card 3 -->
+      <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+        <div class="h-2 bg-gradient-to-r from-cyan-400 to-cyan-500"></div>
+        <div class="p-8">
+          <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3 group-hover:text-cyan-400 transition-colors">
+            Alicatado
+          </h3>
+          <p class="text-gray-600 mb-6 leading-relaxed">
+            Azulejos y revestimientos instalados con máxima precisión. Diseños personalizados para cada espacio.
+          </p>
+          <a routerLink="/services" class="inline-flex items-center text-cyan-400 font-semibold group-hover:text-cyan-500 transition-colors">
+            <span>Más información</span>
+            <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- View All Services Button -->
+    <div class="text-center mt-12">
+      <a routerLink="/services" 
+         class="inline-flex items-center px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <span>Ver todos los servicios</span>
+        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>

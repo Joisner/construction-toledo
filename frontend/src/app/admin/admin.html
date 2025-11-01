@@ -1,0 +1,35 @@
+<section class="container mx-auto px-4 py-8">
+  <h2 class="text-3xl font-bold mb-4">Panel de administración (local)</h2>
+
+  <h3 class="text-xl font-bold mt-4 mb-2">Solicitudes de cotización</h3>
+  <div *ngIf="submissions.length === 0" class="text-gray-600">No hay solicitudes aún.</div>
+  <div *ngFor="let s of submissions; let i = index" class="bg-white p-4 rounded shadow mb-2">
+    <div class="flex justify-between">
+      <div>
+        <div class="font-bold">{{ s.name }} - {{ s.service }}</div>
+        <div class="text-sm text-gray-600">{{ s.email }} • {{ s.phone }} • {{ s.date }}</div>
+        <p class="mt-2">{{ s.message }}</p>
+      </div>
+      <div>
+        <button (click)="deleteSubmission(i)" class="px-3 py-1 bg-red-500 text-white rounded">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="text-xl font-bold mt-6 mb-2">Servicios (local)</h3>
+  <form (submit)="addService($event)" class="bg-white p-4 rounded shadow mb-4">
+    <div class="mb-2"><label class="block">Título</label><input name="title" class="w-full border p-2 rounded" required></div>
+    <div class="mb-2"><label class="block">Descripción</label><input name="description" class="w-full border p-2 rounded"></div>
+    <div class="mb-2"><label class="block">Imagen (URL)</label><input name="image" class="w-full border p-2 rounded"></div>
+    <div class="flex justify-end"><button class="px-4 py-2 bg-green-600 text-white rounded">Agregar servicio</button></div>
+  </form>
+
+  <div *ngIf="services.length === 0" class="text-gray-600">No hay servicios locales guardados.</div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div *ngFor="let svc of services" class="bg-white rounded p-4 shadow">
+      <img [src]="svc.image || 'https://via.placeholder.com/300x200.png?text=Servicio'" alt="{{ svc.title }}" class="w-full h-36 object-cover rounded mb-2">
+      <div class="font-bold">{{ svc.title }}</div>
+      <div class="text-sm text-gray-600">{{ svc.description }}</div>
+    </div>
+  </div>
+</section>

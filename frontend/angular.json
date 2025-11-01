@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "363c708a-e533-4c66-9a5d-afd4c74c5446"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -112,6 +113,11 @@
             "styles": [
               "src/styles.css"
             ]
+              ,
+              "tailwindConfiguration": {
+                "package": "tailwindcss",
+                "file": "tailwind.config.js"
+              }
           }
         }
       }
