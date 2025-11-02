@@ -78,17 +78,18 @@ export class Admin implements OnInit {
   }
 
   ngOnInit() {
+    debugger;
     // Verificar autenticación
     const authId = localStorage.getItem('authAdminId');
     if (!authId) {
       this.router.navigate(['/login']);
       return;
     }
-    const admins = JSON.parse(localStorage.getItem('admins') || '[]');
+/*     const admins = JSON.parse(localStorage.getItem('admins') || '[]');
     const isAuth = admins.some((admin: any) => admin.id === authId);
     if (!isAuth) {
       this.router.navigate(['/login']);
-    }
+    } */
   }
 
   logout() {
