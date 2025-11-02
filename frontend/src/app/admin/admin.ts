@@ -1,6 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 interface Quote {
   id: string;
@@ -54,7 +55,7 @@ type AdminTab = 'quotes' | 'projects' | 'services' | 'admins';
   templateUrl: './admin.html',
   styleUrls: ['./admin.css']
 })
-export class Admin {
+export class Admin implements OnInit {
   // Estado actual
   currentTab = signal<AdminTab>('quotes');
   editingItem = signal<any>(null);
@@ -71,9 +72,28 @@ export class Admin {
     this.quotes().filter(q => q.status === 'pending').length
   );
 
-  constructor() {
+  constructor(private router: Router) {
     // Cargar datos al iniciar
     this.loadAllData();
+  }
+
+  ngOnInit() {
+    // Verificar autenticación
+    const authId = localStorage.getItem('authAdminId');
+    if (!authId) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    const admins = JSON.parse(localStorage.getItem('admins') || '[]');
+    const isAuth = admins.some((admin: any) => admin.id === authId);
+    if (!isAuth) {
+      this.router.navigate(['/login']);
+    }
+  }
+
+  logout() {
+    localStorage.removeItem('authAdminId');
+    this.router.navigate(['/login']);
   }
 
   addBeforeAfterPair() {

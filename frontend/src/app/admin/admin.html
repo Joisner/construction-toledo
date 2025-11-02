@@ -10,6 +10,10 @@
                     <p class="text-gray-600">Gestiona tus proyectos, servicios y cotizaciones</p>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <!-- Logout button -->
+                    <button (click)="logout()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow">
+                        Cerrar sesión
+                    </button>
                     <!-- Notification Badge -->
                     <div class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-xl shadow-lg">
                         <div class="flex items-center space-x-2">
@@ -286,7 +290,7 @@
                         </div>
                         <div
                             class="absolute top-4 right-4 bg-cyan-400 text-slate-900 px-3 py-1 rounded-full text-xs font-bold">
-                            {{ project.beforeAfterPairs?.length || 0 }} fotos
+                            {{ project.beforeAfterPairs.length || 0 }} fotos
                         </div>
                     </div>
                     <div class="p-6">

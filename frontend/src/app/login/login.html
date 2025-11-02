@@ -1,20 +1,119 @@
-<section class="min-h-screen flex items-center justify-center bg-gray-50">
-  <div class="max-w-md w-full bg-white p-8 rounded shadow">
-    <h2 class="text-2xl font-bold mb-4">Acceso administrador</h2>
-    <form (submit)="onSubmit($event)">
-      <div class="mb-4">
-        <label class="block font-bold mb-1">Usuario o email</label>
-        <input [(ngModel)]="username" name="username" required class="w-full border p-2 rounded" />
+<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 relative overflow-hidden">
+  <!-- Animated background pattern -->
+  <div class="absolute inset-0 opacity-10">
+    <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px);"></div>
+  </div>
+
+  <!-- Decorative shapes -->
+  <div class="absolute top-20 left-20 w-72 h-72 bg-cyan-400/20 rounded-full blur-3xl animate-pulse"></div>
+  <div class="absolute bottom-20 right-20 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+
+  <div class="max-w-md w-full p-2 mx-4 relative z-10">
+    <!-- Login Card -->
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8">
+      <div class="flex justify-center mb-6">
+        <img src="/assets/logos/logo.png" class="w-32" alt="Construcciones Toledo Logo">
       </div>
-      <div class="mb-4">
-        <label class="block font-bold mb-1">Contraseña (opcional)</label>
-        <input [(ngModel)]="password" name="password" type="password" class="w-full border p-2 rounded" />
+      <form (submit)="onSubmit($event)" class="space-y-6">
+        <!-- Username Field -->
+        <div>
+          <label class="block text-sm font-semibold text-cyan-300 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            Usuario o email
+          </label>
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-cyan-400 group-focus-within:text-cyan-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            </div>
+            <input 
+              [(ngModel)]="username" 
+              name="username" 
+              required 
+              placeholder="Ingresa tu usuario"
+              class="w-full pl-12 pr-4 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-white/40 focus:bg-white/20 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/30 transition-all outline-none text-lg" />
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label class="block text-sm font-semibold text-cyan-300 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            Contraseña
+          </label>
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-cyan-400 group-focus-within:text-cyan-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <input 
+              [(ngModel)]="password" 
+              name="password" 
+              type="password"
+              placeholder="Ingresa tu contraseña"
+              class="w-full pl-12 pr-4 py-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white placeholder-white/40 focus:bg-white/20 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/30 transition-all outline-none text-lg" />
+          </div>
+          <p class="text-xs text-cyan-300/70 mt-2 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            La contraseña es opcional para desarrollo
+          </p>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="bg-red-500/20 border-2 border-red-500/50 backdrop-blur-sm rounded-2xl p-4 flex items-start space-x-3 animate-shake">
+          <svg class="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <div>
+            <p class="font-semibold text-red-200">Error de autenticación</p>
+            <p class="text-sm text-red-300 mt-1">{{ error }}</p>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit"
+          class="w-full px-6 py-4 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-2xl shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] flex items-center justify-center text-lg group">
+          <svg class="w-6 h-6 mr-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+          </svg>
+          Iniciar sesión
+        </button>
+
+        <!-- Back Link -->
+        <div class="text-center pt-4">
+          <button
+            type="button"
+            (click)="logoutAny()"
+            class="text-cyan-300 hover:text-cyan-200 font-medium transition-colors inline-flex items-center group">
+            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver al inicio
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Security Badge -->
+    <div class="text-center mt-8 space-y-3">
+      <div class="flex items-center justify-center space-x-2 text-cyan-300/80 text-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+        </svg>
+        <span class="font-medium">Conexión segura y encriptada</span>
       </div>
-      <div *ngIf="error" class="text-red-600 mb-2">{{ error }}</div>
-      <div class="flex justify-between items-center">
-        <button class="px-4 py-2 bg-blue-600 text-white rounded">Entrar</button>
-        <a (click)="logoutAny()" class="text-sm text-gray-600 hover:underline cursor-pointer">Volver</a>
-      </div>
-    </form>
+      <p class="text-xs text-cyan-300/60">
+        © 2025 Construcciones Toledo. Todos los derechos reservados.
+      </p>
+    </div>
   </div>
 </section>
