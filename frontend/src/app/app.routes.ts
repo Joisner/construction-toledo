@@ -9,6 +9,9 @@ import { Contact } from './contact/contact';
 import { Testimonials } from './testimonials/testimonials';
 import { Admin } from './admin/admin';
 import { Login } from './login/login';
+import { InvoiceEditor } from './shared/components/invoice-creator/invoice-creator';
+import { Budget } from './shared/components/budget/budget';
+import { DocumentsList } from './shared/components/documents-list/documents-list';
 
 // ✅ Simple Auth Guard
 const authGuard = () => {
@@ -25,6 +28,21 @@ const authGuard = () => {
 
 export const routes: Routes = [
   { path: '', component: Home },
+  {
+    path: 'documents',
+    component: DocumentsList,
+    title: 'Gestión de Documentos - Construcciones Toledo'
+  },
+  {
+    path: 'invoice',
+    component: InvoiceEditor,
+    title: 'Nueva Factura - Construcciones Toledo'
+  },
+  {
+    path: 'budget',
+    component: Budget,
+    title: 'Nuevo Presupuesto - Construcciones Toledo'
+  },
   { path: 'services', component: Services },
   { path: 'projects', component: Projects },
   { path: 'project/:id', component: ProjectDetail },

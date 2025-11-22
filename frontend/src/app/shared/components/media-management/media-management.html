@@ -1,0 +1,124 @@
+@if (isOpen) {
+  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white rounded-2xl p-8 max-w-4xl w-full shadow-2xl transform my-8">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-slate-900">
+          Gestionar <span class="text-cyan-400">Fotos y Videos</span>
+        </h3>
+        <button (click)="closeMediaModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Formulario para añadir media -->
+      <div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 mb-6">
+        <h4 class="text-lg font-bold text-slate-900 mb-4">Añadir nuevo item</h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de media *</label>
+            <select [(ngModel)]="newMediaItem().media_type" name="media_type"
+              class="w-full border-2 border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all bg-white">
+              <option value="image">📷 Imagen</option>
+              <option value="video">🎥 Video</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Estado *</label>
+            <select [(ngModel)]="newMediaItem().is_before" name="is_before"
+              class="w-full border-2 border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all bg-white">
+              <option [ngValue]="true">🔴 ANTES</option>
+              <option [ngValue]="false">🟢 DESPUÉS</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">URL del archivo *</label>
+          <input [(ngModel)]="newMediaItem().file_url" name="file_url" type="url"
+            placeholder="https://ejemplo.com/archivo.jpg"
+            class="w-full border-2 border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción *</label>
+          <input [(ngModel)]="newMediaItem().description" name="description"
+            placeholder="Ej: Renovación completa de cocina"
+            class="w-full border-2 border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all">
+        </div>
+
+        <button type="button" (click)="addMediaToList()"
+          class="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-lg transition-all flex items-center justify-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Añadir a la lista
+        </button>
+      </div>
+
+      <!-- Lista de media actual -->
+      <div class="mb-6">
+        <h4 class="text-lg font-bold text-slate-900 mb-4">
+          Media del proyecto ({{ currentMediaList().length }} items)
+        </h4>
+
+        @if (currentMediaList().length === 0) {
+          <div class="text-center py-8 text-gray-500">
+            <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            No hay media agregada aún
+          </div>
+        }
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          @for (item of currentMediaList(); track item.id; let i = $index) {
+            <div class="relative bg-white rounded-xl overflow-hidden border-2 border-gray-200 hover:border-cyan-400 transition-all">
+              <div class="relative h-48">
+                @if (item.media_type === 'image') {
+                  <img [src]="item.file_url" [alt]="item.description" class="w-full h-full object-cover">
+                }
+                @if (item.media_type === 'video') {
+                  <video [src]="item.file_url" class="w-full h-full object-cover" controls></video>
+                }
+                <div class="absolute top-2 left-2 px-3 py-1 rounded-lg text-xs font-bold text-white shadow-lg"
+                  [class.bg-red-500]="item.is_before" [class.bg-green-500]="!item.is_before">
+                  {{ item.is_before ? '🔴 ANTES' : '🟢 DESPUÉS' }}
+                </div>
+                <div class="absolute top-2 right-2 px-3 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-lg">
+                  {{ item.media_type === 'image' ? '📷' : '🎥' }}
+                </div>
+              </div>
+              <div class="p-4">
+                <p class="text-sm text-gray-700 mb-3 line-clamp-2">{{ item.description }}</p>
+                <button type="button" (click)="removeMediaFromList(i)"
+                  class="w-full px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition-colors flex items-center justify-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Botones del modal -->
+      <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <button type="button" (click)="closeMediaModal()"
+          class="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-xl transition-colors">
+          Cancelar
+        </button>
+        <button type="button" (click)="saveMediaList()"
+          class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,247 @@
+/* Estilos adicionales para impresión */
+@media print {
+  /* Ocultar elementos no imprimibles */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Asegurar que la factura use todo el ancho */
+  .invoice-container {
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  /* Asegurar colores en impresión */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Eliminar padding del body en impresión */
+  body {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Configurar márgenes de página optimizados */
+  @page {
+    margin: 0.5cm;
+    size: A4;
+  }
+
+  /* Optimizar contenedor principal */
+  .print-optimized {
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+
+  /* Forzar layout horizontal en impresión */
+  .sm\:hidden {
+    display: none !important;
+  }
+  
+  .hidden.sm\:flex {
+    display: flex !important;
+  }
+
+  /* Updated print header for 3-column layout: logo left, company center, invoice right */
+  .print-header {
+    padding: 12px 15px 12px 15px !important;
+    gap: 8px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  /* Logo container on the left - fixed size */
+  .print-logo-container {
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Logo stays fixed size on left */
+  .print-logo {
+    width: 85px !important;
+    height: 85px !important;
+    padding: 6px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Company info section in center - takes minimal space needed */
+  .print-company-info {
+    padding: 0 8px !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    text-align: left !important;
+    min-width: 0 !important;
+    max-width: 300px !important;
+  }
+
+  /* Forzar la sección FACTURA completamente al borde derecho - sin padding extra */
+  .print-invoice-section {
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-align: right !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+  }
+
+  /* Reducir tamaño de título */
+  .print-title {
+    font-size: 20px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Reducir texto de empresa */
+  .print-company-text {
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Título FACTURA alineado a derecha */
+  .print-invoice-title {
+    font-size: 20px !important;
+    margin-bottom: 4px !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+  }
+
+  .print-invoice-details {
+    font-size: 9px !important;
+  }
+
+  /* Reducir padding sección cliente */
+  .print-client-section {
+    padding: 12px 15px !important;
+    gap: 15px !important;
+  }
+
+  /* Reducir padding tabla */
+  .print-table-section {
+    padding: 12px 15px !important;
+  }
+
+  /* Reducir padding celdas tabla */
+  .print-table-cell {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+
+  .print-table-header {
+    padding: 6px 10px !important;
+  }
+
+  /* Reducir padding totales */
+  .print-totals-section {
+    padding: 8px 15px 12px !important;
+  }
+
+  .print-total-row {
+    padding: 5px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .print-total-row-main {
+    padding: 6px 12px !important;
+    font-size: 15px !important;
+  }
+
+  /* Reducir sección de pago */
+  .print-payment-section {
+    padding: 12px 15px !important;
+  }
+
+  .print-payment-title {
+    font-size: 10px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .print-payment-box {
+    padding: 10px !important;
+  }
+
+  .print-payment-text {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Reducir footer */
+  .print-footer {
+    padding: 10px !important;
+    font-size: 10px !important;
+  }
+
+  /* Reducir títulos de sección */
+  .print-section-title {
+    font-size: 8px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Ajustar line-height general */
+  .print-compact {
+    line-height: 1.3 !important;
+  }
+
+  /* Reducir bordes */
+  .print-border {
+    border-width: 1px !important;
+  }
+
+  /* Permitir saltos de página */
+  .print-table-section {
+    page-break-inside: auto;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+}
+
+/* Ajustes específicos para el componente */
+:host {
+  display: block;
+}
+
+/* Animaciones suaves para transiciones */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Ajustes para inputs en iOS (evitar zoom) */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+textarea {
+  font-size: 16px !important;
+}
+
+@media (min-width: 1024px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  textarea {
+    font-size: 14px !important;
+  }
+}

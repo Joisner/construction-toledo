@@ -1,19 +1,11 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-interface ProjectImage {
-  url: string;
-  label: string;
-}
-
-interface BeforeAfterPair {
-  before: string;
-  after: string;
-  description: string;
-}
-
-interface VideoBeforeAfterPair {
-  before: string;
-  after: string;
+import { IProject, Media } from '../../core/models/project.model';
+import { ActivatedRoute } from '@angular/router';
+import { Project } from '../../core/services/project';
+interface MediaPair {
+  before: Media | null;
+  after: Media | null;
   description: string;
 }
 
@@ -24,97 +16,122 @@ interface VideoBeforeAfterPair {
   styleUrls: ['./project-detail.css'],
 })
 export class ProjectDetail implements OnInit {
-   @ViewChild('comparisonContainer') comparisonContainer!: ElementRef;
+  @ViewChild('comparisonContainer') comparisonContainer!: ElementRef;
   @ViewChild('beforeVideo') beforeVideo!: ElementRef<HTMLVideoElement>;
   @ViewChild('afterVideo') afterVideo!: ElementRef<HTMLVideoElement>;
+
+  project: IProject | null = null;
+  loading: boolean = true;
 
   viewMode: 'carousel' | 'comparison' | 'video-comparison' = 'carousel';
   currentIndex = 0;
   comparisonIndex = 0;
   videoComparisonIndex = 0;
-  sliderPosition = 50; // Posición inicial del slider (50%)
+  sliderPosition = 50;
   isDragging = false;
 
-  // Imágenes para el carrusel
-  images: ProjectImage[] = [
-    { url: 'https://via.placeholder.com/800x600.png?text=Vista+General+Antes', label: 'Vista General - Antes' },
-    { url: 'https://via.placeholder.com/800x600.png?text=Vista+General+Después', label: 'Vista General - Después' },
-    { url: 'https://via.placeholder.com/800x600.png?text=Cocina+Antes', label: 'Cocina - Antes' },
-    { url: 'https://via.placeholder.com/800x600.png?text=Cocina+Después', label: 'Cocina - Después' },
-    { url: 'https://via.placeholder.com/800x600.png?text=Baño+Antes', label: 'Baño - Antes' },
-    { url: 'https://via.placeholder.com/800x600.png?text=Baño+Después', label: 'Baño - Después' }
-  ];
+  // Media organizada
+  allMedia: Media[] = [];
+  imagePairs: MediaPair[] = [];
+  videoPairs: MediaPair[] = [];
 
-  // Pares de imágenes antes/después
-  beforeAfterPairs: BeforeAfterPair[] = [
-    {
-      before: 'https://via.placeholder.com/800x600.png?text=Vista+General+Antes',
-      after: 'https://via.placeholder.com/800x600.png?text=Vista+General+Después',
-      description: 'Renovación completa del espacio, mejorando iluminación y distribución'
-    },
-    {
-      before: 'https://via.placeholder.com/800x600.png?text=Cocina+Antes',
-      after: 'https://via.placeholder.com/800x600.png?text=Cocina+Después',
-      description: 'Modernización de cocina con nuevos acabados y electrodomésticos'
-    },
-    {
-      before: 'https://via.placeholder.com/800x600.png?text=Baño+Antes',
-      after: 'https://via.placeholder.com/800x600.png?text=Baño+Después',
-      description: 'Renovación completa del baño con materiales de alta calidad'
-    }
-  ];
-
-  // Pares de videos antes/después
-  videoBeforeAfterPairs: VideoBeforeAfterPair[] = [
-    {
-      before: 'assets/videos/cocina-antes.mp4',
-      after: 'assets/videos/cocina-despues.mp4',
-      description: 'Renovación completa de cocina - Vista 360° del espacio transformado'
-    },
-    {
-      before: 'assets/videos/salon-antes.mp4',
-      after: 'assets/videos/salon-despues.mp4',
-      description: 'Remodelación del salón principal con nuevos acabados y diseño moderno'
-    },
-    {
-      before: 'assets/videos/bano-antes.mp4',
-      after: 'assets/videos/bano-despues.mp4',
-      description: 'Modernización de baño con materiales premium y diseño contemporáneo'
-    }
-  ];
+  constructor(
+    private route: ActivatedRoute,
+    private projectService: Project
+  ) { }
 
   ngOnInit(): void {
-    // Inicialización si es necesaria
+    const projectId = this.route.snapshot.paramMap.get('id');
+    if (projectId) {
+      this.loadProject(projectId);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.pauseAllVideos();
+  }
+
+  private loadProject(id: string): void {
+    this.projectService.getProjectById(id).subscribe({
+      next: (project: IProject) => {
+        debugger
+        this.project = project;
+        this.allMedia = project.media;
+        this.organizePairs();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading project:', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  private organizePairs(): void {
+    if (!this.project) return;
+
+    const images = this.project.media.filter(m => m.media_type === 'image');
+    const videos = this.project.media.filter(m => m.media_type === 'video');
+
+    // Organizar imágenes en pares
+    const beforeImages = images.filter(m => m.is_before);
+    const afterImages = images.filter(m => !m.is_before);
+
+    this.imagePairs = this.createPairs(beforeImages, afterImages);
+
+    // Organizar videos en pares
+    const beforeVideos = videos.filter(m => m.is_before);
+    const afterVideos = videos.filter(m => !m.is_before);
+
+    this.videoPairs = this.createPairs(beforeVideos, afterVideos);
+  }
+
+  private createPairs(beforeList: Media[], afterList: Media[]): MediaPair[] {
+    const pairs: MediaPair[] = [];
+    const maxLength = Math.max(beforeList.length, afterList.length);
+
+    for (let i = 0; i < maxLength; i++) {
+      const before = beforeList[i] || null;
+      const after = afterList[i] || null;
+
+      pairs.push({
+        before,
+        after,
+        description: after?.description || before?.description || 'Transformación'
+      });
+    }
+
+    return pairs;
   }
 
   // ==================== MÉTODOS DEL CARRUSEL ====================
-  
+
   prevImage(): void {
-    this.currentIndex = this.currentIndex > 0 ? this.currentIndex - 1 : this.images.length - 1;
+    this.currentIndex = this.currentIndex > 0 ? this.currentIndex - 1 : this.allMedia.length - 1;
   }
 
   nextImage(): void {
-    this.currentIndex = this.currentIndex < this.images.length - 1 ? this.currentIndex + 1 : 0;
+    this.currentIndex = this.currentIndex < this.allMedia.length - 1 ? this.currentIndex + 1 : 0;
   }
 
   // ==================== MÉTODOS DE COMPARACIÓN DE IMÁGENES ====================
-  
+
   prevComparison(): void {
     if (this.comparisonIndex > 0) {
       this.comparisonIndex--;
-      this.sliderPosition = 50; // Reset slider position
+      this.sliderPosition = 50;
     }
   }
 
   nextComparison(): void {
-    if (this.comparisonIndex < this.beforeAfterPairs.length - 1) {
+    if (this.comparisonIndex < this.imagePairs.length - 1) {
       this.comparisonIndex++;
-      this.sliderPosition = 50; // Reset slider position
+      this.sliderPosition = 50;
     }
   }
 
   // ==================== MÉTODOS DEL SLIDER ANTES/DESPUÉS ====================
-  
+
   startDragging(event: MouseEvent | TouchEvent): void {
     this.isDragging = true;
     event.preventDefault();
@@ -127,7 +144,7 @@ export class ProjectDetail implements OnInit {
 
     const container = this.comparisonContainer.nativeElement;
     const rect = container.getBoundingClientRect();
-    
+
     let clientX: number;
     if (event instanceof MouseEvent) {
       clientX = event.clientX;
@@ -137,8 +154,7 @@ export class ProjectDetail implements OnInit {
 
     const x = clientX - rect.left;
     const percentage = (x / rect.width) * 100;
-    
-    // Limitar entre 0 y 100
+
     this.sliderPosition = Math.max(0, Math.min(100, percentage));
   }
 
@@ -149,7 +165,7 @@ export class ProjectDetail implements OnInit {
   }
 
   // ==================== MÉTODOS DE COMPARACIÓN DE VIDEOS ====================
-  
+
   prevVideoComparison(): void {
     if (this.videoComparisonIndex > 0) {
       this.pauseAllVideos();
@@ -158,7 +174,7 @@ export class ProjectDetail implements OnInit {
   }
 
   nextVideoComparison(): void {
-    if (this.videoComparisonIndex < this.videoBeforeAfterPairs.length - 1) {
+    if (this.videoComparisonIndex < this.videoPairs.length - 1) {
       this.pauseAllVideos();
       this.videoComparisonIndex++;
     }
@@ -168,12 +184,10 @@ export class ProjectDetail implements OnInit {
     if (this.beforeVideo && this.afterVideo) {
       const beforeVid = this.beforeVideo.nativeElement;
       const afterVid = this.afterVideo.nativeElement;
-      
-      // Reiniciar ambos videos desde el inicio
+
       beforeVid.currentTime = 0;
       afterVid.currentTime = 0;
-      
-      // Reproducir ambos videos
+
       beforeVid.play().catch(err => console.error('Error playing before video:', err));
       afterVid.play().catch(err => console.error('Error playing after video:', err));
     }
@@ -195,30 +209,43 @@ export class ProjectDetail implements OnInit {
     const afterVid = this.afterVideo.nativeElement;
 
     if (source === 'before') {
-      // Si se reproduce el video "antes", sincronizar el "después"
       afterVid.currentTime = beforeVid.currentTime;
       afterVid.play().catch(err => console.error('Error syncing after video:', err));
     } else {
-      // Si se reproduce el video "después", sincronizar el "antes"
       beforeVid.currentTime = afterVid.currentTime;
       beforeVid.play().catch(err => console.error('Error syncing before video:', err));
     }
   }
 
   // ==================== MÉTODO PARA CAMBIAR DE MODO ====================
-  
+
   changeViewMode(mode: 'carousel' | 'comparison' | 'video-comparison'): void {
-    // Pausar videos al cambiar de modo
     if (this.viewMode === 'video-comparison') {
       this.pauseAllVideos();
     }
     this.viewMode = mode;
   }
 
-  // ==================== LIFECYCLE HOOKS ====================
-  
-  ngOnDestroy(): void {
-    // Limpiar recursos al destruir el componente
-    this.pauseAllVideos();
+  // ==================== UTILIDADES ====================
+
+  hasImagePairs(): boolean {
+    return this.imagePairs.length > 0;
+  }
+
+  hasVideoPairs(): boolean {
+    return this.videoPairs.length > 0;
+  }
+
+  getMediaLabel(media: Media): string {
+    return `${media.is_before ? 'Antes' : 'Después'} - ${media.description}`;
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 }

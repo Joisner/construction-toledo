@@ -1,0 +1,153 @@
+/* Componente de listado */
+:host {
+  display: block;
+}
+
+/* Animación para modales */
+@keyframes scale {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale {
+  animation: scale 0.2s ease-out;
+}
+
+/* Transiciones suaves */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Hover en filas de tabla */
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+/* Scroll horizontal en tabla */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Badges con mejor contraste */
+.bg-blue-100 {
+  background-color: #dbeafe;
+}
+
+.text-blue-800 {
+  color: #1e40af;
+}
+
+.bg-green-100 {
+  background-color: #d1fae5;
+}
+
+.text-green-800 {
+  color: #065f46;
+}
+
+.bg-red-100 {
+  background-color: #fee2e2;
+}
+
+.text-red-800 {
+  color: #991b1b;
+}
+
+.bg-purple-100 {
+  background-color: #ede9fe;
+}
+
+.text-purple-800 {
+  color: #5b21b6;
+}
+
+.bg-yellow-100 {
+  background-color: #fef3c7;
+}
+
+.text-yellow-800 {
+  color: #92400e;
+}
+
+/* Botones de acción con tamaño consistente */
+tbody button {
+  font-size: 1.25rem;
+  padding: 0.25rem;
+}
+
+/* Responsive tables */
+@media (max-width: 1024px) {
+  table {
+    font-size: 0.875rem;
+  }
+  
+  th, td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* En móvil, hacer scroll horizontal */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    min-width: 800px;
+  }
+}
+
+/* Estados de botones */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.95);
+}
+
+/* Input de archivo oculto */
+input[type="file"].hidden {
+  display: none;
+}
+
+/* Estadísticas con sombra sutil */
+.bg-blue-50,
+.bg-green-50,
+.bg-yellow-50,
+.bg-red-50 {
+  transition: transform 0.2s ease;
+}
+
+.bg-blue-50:hover,
+.bg-green-50:hover,
+.bg-yellow-50:hover,
+.bg-red-50:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}

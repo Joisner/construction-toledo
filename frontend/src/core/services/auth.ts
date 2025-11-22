@@ -18,7 +18,7 @@ export class Auth {
     body.set('username', credentials.username || '');
     body.set('password', credentials.password || '');
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-    return this.http.post(`${environment.authService}`, body.toString(), { headers }).pipe(
+    return this.http.post(`${environment.urlServer}${environment.authService}`, body.toString(), { headers }).pipe(
       map((res:any) => {
         return res
       })

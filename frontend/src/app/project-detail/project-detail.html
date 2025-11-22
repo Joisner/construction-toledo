@@ -1,11 +1,17 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50 py-16">
-  <div class="container mx-auto px-4">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center min-h-[60vh]">
+    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-400"></div>
+  </div>
+
+  <!-- Project Content -->
+  <div *ngIf="!loading && project" class="container mx-auto px-4">
     <!-- Breadcrumb -->
     <div class="mb-8">
       <nav class="flex items-center space-x-2 text-sm">
         <a routerLink="/projects" class="text-cyan-400 hover:text-cyan-500 font-medium">Proyectos</a>
         <span class="text-gray-400">/</span>
-        <span class="text-gray-600">Detalle del Proyecto</span>
+        <span class="text-gray-600">{{ project.title }}</span>
       </nav>
     </div>
 
@@ -14,8 +20,7 @@
       <div class="order-2 lg:order-1">
         <div class="bg-white rounded-2xl shadow-xl p-8">
           <!-- Badge -->
-          <div
-            class="inline-flex items-center bg-cyan-100 text-cyan-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+          <div class="inline-flex items-center bg-cyan-100 text-cyan-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
               <path fill-rule="evenodd"
@@ -27,15 +32,13 @@
 
           <!-- Title -->
           <h2 class="text-4xl font-bold text-slate-900 mb-6">
-            Título del <span class="text-cyan-400">Proyecto</span>
+            {{ project.title }}
           </h2>
 
           <!-- Description -->
           <div class="mb-8">
             <p class="text-gray-600 leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl nec ultricies lacinia,
-              nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl. Construcción de alta calidad con
-              materiales premium y acabados profesionales.
+              {{ project.description }}
             </p>
           </div>
 
@@ -43,8 +46,7 @@
           <div class="space-y-6">
             <div class="border-l-4 border-cyan-400 pl-6 py-2">
               <div class="flex items-start">
-                <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,35 +54,51 @@
                 </svg>
                 <div>
                   <span class="block text-sm font-semibold text-gray-500 mb-1">Ubicación</span>
-                  <span class="text-lg font-bold text-slate-900">Ciudad, Estado</span>
+                  <span class="text-lg font-bold text-slate-900">{{ project.location }}</span>
                 </div>
               </div>
             </div>
 
             <div class="border-l-4 border-cyan-400 pl-6 py-2">
               <div class="flex items-start">
-                <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 <div>
                   <span class="block text-sm font-semibold text-gray-500 mb-1">Tipo de Trabajo</span>
-                  <span class="text-lg font-bold text-slate-900">Remodelación</span>
+                  <span class="text-lg font-bold text-slate-900">{{ project.service }}</span>
                 </div>
               </div>
             </div>
 
             <div class="border-l-4 border-cyan-400 pl-6 py-2">
               <div class="flex items-start">
-                <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <div>
                   <span class="block text-sm font-semibold text-gray-500 mb-1">Fecha de Finalización</span>
-                  <span class="text-lg font-bold text-slate-900">1 de Enero, 2023</span>
+                  <span class="text-lg font-bold text-slate-900">{{ formatDate(project.completion_date) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Media Stats -->
+            <div class="border-l-4 border-cyan-400 pl-6 py-2">
+              <div class="flex items-start">
+                <svg class="w-6 h-6 text-cyan-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <span class="block text-sm font-semibold text-gray-500 mb-1">Multimedia</span>
+                  <span class="text-lg font-bold text-slate-900">
+                    {{ project.media.length }} archivos
+                    <span *ngIf="hasImagePairs()" class="text-sm text-gray-600">({{ imagePairs.length }} fotos)</span>
+                    <span *ngIf="hasVideoPairs()" class="text-sm text-gray-600">({{ videoPairs.length }} videos)</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -99,45 +117,66 @@
         </div>
       </div>
 
-      <!-- Before/After Gallery -->
+      <!-- Media Gallery -->
       <div class="order-1 lg:order-2">
         <div class="bg-white rounded-2xl shadow-xl p-4 sticky top-8">
           <!-- Tab Selector -->
           <div class="flex bg-gray-100 rounded-xl p-1 mb-4">
-            <button (click)="viewMode = 'carousel'" [class.bg-white]="viewMode === 'carousel'"
-              [class.shadow-md]="viewMode === 'carousel'" [class.text-cyan-400]="viewMode === 'carousel'"
+            <button (click)="changeViewMode('carousel')" 
+              [class.bg-white]="viewMode === 'carousel'"
+              [class.shadow-md]="viewMode === 'carousel'" 
+              [class.text-cyan-400]="viewMode === 'carousel'"
               [class.font-semibold]="viewMode === 'carousel'"
               class="flex-1 px-4 py-3 rounded-lg transition-all duration-300 text-sm">
               Galería
             </button>
-            <button (click)="viewMode = 'comparison'" [class.bg-white]="viewMode === 'comparison'"
-              [class.shadow-md]="viewMode === 'comparison'" [class.text-cyan-400]="viewMode === 'comparison'"
+            <button *ngIf="hasImagePairs()" (click)="changeViewMode('comparison')" 
+              [class.bg-white]="viewMode === 'comparison'"
+              [class.shadow-md]="viewMode === 'comparison'" 
+              [class.text-cyan-400]="viewMode === 'comparison'"
               [class.font-semibold]="viewMode === 'comparison'"
               class="flex-1 px-4 py-3 rounded-lg transition-all duration-300 text-sm">
               Antes/Después
             </button>
+            <button *ngIf="hasVideoPairs()" (click)="changeViewMode('video-comparison')" 
+              [class.bg-white]="viewMode === 'video-comparison'"
+              [class.shadow-md]="viewMode === 'video-comparison'" 
+              [class.text-cyan-400]="viewMode === 'video-comparison'"
+              [class.font-semibold]="viewMode === 'video-comparison'"
+              class="flex-1 px-4 py-3 rounded-lg transition-all duration-300 text-sm">
+              Videos
+            </button>
           </div>
 
-          <!-- Carousel View -->
+          <!-- CAROUSEL VIEW -->
           <div *ngIf="viewMode === 'carousel'" class="carousel relative rounded-xl overflow-hidden">
-            <div *ngFor="let image of images; let i = index" class="carousel-item" [class.active]="i === currentIndex">
-              <img [src]="image.url" alt="Project Image {{ i + 1 }}" class="w-full h-auto rounded-xl">
+            <div *ngFor="let media of allMedia; let i = index" class="carousel-item" [class.hidden]="i !== currentIndex">
+              <img *ngIf="media.media_type === 'image'" 
+                [src]="media.file_url" 
+                [alt]="media.description"
+                class="w-full h-auto rounded-xl">
+              <video *ngIf="media.media_type === 'video'" 
+                [src]="media.file_url"
+                class="w-full h-auto rounded-xl" 
+                controls>
+              </video>
 
-              <!-- Image Label -->
-              <div
-                class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-semibold">
-                {{ image.label }}
+              <!-- Media Label -->
+              <div class="absolute top-4 left-4 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg"
+                [class.bg-red-500/90]="media.is_before"
+                [class.bg-green-500/90]="!media.is_before">
+                {{ getMediaLabel(media) }}
               </div>
             </div>
 
             <!-- Navigation Buttons -->
-            <button (click)="prevImage()"
+            <button *ngIf="allMedia.length > 1" (click)="prevImage()"
               class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-slate-900/80 hover:bg-slate-900 text-white p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <button (click)="nextImage()"
+            <button *ngIf="allMedia.length > 1" (click)="nextImage()"
               class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-slate-900/80 hover:bg-slate-900 text-white p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -146,31 +185,114 @@
 
             <!-- Indicators -->
             <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              <button *ngFor="let image of images; let i = index" (click)="currentIndex = i"
-                [class.bg-cyan-400]="i === currentIndex" [class.bg-white/50]="i !== currentIndex"
+              <button *ngFor="let media of allMedia; let i = index" (click)="currentIndex = i"
+                [class.bg-cyan-400]="i === currentIndex" 
+                [class.bg-white/50]="i !== currentIndex"
                 class="w-2 h-2 rounded-full transition-all duration-300 hover:scale-125">
               </button>
             </div>
           </div>
 
-          <!-- Video Comparison View -->
-          <div *ngIf="viewMode === 'video-comparison'" class="space-y-4">
+          <!-- IMAGE COMPARISON VIEW -->
+          <div *ngIf="viewMode === 'comparison' && hasImagePairs()" class="space-y-4">
             <!-- Comparison Selector -->
             <div class="flex justify-between items-center mb-4">
-              <span class="text-sm font-semibold text-gray-600">Video {{ videoComparisonIndex + 1 }} de {{
-                videoBeforeAfterPairs.length }}</span>
+              <span class="text-sm font-semibold text-gray-600">
+                Comparación {{ comparisonIndex + 1 }} de {{ imagePairs.length }}
+              </span>
+              <div class="flex space-x-2">
+                <button (click)="prevComparison()" [disabled]="comparisonIndex === 0"
+                  [class.opacity-50]="comparisonIndex === 0"
+                  class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:cursor-not-allowed">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button (click)="nextComparison()"
+                  [disabled]="comparisonIndex === imagePairs.length - 1"
+                  [class.opacity-50]="comparisonIndex === imagePairs.length - 1"
+                  class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:cursor-not-allowed">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Before/After Slider -->
+            <div #comparisonContainer class="relative rounded-xl overflow-hidden cursor-ew-resize select-none">
+              <!-- After Image (Background) -->
+              <img *ngIf="imagePairs[comparisonIndex].after"
+                [src]="imagePairs[comparisonIndex].after!.file_url"
+                [alt]="imagePairs[comparisonIndex].after!.description"
+                class="w-full h-auto">
+
+              <!-- Before Image (Overlay with clip) -->
+              <div class="absolute inset-0 overflow-hidden"
+                [style.width.%]="sliderPosition"
+                (mousedown)="startDragging($event)"
+                (touchstart)="startDragging($event)">
+                <img *ngIf="imagePairs[comparisonIndex].before"
+                  [src]="imagePairs[comparisonIndex].before!.file_url"
+                  [alt]="imagePairs[comparisonIndex].before!.description"
+                  class="w-full h-auto">
+              </div>
+
+              <!-- Slider Handle -->
+              <div class="absolute top-0 bottom-0 w-1 bg-white shadow-2xl cursor-ew-resize"
+                [style.left.%]="sliderPosition"
+                (mousedown)="startDragging($event)"
+                (touchstart)="startDragging($event)">
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center">
+                  <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Labels -->
+              <div class="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
+                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" />
+                </svg>
+                ANTES
+              </div>
+              <div class="absolute top-4 right-4 bg-green-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
+                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                DESPUÉS
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4">
+              <p class="text-sm text-gray-700">
+                <span class="font-semibold text-cyan-600">Transformación:</span>
+                {{ imagePairs[comparisonIndex].description }}
+              </p>
+            </div>
+          </div>
+
+          <!-- VIDEO COMPARISON VIEW -->
+          <div *ngIf="viewMode === 'video-comparison' && hasVideoPairs()" class="space-y-4">
+            <!-- Video Selector -->
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-sm font-semibold text-gray-600">
+                Video {{ videoComparisonIndex + 1 }} de {{ videoPairs.length }}
+              </span>
               <div class="flex space-x-2">
                 <button (click)="prevVideoComparison()" [disabled]="videoComparisonIndex === 0"
                   [class.opacity-50]="videoComparisonIndex === 0"
-                  class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                  class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:cursor-not-allowed">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button (click)="nextVideoComparison()"
-                  [disabled]="videoComparisonIndex === videoBeforeAfterPairs.length - 1"
-                  [class.opacity-50]="videoComparisonIndex === videoBeforeAfterPairs.length - 1"
-                  class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                  [disabled]="videoComparisonIndex === videoPairs.length - 1"
+                  [class.opacity-50]="videoComparisonIndex === videoPairs.length - 1"
+                  class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:cursor-not-allowed">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
@@ -181,31 +303,34 @@
             <!-- Side by Side Videos -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Before Video -->
-              <div class="relative rounded-xl overflow-hidden bg-slate-900">
-                <video #beforeVideo [src]="videoBeforeAfterPairs[videoComparisonIndex].before" class="w-full h-auto"
-                  controls (play)="syncVideos('before')" (pause)="pauseAllVideos()">
+              <div *ngIf="videoPairs[videoComparisonIndex].before" class="relative rounded-xl overflow-hidden bg-slate-900">
+                <video #beforeVideo 
+                  [src]="videoPairs[videoComparisonIndex].before!.file_url"
+                  class="w-full h-auto"
+                  controls 
+                  (play)="syncVideos('before')" 
+                  (pause)="pauseAllVideos()">
                 </video>
-                <div
-                  class="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
+                <div class="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
                   <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" />
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" />
                   </svg>
                   ANTES
                 </div>
               </div>
 
               <!-- After Video -->
-              <div class="relative rounded-xl overflow-hidden bg-slate-900">
-                <video #afterVideo [src]="videoBeforeAfterPairs[videoComparisonIndex].after" class="w-full h-auto"
-                  controls (play)="syncVideos('after')" (pause)="pauseAllVideos()">
+              <div *ngIf="videoPairs[videoComparisonIndex].after" class="relative rounded-xl overflow-hidden bg-slate-900">
+                <video #afterVideo 
+                  [src]="videoPairs[videoComparisonIndex].after!.file_url"
+                  class="w-full h-auto"
+                  controls 
+                  (play)="syncVideos('after')" 
+                  (pause)="pauseAllVideos()">
                 </video>
-                <div
-                  class="absolute top-4 left-4 bg-green-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
+                <div class="absolute top-4 left-4 bg-green-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
                   <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
                   DESPUÉS
                 </div>
@@ -213,23 +338,18 @@
             </div>
 
             <!-- Sync Control -->
-            <div
-              class="flex items-center justify-center space-x-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4">
+            <div class="flex items-center justify-center space-x-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4">
               <button (click)="playBothVideos()"
                 class="flex items-center px-4 py-2 bg-cyan-400 hover:bg-cyan-500 text-slate-900 font-semibold rounded-lg transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                    clip-rule="evenodd" />
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
                 </svg>
                 Reproducir ambos
               </button>
               <button (click)="pauseAllVideos()"
                 class="flex items-center px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded-lg transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
-                    clip-rule="evenodd" />
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                 </svg>
                 Pausar
               </button>
@@ -239,12 +359,29 @@
             <div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4">
               <p class="text-sm text-gray-700">
                 <span class="font-semibold text-cyan-600">Transformación:</span>
-                {{ videoBeforeAfterPairs[videoComparisonIndex].description }}
+                {{ videoPairs[videoComparisonIndex].description }}
               </p>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && !project" class="container mx-auto px-4 text-center py-20">
+    <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <h3 class="text-2xl font-bold text-gray-700 mb-2">Proyecto no encontrado</h3>
+    <p class="text-gray-500 mb-6">El proyecto que buscas no existe o ha sido eliminado</p>
+    <a routerLink="/projects"
+      class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-xl shadow-lg transition-all">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Volver a Proyectos
+    </a>
   </div>
 </div>

@@ -1,4 +1,10 @@
-@if (currentUrl !== '/login' && '/admin'){
+@if (
+currentUrl !== '/budget' &&
+currentUrl !== '/invoice' &&
+currentUrl !== '/login' &&
+currentUrl !== '/admin' &&
+currentUrl !== '/documents'
+) {
 <header
   class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white shadow-lg border-b-4 border-cyan-400">
   <nav class="container mx-auto px-4 py-4">
@@ -155,6 +161,68 @@
     </div>
   </div>
 </div>
+} @else if(currentUrl === '/invoice' || currentUrl === '/budget'){
+<!-- Navbar Component para navegación -->
+<nav class="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg print:hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      
+      <!-- Logo y nombre -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white rounded-lg p-1.5 flex items-center justify-center">
+          <img src="/assets/logos/logo.png" alt="Logo" class="w-full h-full object-contain">
+        </div>
+        <div class="hidden sm:block">
+          <h1 class="text-xl font-bold">Construcciones Toledo</h1>
+          <p class="text-xs text-blue-100">Sistema de Gestión</p>
+        </div>
+      </div>
+
+      <!-- Navegación desktop -->
+      <div class="hidden md:flex items-center gap-2">
+        <a routerLink="/documents" routerLinkActive="bg-blue-800" 
+          class="px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center gap-2">
+          <span>📋</span>
+          <span>Documentos</span>
+        </a>
+        <a routerLink="/budget" routerLinkActive="bg-blue-800"
+          class="px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center gap-2">
+          <span>📝</span>
+          <span>Nuevo Presupuesto</span>
+        </a>
+        <a routerLink="/invoice" routerLinkActive="bg-blue-800"
+          class="px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center gap-2">
+          <span>📄</span>
+          <span>Nueva Factura</span>
+        </a>
+      </div>
+
+      <!-- Menú móvil -->
+      <button (click)="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-blue-800 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path *ngIf="!showMobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          <path *ngIf="showMobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Menú móvil expandido -->
+    <div *ngIf="showMobileMenu" class="md:hidden pb-4 space-y-2">
+      <a routerLink="/documents" routerLinkActive="bg-blue-800" (click)="toggleMobileMenu()"
+        class="block px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">
+        📋 Documentos
+      </a>
+      <a routerLink="/budget" routerLinkActive="bg-blue-800" (click)="toggleMobileMenu()"
+        class="block px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">
+        📝 Nuevo Presupuesto
+      </a>
+      <a routerLink="/invoice" routerLinkActive="bg-blue-800" (click)="toggleMobileMenu()"
+        class="block px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition">
+        📄 Nueva Factura
+      </a>
+    </div>
+  </div>
+</nav>
 }
 
 <main class="min-h-screen bg-gray-50">

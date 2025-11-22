@@ -15,101 +15,42 @@
 
     <!-- Projects Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Project Card 1 -->
-      <div class="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-        <a routerLink="/project/1" class="block">
-          <div class="relative overflow-hidden">
-            <img src="https://via.placeholder.com/600x400.png?text=Project+1" 
-                 alt="Project 1" 
-                 class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
-            <div class="absolute top-4 right-4 bg-cyan-400 text-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
-              Finalizado
-            </div>
-          </div>
-          <div class="p-6">
-            <div class="flex items-center mb-3">
-              <div class="w-1 h-6 bg-cyan-400 mr-3"></div>
-              <h3 class="text-2xl font-bold text-slate-900 group-hover:text-cyan-400 transition-colors">
-                Proyecto Uno
-              </h3>
-            </div>
-            <p class="text-gray-600 mb-4 line-clamp-2">
-              Una breve descripción del primer proyecto de construcción realizado.
-            </p>
-            <div class="flex items-center text-cyan-400 font-semibold">
-              <span>Ver detalles</span>
-              <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-              </svg>
-            </div>
-          </div>
-        </a>
-      </div>
 
-      <!-- Project Card 2 -->
-      <div class="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-        <a routerLink="/project/2" class="block">
+      @for (project of projects(); track project.id; let i = $index) {
+      <div
+        class="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+        <a [routerLink]="['/project', project.id]" class="block">
           <div class="relative overflow-hidden">
-            <img src="https://via.placeholder.com/600x400.png?text=Project+2" 
-                 alt="Project 2" 
-                 class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
+            <img [src]="project.title" [alt]="project.title"
+              class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60">
+            </div>
             <div class="absolute top-4 right-4 bg-cyan-400 text-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
-              Finalizado
+              {{ project.is_active ? 'Activo' : 'Inactivo' }}
             </div>
           </div>
           <div class="p-6">
             <div class="flex items-center mb-3">
               <div class="w-1 h-6 bg-cyan-400 mr-3"></div>
               <h3 class="text-2xl font-bold text-slate-900 group-hover:text-cyan-400 transition-colors">
-                Proyecto Dos
+                {{ project.title }}
               </h3>
             </div>
             <p class="text-gray-600 mb-4 line-clamp-2">
-              Una breve descripción del segundo proyecto de construcción realizado.
+              {{ project.description }}
             </p>
             <div class="flex items-center text-cyan-400 font-semibold">
               <span>Ver detalles</span>
-              <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </div>
           </div>
         </a>
       </div>
+      }
 
-      <!-- Project Card 3 -->
-      <div class="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-        <a routerLink="/project/3" class="block">
-          <div class="relative overflow-hidden">
-            <img src="https://via.placeholder.com/600x400.png?text=Project+3" 
-                 alt="Project 3" 
-                 class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
-            <div class="absolute top-4 right-4 bg-cyan-400 text-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
-              Finalizado
-            </div>
-          </div>
-          <div class="p-6">
-            <div class="flex items-center mb-3">
-              <div class="w-1 h-6 bg-cyan-400 mr-3"></div>
-              <h3 class="text-2xl font-bold text-slate-900 group-hover:text-cyan-400 transition-colors">
-                Proyecto Tres
-              </h3>
-            </div>
-            <p class="text-gray-600 mb-4 line-clamp-2">
-              Una breve descripción del tercer proyecto de construcción realizado.
-            </p>
-            <div class="flex items-center text-cyan-400 font-semibold">
-              <span>Ver detalles</span>
-              <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-              </svg>
-            </div>
-          </div>
-        </a>
-      </div>
     </div>
   </div>
 </div>

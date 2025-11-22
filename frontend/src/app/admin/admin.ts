@@ -2,7 +2,9 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
+import { Project } from '../../core/services/project';
+import { IProject, Media } from '../../core/models/project.model';
+import { MediaManagement } from '../shared/components/media-management/media-management';
 interface Quote {
   id: string;
   name: string;
@@ -23,20 +25,9 @@ interface Service {
   active: boolean;
 }
 
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  service: string;
-  completionDate: string;
-  beforeAfterPairs: {
-    before: string;
-    after: string;
-    description: string;
-  }[];
-  active: boolean;
-}
+
+
+
 
 interface IAdmin {
   id: string;
@@ -51,45 +42,59 @@ type AdminTab = 'quotes' | 'projects' | 'services' | 'admins';
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MediaManagement],
   templateUrl: './admin.html',
   styleUrls: ['./admin.css']
 })
 export class Admin implements OnInit {
-  // Estado actual
   currentTab = signal<AdminTab>('quotes');
   editingItem = signal<any>(null);
   showDeleteConfirm = signal<any>(null);
-  
-  // Datos
+
+  showMediaModal = signal<boolean>(false);
+  currentMediaList = signal<Media[]>([]);
+
   quotes = signal<Quote[]>([]);
-  projects = signal<Project[]>([]);
+  projects = signal<IProject[]>([]);
   services = signal<Service[]>([]);
   admins = signal<IAdmin[]>([]);
 
-  // Computed properties para filtrado
-  pendingQuotes = computed(() => 
+  pendingQuotes = computed(() =>
     this.quotes().filter(q => q.status === 'pending').length
   );
 
-  constructor(private router: Router) {
-    // Cargar datos al iniciar
+  constructor(
+    private router: Router,
+    private projectService: Project
+  ) {
     this.loadAllData();
   }
 
   ngOnInit() {
-    debugger;
-    // Verificar autenticación
     const authId = localStorage.getItem('authAdminId');
     if (!authId) {
       this.router.navigate(['/login']);
       return;
     }
-/*     const admins = JSON.parse(localStorage.getItem('admins') || '[]');
-    const isAuth = admins.some((admin: any) => admin.id === authId);
-    if (!isAuth) {
-      this.router.navigate(['/login']);
-    } */
+  }
+
+  openMediaModal() {
+    const currentProject = this.editingItem();
+    this.currentMediaList.set(currentProject?.media || []);
+    this.showMediaModal.set(true);
+  }
+
+  closeMediaModal() {
+    this.showMediaModal.set(false);
+  }
+
+  onMediaSaved(mediaList: Media[]) {
+    const currentProject = this.editingItem();
+    if (currentProject) {
+      currentProject.media = mediaList;
+      this.editingItem.set({ ...currentProject });
+    }
+    this.showMediaModal.set(false);
   }
 
   logout() {
@@ -97,39 +102,25 @@ export class Admin implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  addBeforeAfterPair() {
-    const item = this.editingItem();
-    if (!item.beforeAfterPairs) {
-      item.beforeAfterPairs = [];
-    }
-    item.beforeAfterPairs.push({
-      before: '',
-      after: '',
-      description: ''
-    });
-    this.editingItem.set({ ...item });
-  }
-
   private loadAllData() {
-    // Convertir cotizaciones antiguas al nuevo formato
+    this.getProjects();
+
     const oldQuotes = JSON.parse(localStorage.getItem('cotizaciones') || '[]');
     const migratedQuotes: Quote[] = oldQuotes.map((q: any) => ({
-      id: Date.now().toString(),
+      id: q.id || Date.now().toString(),
       name: q.name,
       email: q.email,
       phone: q.phone,
       service: q.service,
       message: q.message,
       date: q.date,
-      status: 'pending'
+      status: q.status || 'pending'
     }));
-    
+
     this.quotes.set(migratedQuotes);
-    this.projects.set(JSON.parse(localStorage.getItem('projects') || '[]'));
     this.services.set(JSON.parse(localStorage.getItem('services') || '[]'));
     this.admins.set(JSON.parse(localStorage.getItem('admins') || '[]'));
-    
-    // Si no hay admins, crear uno por defecto
+
     if (this.admins().length === 0) {
       this.addAdmin({
         username: 'admin',
@@ -139,16 +130,25 @@ export class Admin implements OnInit {
     }
   }
 
-  // Navegación
+  private getProjects() {
+    this.projectService.getAllProjects().subscribe({
+      next: (projects: IProject[]) => {
+        this.projects.set(projects);
+      },
+      error: (err) => {
+        console.error('Error loading projects:', err);
+      }
+    });
+  }
+
   setTab(tab: AdminTab) {
     this.currentTab.set(tab);
     this.editingItem.set(null);
     this.showDeleteConfirm.set(null);
   }
 
-  // Cotizaciones
   updateQuoteStatus(quote: Quote, status: Quote['status']) {
-    const updated = this.quotes().map(q => 
+    const updated = this.quotes().map(q =>
       q.id === quote.id ? { ...q, status } : q
     );
     this.quotes.set(updated);
@@ -162,42 +162,63 @@ export class Admin implements OnInit {
     this.showDeleteConfirm.set(null);
   }
 
-  // Proyectos
-  addProject(project: Partial<Project>) {
-    const newProject: Project = {
+  addProject(project: Partial<IProject>) {
+    const newProject: IProject = {
       id: Date.now().toString(),
       title: project.title || '',
       description: project.description || '',
       location: project.location || '',
       service: project.service || '',
-      completionDate: project.completionDate || new Date().toISOString().split('T')[0],
-      beforeAfterPairs: project.beforeAfterPairs || [],
-      active: true
+      completion_date: project.completion_date || new Date().toISOString().split('T')[0],
+      is_active: true,
+      media: project.media || [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
-    
-    const updated = [...this.projects(), newProject];
-    this.projects.set(updated);
-    localStorage.setItem('projects', JSON.stringify(updated));
-    this.editingItem.set(null);
+
+    this.projectService.createProject(newProject).subscribe({
+      next: () => {
+        this.getProjects();
+        this.editingItem.set(null);
+      },
+      error: (err) => {
+        console.error('Error creating project:', err);
+        alert('Error al crear el proyecto');
+      }
+    });
   }
 
-  updateProject(project: Project) {
-    const updated = this.projects().map(p => 
-      p.id === project.id ? project : p
-    );
-    this.projects.set(updated);
-    localStorage.setItem('projects', JSON.stringify(updated));
-    this.editingItem.set(null);
+  updateProject(project: IProject) {
+    const updatedProject = {
+      ...project,
+      updated_at: new Date().toISOString()
+    };
+
+    this.projectService.updateProject(project.id, updatedProject).subscribe({
+      next: () => {
+        this.getProjects();
+        this.editingItem.set(null);
+      },
+      error: (err) => {
+        console.error('Error updating project:', err);
+        alert('Error al actualizar el proyecto');
+      }
+    });
   }
 
   deleteProject(id: string) {
-    const updated = this.projects().filter(p => p.id !== id);
-    this.projects.set(updated);
-    localStorage.setItem('projects', JSON.stringify(updated));
-    this.showDeleteConfirm.set(null);
+    this.projectService.deleteProject(id).subscribe({
+      next: () => {
+        this.getProjects();
+        this.showDeleteConfirm.set(null);
+      },
+      error: (err) => {
+        console.error('Error deleting project:', err);
+        alert('Error al eliminar el proyecto');
+      }
+    });
   }
 
-  // Servicios
   addService(service: Partial<Service>) {
     const newService: Service = {
       id: Date.now().toString(),
@@ -207,7 +228,7 @@ export class Admin implements OnInit {
       image: service.image || '',
       active: true
     };
-    
+
     const updated = [...this.services(), newService];
     this.services.set(updated);
     localStorage.setItem('services', JSON.stringify(updated));
@@ -215,7 +236,7 @@ export class Admin implements OnInit {
   }
 
   updateService(service: Service) {
-    const updated = this.services().map(s => 
+    const updated = this.services().map(s =>
       s.id === service.id ? service : s
     );
     this.services.set(updated);
@@ -230,7 +251,6 @@ export class Admin implements OnInit {
     this.showDeleteConfirm.set(null);
   }
 
-  // Administradores
   addAdmin(admin: Partial<IAdmin>) {
     const newAdmin: IAdmin = {
       id: Date.now().toString(),
@@ -239,7 +259,7 @@ export class Admin implements OnInit {
       role: admin.role || 'editor',
       active: true
     };
-    
+
     const updated = [...this.admins(), newAdmin];
     this.admins.set(updated);
     localStorage.setItem('admins', JSON.stringify(updated));
@@ -247,7 +267,7 @@ export class Admin implements OnInit {
   }
 
   updateAdmin(admin: IAdmin) {
-    const updated = this.admins().map(a => 
+    const updated = this.admins().map(a =>
       a.id === admin.id ? admin : a
     );
     this.admins.set(updated);
@@ -256,21 +276,41 @@ export class Admin implements OnInit {
   }
 
   deleteAdmin(id: string) {
-    // Prevenir eliminar el último admin
     if (this.admins().length <= 1) {
       alert('No se puede eliminar el último administrador');
       return;
     }
-    
+
     const updated = this.admins().filter(a => a.id !== id);
     this.admins.set(updated);
     localStorage.setItem('admins', JSON.stringify(updated));
     this.showDeleteConfirm.set(null);
   }
 
-  // Helpers
   confirmDelete(item: any, type: 'quote' | 'project' | 'service' | 'admin') {
     this.showDeleteConfirm.set({ item, type });
+  }
+
+  executeDelete() {
+    const confirm = this.showDeleteConfirm();
+    if (!confirm) return;
+
+    const { item, type } = confirm;
+
+    switch (type) {
+      case 'quote':
+        this.deleteQuote(item.id);
+        break;
+      case 'project':
+        this.deleteProject(item.id);
+        break;
+      case 'service':
+        this.deleteService(item.id);
+        break;
+      case 'admin':
+        this.deleteAdmin(item.id);
+        break;
+    }
   }
 
   cancelDelete() {
@@ -278,10 +318,25 @@ export class Admin implements OnInit {
   }
 
   startEdit(item: any) {
-    this.editingItem.set({ ...item }); // Clone para edición
+    this.editingItem.set({ ...item, media: item.media || [] });
   }
 
   cancelEdit() {
     this.editingItem.set(null);
+  }
+
+  getBeforeMedia(project: IProject): Media[] {
+    return project.media.filter(m => m.is_before);
+  }
+
+  getAfterMedia(project: IProject): Media[] {
+    return project.media.filter(m => !m.is_before);
+  }
+
+  getMediaByType(media: Media[]): { images: Media[], videos: Media[] } {
+    return {
+      images: media.filter(m => m.media_type === 'image'),
+      videos: media.filter(m => m.media_type === 'video')
+    };
   }
 }

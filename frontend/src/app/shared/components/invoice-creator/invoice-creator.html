@@ -1,0 +1,303 @@
+<div class="min-h-screen bg-gray-100 p-4 lg:p-8">
+    <!-- Overlay para móvil -->
+    @if (isEditorOpen) {
+    <div (click)="toggleEditor()" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"></div>
+    }
+
+    <!-- Botones de acción -->
+    <div class="fixed bottom-4 left-4 sm:bottom-5 sm:left-5 flex flex-col sm:flex-row gap-2 sm:gap-3 z-30">
+        <button (click)="print()"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 font-semibold transition-all hover:-translate-y-1 print:hidden text-sm sm:text-base">
+            <span>🖨️</span>
+            <span class="hidden sm:inline">Imprimir</span>
+        </button>
+        <button (click)="downloadPDF()"
+            class="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 font-semibold transition-all hover:-translate-y-1 print:hidden text-sm sm:text-base">
+            <span>📄</span>
+            <span class="hidden sm:inline">PDF</span>
+        </button>
+    </div>
+
+    <!-- Botón toggle editor -->
+    <button (click)="toggleEditor()" [class.right-0]="!isEditorOpen" [class.right-[350px]]="isEditorOpen"
+        class="fixed top-4 sm:top-5 bg-blue-700 hover:bg-blue-800 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-l-lg shadow-lg font-semibold z-40 transition-all print:hidden text-sm sm:text-base"
+        [class.bottom-4]="!isEditorOpen" [class.sm:bottom-5]="!isEditorOpen"
+        [class.w-12]="!isEditorOpen" [class.h-12]="!isEditorOpen"
+        [class.sm:w-14]="!isEditorOpen" [class.sm:h-14]="!isEditorOpen"
+        [class.rounded-full]="!isEditorOpen" [class.lg:w-auto]="isEditorOpen" [class.lg:h-auto]="isEditorOpen"
+        [class.lg:rounded-l-lg]="isEditorOpen">
+
+        @if (!isEditorOpen) {
+        <span class="text-lg sm:text-xl">✏️</span>
+        } @else {
+        <span class="hidden lg:inline">✖️ Cerrar</span>
+        <span class="lg:hidden text-lg">✖️</span>
+        }
+
+    </button>
+
+    <!-- Panel Editor -->
+    <div [class.translate-x-full]="!isEditorOpen" [class.lg:translate-x-0]="isEditorOpen"
+        [class.translate-y-full]="!isEditorOpen" [class.lg:translate-y-0]="isEditorOpen"
+        class="fixed right-0 top-0 w-full sm:w-[400px] lg:w-[350px] h-[92vh] sm:h-[95vh] lg:h-screen bg-white shadow-2xl overflow-y-auto z-50 transition-transform duration-300 rounded-t-2xl sm:rounded-t-3xl lg:rounded-none print:hidden">
+
+        <div
+            class="sticky top-0 bg-blue-700 text-white p-3 sm:p-4 flex justify-between items-center z-10 rounded-t-2xl sm:rounded-t-3xl lg:rounded-none">
+            <h2 class="text-base sm:text-lg font-semibold">Editor de Factura</h2>
+            <button (click)="toggleEditor()" class="lg:hidden text-xl sm:text-2xl w-7 h-7 sm:w-8 sm:h-8">✖</button>
+        </div>
+
+        <div class="p-5 space-y-5">
+
+            <!-- Número de factura -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Número de
+                    Factura</label>
+                <input type="text" [(ngModel)]="invoiceNumber"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <!-- Fecha -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Fecha</label>
+                <input type="date" [(ngModel)]="invoiceDate"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <!-- Nombre cliente -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Nombre del
+                    Cliente</label>
+                <input type="text" [(ngModel)]="clientName"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <!-- Dirección cliente -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Dirección del
+                    Cliente</label>
+                <textarea [(ngModel)]="clientAddress" rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+            </div>
+
+            <!-- DNI cliente -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">DNI/NIF del
+                    Cliente</label>
+                <input type="text" [(ngModel)]="clientDNI"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <hr class="my-8 border-t-2 border-gray-200" />
+
+            <!-- Conceptos -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Conceptos de
+                    Factura</label>
+
+                @for (item of items; track $index) {
+                <div class="bg-gray-100 p-4 rounded-lg mb-3 relative">
+                    <button (click)="removeItem($index)"
+                        class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold">
+                        ✖
+                    </button>
+
+                    <div class="mb-3">
+                        <label
+                            class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Descripción</label>
+                        <textarea [(ngModel)]="item.description" rows="3"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Importe
+                            (€)</label>
+                        <input type="number" [(ngModel)]="item.amount" step="0.01"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                </div>
+                }
+
+                <button (click)="addItem()"
+                    class="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-lg font-semibold mt-3">
+                    + Añadir Concepto
+                </button>
+            </div>
+
+            <!-- IVA -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IVA (%)</label>
+                <input type="number" [(ngModel)]="taxRate" step="0.01"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <!-- IBAN -->
+            <div>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IBAN</label>
+                <input type="text" [(ngModel)]="iban"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <button (click)="print()"
+                class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-lg font-semibold mt-5">
+                🖨️ Imprimir Factura
+            </button>
+        </div>
+    </div>
+
+    <!-- Factura -->
+    <div class="max-w-4xl mx-auto bg-white shadow-xl print-optimized">
+
+        <!-- Header: Logo LEFT, Company info CENTER, Invoice info RIGHT -->
+        <div class="bg-gradient-to-r from-blue-700 to-blue-600 text-white p-4 sm:p-6 lg:p-10 print-header">
+            <!-- Mobile Layout (vertical stack) -->
+            <div class="flex flex-col gap-4 sm:hidden">
+                <!-- Logo and Invoice Number Row -->
+                <div class="flex justify-between items-start">
+                    <div class="flex-shrink-0 print-logo-container">
+                        <div class="w-20 h-20 bg-white rounded-lg p-3 shadow-lg print-logo">
+                            <img src="/assets/logos/logo.png" alt="Construcciones Toledo"
+                                class="w-full h-full object-contain" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end print-invoice-section">
+                        <div class="text-xl font-bold print-invoice-title">FACTURA</div>
+                        <div class="text-xs opacity-90 text-right print-invoice-details">
+                            <div class="mb-1"><strong>Nº:</strong> {{ invoiceNumber }}</div>
+                            <div><strong>Fecha:</strong> {{ formatDate(invoiceDate) }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Company Information -->
+                <div class="print-company-info">
+                    <h1 class="text-xl font-bold mb-2 print-title">{{ companyInfo.name }}</h1>
+                    <p class="text-xs opacity-95 leading-relaxed print-company-text">
+                        {{ companyInfo.owner }}<br>
+                        {{ companyInfo.address }}<br>
+                        {{ companyInfo.city }}<br>
+                        <strong>NIF: {{ companyInfo.nif }}</strong> <br>
+                        <strong>TFNO: {{ companyInfo.phone }}</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tablet/Desktop Layout (horizontal) -->
+            <div class="hidden sm:flex flex-row items-center justify-between gap-4 md:gap-6 lg:gap-8">
+                <!-- LEFT: Logo -->
+                <div class="flex-shrink-0 print-logo-container">
+                    <div class="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-40 xl:h-40 bg-white rounded-xl p-3 md:p-4 lg:p-6 shadow-lg print-logo">
+                        <img src="/assets/logos/logo.png" alt="Construcciones Toledo"
+                            class="w-full h-full object-contain" />
+                    </div>
+                </div>
+
+                <!-- CENTER: Company Information - minimal width -->
+                <div class="flex flex-col justify-center flex-shrink-0 print-company-info" style="max-width: 350px;">
+                    <h1 class="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 lg:mb-3 print-title">{{ companyInfo.name }}</h1>
+                    <p class="text-xs md:text-sm lg:text-base opacity-95 leading-relaxed print-company-text">
+                        {{ companyInfo.owner }}<br>
+                        {{ companyInfo.address }}<br>
+                        {{ companyInfo.city }}<br>
+                        NIF: {{ companyInfo.nif }}<br>
+                        <strong>TFNO: {{ companyInfo.phone }}</strong>
+                    </p>
+                </div>
+
+                <!-- RIGHT: Invoice Number - pegado completamente a la derecha -->
+                <div class="flex flex-col items-end justify-center gap-2 flex-shrink-0 ml-auto print-invoice-section">
+                    <div class="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold print-invoice-title whitespace-nowrap">FACTURA</div>
+                    <div class="text-xs md:text-sm opacity-90 text-right print-invoice-details whitespace-nowrap">
+                        <div class="mb-1"><strong>Nº:</strong> {{ invoiceNumber }}</div>
+                        <div><strong>Fecha:</strong> {{ formatDate(invoiceDate) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cliente info -->
+        <div
+            class="grid grid-cols-1 gap-6 sm:gap-8 lg:gap-10 p-4 sm:p-6 lg:p-10 border-b-2 border-gray-200 print-client-section print-border">
+            <div>
+                <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Facturar a
+                </h3>
+                <div class="text-gray-700 leading-relaxed text-sm sm:text-base print-compact">
+                    <p class="print-table-cell"><strong class="text-black">{{ clientName }}</strong><br>
+                        <span [innerHTML]="formatText(clientAddress)"></span><br>
+                        DNI: {{ clientDNI }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="p-4 sm:p-6 lg:p-10 print-table-section">
+            <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-4 sm:mb-5 print-section-title">Descripción de
+                Trabajos</h3>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[400px]">
+                    <thead class="bg-blue-700 text-white">
+                        <tr>
+                            <th
+                                class="text-left px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs uppercase tracking-wide print-table-header">
+                                Descripción</th>
+                            <th
+                                class="text-right px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs uppercase tracking-wide print-table-header w-24 sm:w-32">
+                                Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @for (item of items; track $index) {
+                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="px-3 sm:px-4 py-4 sm:py-5 text-gray-700 text-xs sm:text-sm leading-relaxed print-table-cell print-compact"
+                                [innerHTML]="formatText(item.description)"></td>
+                            <td class="px-3 sm:px-4 py-4 sm:py-5 text-right font-semibold text-black text-xs sm:text-base print-table-cell whitespace-nowrap">
+                                {{ formatCurrency(item.amount) }}
+                            </td>
+                        </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Totales -->
+        <div class="px-4 sm:px-6 lg:px-10 pb-6 sm:pb-8 lg:pb-10 flex justify-end print-totals-section">
+            <div class="w-full sm:w-80 lg:w-96">
+                <div class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-gray-100 text-gray-600 text-xs sm:text-sm print-total-row">
+                    <span>Subtotal</span>
+                    <span>{{ formatCurrency(getSubtotal()) }}</span>
+                </div>
+                <div class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-gray-200 text-gray-600 text-xs sm:text-sm print-total-row">
+                    <span>IVA {{ taxRate.toFixed(2) }}%</span>
+                    <span>{{ formatCurrency(getTax()) }}</span>
+                </div>
+                <div
+                    class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-blue-700 text-white text-base sm:text-lg font-bold mt-1 print-total-row-main">
+                    <span>TOTAL</span>
+                    <span>{{ formatCurrency(getTotal()) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pago -->
+        <div class="bg-gray-100 p-4 sm:p-6 lg:p-10 border-t-2 border-gray-300 print-payment-section print-border">
+            <h3 class="text-blue-700 text-xs sm:text-sm font-bold uppercase tracking-wide mb-3 sm:mb-4 print-payment-title">Forma de Pago
+            </h3>
+            <div class="bg-white p-4 sm:p-5 rounded-lg border border-gray-300 print-payment-box">
+                <p class="text-gray-700 leading-loose text-xs sm:text-sm print-payment-text">
+                    <strong>Transferencia Bancaria</strong><br>
+                    IBAN: {{ iban }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-blue-700 text-white text-center py-4 sm:py-5 lg:py-6 text-xs sm:text-sm print-footer">
+            GRACIAS POR SU CONFIANZA
+        </div>
+    </div>
+</div>
