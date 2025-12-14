@@ -6,15 +6,6 @@
 
   <!-- Project Content -->
   <div *ngIf="!loading && project" class="container mx-auto px-4">
-    <!-- Breadcrumb -->
-    <div class="mb-8">
-      <nav class="flex items-center space-x-2 text-sm">
-        <a routerLink="/projects" class="text-cyan-400 hover:text-cyan-500 font-medium">Proyectos</a>
-        <span class="text-gray-400">/</span>
-        <span class="text-gray-600">{{ project.title }}</span>
-      </nav>
-    </div>
-
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
       <!-- Project Info -->
       <div class="order-2 lg:order-1">
@@ -122,14 +113,14 @@
         <div class="bg-white rounded-2xl shadow-xl p-4 sticky top-8">
           <!-- Tab Selector -->
           <div class="flex bg-gray-100 rounded-xl p-1 mb-4">
-            <button (click)="changeViewMode('carousel')" 
+          <!--   <button (click)="changeViewMode('carousel')" 
               [class.bg-white]="viewMode === 'carousel'"
               [class.shadow-md]="viewMode === 'carousel'" 
               [class.text-cyan-400]="viewMode === 'carousel'"
               [class.font-semibold]="viewMode === 'carousel'"
               class="flex-1 px-4 py-3 rounded-lg transition-all duration-300 text-sm">
               Galería
-            </button>
+            </button> -->
             <button *ngIf="hasImagePairs()" (click)="changeViewMode('comparison')" 
               [class.bg-white]="viewMode === 'comparison'"
               [class.shadow-md]="viewMode === 'comparison'" 
@@ -308,8 +299,8 @@
                   [src]="videoPairs[videoComparisonIndex].before!.file_url"
                   class="w-full h-auto"
                   controls 
-                  (play)="syncVideos('before')" 
-                  (pause)="pauseAllVideos()">
+            (play)="syncVideos('before')" 
+            (pause)="onVideoPause($event)">
                 </video>
                 <div class="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
                   <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -325,8 +316,8 @@
                   [src]="videoPairs[videoComparisonIndex].after!.file_url"
                   class="w-full h-auto"
                   controls 
-                  (play)="syncVideos('after')" 
-                  (pause)="pauseAllVideos()">
+            (play)="syncVideos('after')" 
+            (pause)="onVideoPause($event)">
                 </video>
                 <div class="absolute top-4 left-4 bg-green-500/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-bold shadow-lg">
                   <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">

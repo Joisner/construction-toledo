@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IProject, Media } from '../../core/models/project.model';
 import { ActivatedRoute } from '@angular/router';
 import { Project } from '../../core/services/project';
+import { environment } from '../../env/environment';
+
 interface MediaPair {
   before: Media | null;
   after: Media | null;
@@ -23,7 +25,7 @@ export class ProjectDetail implements OnInit {
   project: IProject | null = null;
   loading: boolean = true;
 
-  viewMode: 'carousel' | 'comparison' | 'video-comparison' = 'carousel';
+  viewMode: 'carousel' | 'comparison' | 'video-comparison' = 'comparison';
   currentIndex = 0;
   comparisonIndex = 0;
   videoComparisonIndex = 0;
@@ -51,12 +53,36 @@ export class ProjectDetail implements OnInit {
     this.pauseAllVideos();
   }
 
+  // ----------------- URL normalization helper -----------------
+  getMediaUrl(fileUrl?: string): string {
+    if (!fileUrl) return '';
+
+    // already absolute
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://') || fileUrl.startsWith('//')) {
+      return fileUrl;
+    }
+
+    // leading slash -> prefix apiUrl
+    if (fileUrl.startsWith('/')) {
+      return `${environment.urlServer}${fileUrl}`;
+    }
+
+    // no leading slash -> add it
+    return `${environment.urlServer}/${fileUrl}`;
+  }
+
+  normalizeMediaList(mediaList: Media[] = []): Media[] {
+    return mediaList.map(m => ({ ...m, file_url: this.getMediaUrl((m as any).file_url) }));
+  }
+  // -----------------------------------------------------------
+
   private loadProject(id: string): void {
     this.projectService.getProjectById(id).subscribe({
       next: (project: IProject) => {
-        debugger
+        // Normalize media URLs immediately so templates can use them directly
+        project.media = this.normalizeMediaList(project.media || []);
         this.project = project;
-        this.allMedia = project.media;
+        this.allMedia = project.media || [];
         this.organizePairs();
         this.loading = false;
       },
@@ -217,6 +243,25 @@ export class ProjectDetail implements OnInit {
     }
   }
 
+  /**
+   * Handler for pause events on the comparison videos.
+   * When a video naturally ends it fires a 'pause' as well, but we don't
+   * want to treat that as a user-initiated pause (which should pause both).
+   * Only call pauseAllVideos when the pause was not caused by the ended state.
+   */
+  onVideoPause(event: Event): void {
+    const vid = event.target as HTMLVideoElement;
+    if (!vid) return;
+
+    // If the video has ended, don't pause the other video — let the longer one continue.
+    if (vid.ended) {
+      return;
+    }
+
+    // Otherwise it was likely a user-initiated pause; pause both videos.
+    this.pauseAllVideos();
+  }
+
   // ==================== MÉTODO PARA CAMBIAR DE MODO ====================
 
   changeViewMode(mode: 'carousel' | 'comparison' | 'video-comparison'): void {
@@ -247,5 +292,11 @@ export class ProjectDetail implements OnInit {
       month: 'long',
       day: 'numeric'
     });
+  }
+
+  // Fallback visual para imágenes que fallan al cargar
+  onImgError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.src = '/assets/img/placeholder.png'; // Pon un placeholder en assets
   }
 }

@@ -36,7 +36,8 @@ export class Login {
           // Backend may return different shapes; try common fields.
           const authId = res?.id || res?.admin?.id || res?.adminId || res?.token || res?.access_token;
           if (authId) {
-            localStorage.setItem('authAdminId', String(authId));
+            // Use Auth service as the single source of truth for tokens
+            this.authService.setToken(String(authId));
           }
           this.error = '';
           this.router.navigate(['/admin']);

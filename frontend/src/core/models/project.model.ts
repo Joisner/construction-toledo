@@ -6,6 +6,9 @@ export interface Media {
   is_before: boolean;
   id: string;
   project_id: string;
+  // Flag local to the frontend to mark temporally added/pending media that
+  // haven't been uploaded yet. Optional so backend objects remain compatible.
+  is_pending?: boolean;
   created_at: string; // ISO string (fecha)
 }
 

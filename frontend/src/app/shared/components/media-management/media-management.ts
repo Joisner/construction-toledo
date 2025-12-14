@@ -1,107 +1,140 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, OnInit, SimpleChanges } from '@angular/core';
 import { Media } from '../../../../core/models/project.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { PendingMediaItem } from '../../../../core/models/media.model';
 @Component({
   selector: 'app-media-management',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './media-management.html',
   styleUrl: './media-management.css',
 })
-export class MediaManagement {
+export class MediaManagement implements OnInit {
   @Input() isOpen = false;
-  @Input() mediaList: Media[] = [];
-  @Output() save = new EventEmitter<Media[]>();
+  @Input() mediaList: Media[] = []; // Media ya guardada
+  @Output() save = new EventEmitter<PendingMediaItem[]>(); // ✅ Cambio: emitir archivos pendientes
+  @Output() close = new EventEmitter<void>();
 
-  showMediaModal = signal<boolean>(false);
-  // Para gestionar media en el modal
-  currentMediaList = signal<Media[]>([]);
-  newMediaItem = signal<Partial<Media>>({
-    file_url: '',
-    mime: '',
-    media_type: 'image',
+  // Lista de archivos pendientes a subir
+  pendingMediaList = signal<PendingMediaItem[]>([]);
+  
+  newMediaItem = signal<{
+    file: File | null;
+    description: string;
+    is_before: boolean;
+    media_type: 'image' | 'video';
+    preview_url: string;
+  }>({
+    file: null,
     description: '',
-    is_before: true
+    is_before: true,
+    media_type: 'image',
+    preview_url: ''
   });
-  editingItem = signal<any>(null);
-  // PROYECTOS
-  openMediaModal() {
-    const currentProject = this.editingItem();
-    this.currentMediaList.set(currentProject?.media || []);
-    this.showMediaModal.set(true);
+
+  ngOnInit() {
+    console.log('MediaManagement initialized');
   }
-  closeMediaModal() {
-    this.showMediaModal.set(false);
-    this.resetNewMediaItem();
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isOpen'] && this.isOpen) {
+      // Limpiar cuando se abre el modal
+      this.pendingMediaList.set([]);
+      this.resetNewMediaItem();
+    }
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Crear URL temporal para preview
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        this.newMediaItem.set({
+          file: file,
+          description: this.newMediaItem().description,
+          is_before: this.newMediaItem().is_before,
+          media_type: file.type.startsWith('video/') ? 'video' : 'image',
+          preview_url: e.target?.result as string
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   addMediaToList() {
-    const newMedia = this.newMediaItem();
+    const current = this.newMediaItem();
 
-    if (!newMedia.file_url || !newMedia.description) {
-      alert('Por favor completa la URL y descripción del media');
+    if (!current.file || !current.description.trim()) {
+      alert('Por favor completa el archivo y descripción del media');
       return;
     }
 
-    const mediaItem: Media = {
-      id: Date.now().toString(),
-      file_url: newMedia.file_url!,
-      mime: newMedia.mime || this.detectMimeType(newMedia.file_url!, newMedia.media_type!),
-      media_type: newMedia.media_type || 'image',
-      description: newMedia.description!,
-      is_before: newMedia.is_before ?? true,
-      project_id: this.editingItem()?.id || '',
-      created_at: new Date().toISOString()
+    const pendingItem: PendingMediaItem = {
+      file: current.file,
+      description: current.description,
+      is_before: current.is_before,
+      media_type: current.media_type,
+      preview_url: current.preview_url
     };
 
-    this.currentMediaList.set([...this.currentMediaList(), mediaItem]);
+    this.pendingMediaList.set([...this.pendingMediaList(), pendingItem]);
+    console.log('Media added to pending list. Count:', this.pendingMediaList().length);
+    
     this.resetNewMediaItem();
+    
+    // Resetear el input file
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 
   removeMediaFromList(index: number) {
-    const updated = this.currentMediaList().filter((_, i) => i !== index);
-    this.currentMediaList.set(updated);
+    const updated = this.pendingMediaList().filter((_, i) => i !== index);
+    this.pendingMediaList.set(updated);
+    console.log('Media removed. Current count:', updated.length);
+  }
+
+  closeMediaModal() {
+    console.log('Closing modal');
+    this.pendingMediaList.set([]);
+    this.resetNewMediaItem();
+    this.close.emit();
   }
 
   saveMediaList() {
-    const currentProject = this.editingItem();
-    if (currentProject) {
-      currentProject.media = this.currentMediaList();
-      this.editingItem.set({ ...currentProject });
-    }
-    this.closeMediaModal();
+    const pending = this.pendingMediaList();
+    console.log('=== SAVING MEDIA LIST ===');
+    console.log('Total items to save:', pending.length);
+    console.log('Items details:', pending.map(p => ({
+      fileName: p.file.name,
+      description: p.description,
+      isBefore: p.is_before,
+      type: p.media_type
+    })));
+    console.log('Emitting save event...');
+    
+    this.save.emit(pending); // ✅ Emitir archivos pendientes
+    
+    console.log('Save event emitted successfully');
+    console.log('========================');
   }
 
   private resetNewMediaItem() {
     this.newMediaItem.set({
-      file_url: '',
-      mime: '',
-      media_type: 'image',
+      file: null,
       description: '',
-      is_before: true
+      is_before: true,
+      media_type: 'image',
+      preview_url: ''
     });
   }
 
-  private detectMimeType(url: string, mediaType: string): string {
-    const ext = url.split('.').pop()?.toLowerCase();
-
-    if (mediaType === 'video') {
-      switch (ext) {
-        case 'mp4': return 'video/mp4';
-        case 'webm': return 'video/webm';
-        case 'ogg': return 'video/ogg';
-        default: return 'video/mp4';
-      }
-    } else {
-      switch (ext) {
-        case 'jpg':
-        case 'jpeg': return 'image/jpeg';
-        case 'png': return 'image/png';
-        case 'gif': return 'image/gif';
-        case 'webp': return 'image/webp';
-        default: return 'image/jpeg';
-      }
-    }
+  // Helper para obtener el conteo total (media guardada + pendiente)
+  getTotalMediaCount(): number {
+    return this.mediaList.length + this.pendingMediaList().length;
   }
 }

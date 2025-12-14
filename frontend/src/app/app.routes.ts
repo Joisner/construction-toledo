@@ -12,6 +12,7 @@ import { Login } from './login/login';
 import { InvoiceEditor } from './shared/components/invoice-creator/invoice-creator';
 import { Budget } from './shared/components/budget/budget';
 import { DocumentsList } from './shared/components/documents-list/documents-list';
+import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
 
 // ✅ Simple Auth Guard
 const authGuard = () => {
@@ -52,7 +53,7 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { 
     path: 'admin', 
-    component: Admin,
+    component: AdminDashboard,
     canActivate: [authGuard]
   },
   { path: '**', redirectTo: '' }
