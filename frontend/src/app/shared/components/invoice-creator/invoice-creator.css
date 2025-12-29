@@ -15,6 +15,7 @@
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   /* Eliminar padding del body en impresión */
@@ -35,12 +36,22 @@
     margin: 0 !important;
   }
 
-  /* Forzar layout horizontal en impresión */
+  /* Forzar layout horizontal en impresión - OCULTAR LAYOUT MÓVIL */
   .sm\:hidden {
     display: none !important;
   }
   
   .hidden.sm\:flex {
+    display: flex !important;
+  }
+
+  /* Ocultar completamente el layout móvil del header en impresión */
+  .print-header > .flex.flex-col.gap-4.sm\:hidden {
+    display: none !important;
+  }
+
+  /* Forzar mostrar el layout desktop del header en impresión */
+  .print-header > .hidden.sm\:flex {
     display: flex !important;
   }
 
@@ -52,6 +63,7 @@
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
+    background: linear-gradient(to right, #1d4ed8, #2563eb) !important;
   }
 
   /* Logo container on the left - fixed size */
@@ -67,6 +79,8 @@
     padding: 6px !important;
     flex-shrink: 0 !important;
     margin: 0 !important;
+    background: white !important;
+    border-radius: 12px !important;
   }
 
   /* Company info section in center - takes minimal space needed */
@@ -79,6 +93,7 @@
     text-align: left !important;
     min-width: 0 !important;
     max-width: 300px !important;
+    color: white !important;
   }
 
   /* Forzar la sección FACTURA completamente al borde derecho - sin padding extra */
@@ -91,18 +106,22 @@
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-end !important;
+    color: white !important;
   }
 
   /* Reducir tamaño de título */
   .print-title {
     font-size: 20px !important;
     margin-bottom: 4px !important;
+    color: white !important;
   }
 
   /* Reducir texto de empresa */
   .print-company-text {
     font-size: 10px !important;
     line-height: 1.4 !important;
+    color: white !important;
+    opacity: 0.95 !important;
   }
 
   /* Título FACTURA alineado a derecha */
@@ -111,10 +130,13 @@
     margin-bottom: 4px !important;
     text-align: right !important;
     white-space: nowrap !important;
+    color: white !important;
   }
 
   .print-invoice-details {
     font-size: 9px !important;
+    color: white !important;
+    opacity: 0.9 !important;
   }
 
   /* Reducir padding sección cliente */
@@ -126,16 +148,36 @@
   /* Reducir padding tabla */
   .print-table-section {
     padding: 12px 15px !important;
+    page-break-inside: auto !important;
   }
 
-  /* Reducir padding celdas tabla */
+  /* MEJORA: Celdas de tabla con más espacio y mejor presentación */
   .print-table-cell {
-    padding: 6px 10px !important;
-    font-size: 11px !important;
+    padding: 10px 10px !important;
+    font-size: 10px !important;
+    line-height: 1.6 !important;
+    vertical-align: top !important;
   }
 
   .print-table-header {
-    padding: 6px 10px !important;
+    padding: 8px 10px !important;
+    background-color: #1d4ed8 !important;
+    color: white !important;
+  }
+
+  /* Mejorar espaciado entre filas de conceptos */
+  .print-table-section tbody tr {
+    border-bottom: 1px solid #e5e7eb !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-table-section tbody tr:last-child {
+    border-bottom: 2px solid #d1d5db !important;
+  }
+
+  /* Alternar colores de fila para mejor legibilidad */
+  .print-table-section tbody tr:nth-child(even) {
+    background-color: #f9fafb !important;
   }
 
   /* Reducir padding totales */
@@ -145,62 +187,85 @@
 
   .print-total-row {
     padding: 5px 12px !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
+    background-color: #f3f4f6 !important;
+  }
+
+  .print-total-row:nth-child(2) {
+    background-color: #e5e7eb !important;
   }
 
   .print-total-row-main {
-    padding: 6px 12px !important;
-    font-size: 15px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    background-color: #1d4ed8 !important;
+    color: white !important;
   }
 
   /* Reducir sección de pago */
   .print-payment-section {
     padding: 12px 15px !important;
+    background-color: #f3f4f6 !important;
   }
 
   .print-payment-title {
-    font-size: 10px !important;
+    font-size: 9px !important;
     margin-bottom: 8px !important;
+    color: #1d4ed8 !important;
+    text-transform: uppercase !important;
+    font-weight: bold !important;
   }
 
   .print-payment-box {
     padding: 10px !important;
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 8px !important;
   }
 
   .print-payment-text {
-    font-size: 11px !important;
-    line-height: 1.4 !important;
+    font-size: 10px !important;
+    line-height: 1.5 !important;
   }
 
   /* Reducir footer */
   .print-footer {
     padding: 10px !important;
     font-size: 10px !important;
+    background-color: #1d4ed8 !important;
+    color: white !important;
+    text-align: center !important;
   }
 
   /* Reducir títulos de sección */
   .print-section-title {
-    font-size: 8px !important;
-    margin-bottom: 6px !important;
+    font-size: 9px !important;
+    margin-bottom: 8px !important;
+    color: #1d4ed8 !important;
+    text-transform: uppercase !important;
+    font-weight: bold !important;
+    letter-spacing: 0.05em !important;
   }
 
   /* Ajustar line-height general */
   .print-compact {
-    line-height: 1.3 !important;
+    line-height: 1.4 !important;
   }
 
   /* Reducir bordes */
   .print-border {
     border-width: 1px !important;
+    border-color: #d1d5db !important;
   }
 
-  /* Permitir saltos de página */
+  /* CRÍTICO: Permitir saltos de página en tabla */
   .print-table-section {
     page-break-inside: auto;
   }
 
   table {
     page-break-inside: auto;
+    border-collapse: collapse !important;
   }
 
   tr {
@@ -214,6 +279,12 @@
 
   tfoot {
     display: table-footer-group;
+  }
+
+  /* Evitar que elementos grandes se rompan mal */
+  .print-payment-section,
+  .print-totals-section {
+    page-break-inside: avoid;
   }
 }
 

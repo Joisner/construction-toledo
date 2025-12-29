@@ -5,10 +5,32 @@
     display: none !important;
   }
 
-  /* Asegurar que el presupuesto use todo el ancho */
-  .invoice-container {
+  /* CRITICAL: Eliminar restricciones de ancho del body, html y todos los contenedores */
+  html,
+  body {
+    width: 100% !important;
     max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* CRITICAL: Forzar ancho completo para el contenedor principal */
+  .print-optimized {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     box-shadow: none !important;
+    box-sizing: border-box !important;
+  }
+
+  /* CRITICAL: Eliminar cualquier restricción de Tailwind en impresión */
+  .max-w-4xl,
+  .max-w-5xl,
+  .max-w-6xl,
+  .max-w-7xl {
+    max-width: 100% !important;
   }
 
   /* Asegurar colores en impresión */
@@ -17,41 +39,32 @@
     print-color-adjust: exact !important;
   }
 
-  /* Eliminar padding del body en impresión */
-  body {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
   /* Configurar márgenes de página optimizados */
   @page {
     margin: 0.5cm;
     size: A4;
   }
 
-  /* Optimizar contenedor principal */
-  .print-optimized {
-    box-shadow: none !important;
-    margin: 0 !important;
-  }
-
   /* Forzar layout horizontal en impresión */
   .sm\:hidden {
     display: none !important;
   }
-  
+
   .hidden.sm\:flex {
     display: flex !important;
   }
 
   /* Updated print header for 3-column layout: logo left, company center, budget right */
+  /* Eliminar padding derecho para que PRESUPUESTO quede pegado al borde */
   .print-header {
-    padding: 12px 15px 12px 15px !important;
+    padding: 8px 0 8px 10px !important;
     gap: 8px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Logo container on the left - fixed size */
@@ -81,12 +94,13 @@
     max-width: 300px !important;
   }
 
-  /* Forzar la sección PRESUPUESTO completamente al borde derecho - sin padding extra */
+  /* Eliminado padding-right para que PRESUPUESTO quede completamente pegado al borde derecho */
   .print-budget-section {
     flex-shrink: 0 !important;
     margin-left: auto !important;
     padding-left: 0 !important;
-    padding-right: 0 !important;
+    margin-right: -10px !important;
+    padding-right: 10px !important;
     text-align: right !important;
     display: flex !important;
     flex-direction: column !important;
@@ -117,49 +131,91 @@
     font-size: 9px !important;
   }
 
-  /* Reducir padding sección cliente */
+  /* CRITICAL FIX: Forzar grid de 2 columnas para sección de cliente en impresión */
   .print-client-section {
-    padding: 12px 15px !important;
-    gap: 15px !important;
+    padding: 8px 10px !important;
+    gap: 10px !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  /* Reducir padding tabla */
+  /* CRITICAL: Reducir padding tabla y forzar ancho 100% */
   .print-table-section {
-    padding: 12px 15px !important;
+    padding: 8px 10px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* CRITICAL FIX: Asegurar que la tabla ocupe el 100% del ancho */
+  .print-table-section table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Asegurar que el contenedor de tabla no tenga overflow */
+  .print-table-section .overflow-x-auto {
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ajustar columnas de la tabla */
+  .print-table-section thead th:first-child,
+  .print-table-section tbody td:first-child {
+    width: 70% !important;
+  }
+
+  .print-table-section thead th:last-child,
+  .print-table-section tbody td:last-child {
+    width: 30% !important;
   }
 
   /* Reducir padding celdas tabla */
   .print-table-cell {
-    padding: 6px 10px !important;
+    padding: 5px 8px !important;
     font-size: 11px !important;
   }
 
   .print-table-header {
-    padding: 6px 10px !important;
+    padding: 5px 8px !important;
   }
 
   /* Reducir padding totales */
   .print-totals-section {
-    padding: 8px 15px 12px !important;
+    padding: 6px 10px 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .print-total-row {
-    padding: 5px 12px !important;
+    padding: 4px 8px !important;
     font-size: 13px !important;
   }
 
   .print-total-row-main {
-    padding: 6px 12px !important;
+    padding: 5px 8px !important;
     font-size: 15px !important;
   }
 
   /* Reducir sección de condiciones */
   .print-conditions-section {
-    padding: 12px 15px !important;
+    padding: 8px 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .print-conditions-box {
-    padding: 10px !important;
+    padding: 8px !important;
   }
 
   .print-conditions-text {
@@ -169,7 +225,16 @@
 
   /* Reducir sección de firmas */
   .print-signature-section {
-    padding: 12px 15px !important;
+    padding: 8px 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Forzar grid de 2 columnas para firmas */
+  .print-signature-section > div {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
   }
 
   .print-signature-box {
@@ -193,8 +258,10 @@
 
   /* Reducir footer */
   .print-footer {
-    padding: 10px !important;
+    padding: 8px !important;
     font-size: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Reducir títulos de sección */

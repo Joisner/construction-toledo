@@ -1,3 +1,90 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Reglas globales mejoradas para impresión con ancho completo */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ocultar elementos de la interfaz de la app */
+  header,
+  nav,
+  aside,
+  footer,
+  .sidebar,
+  .admin-sidebar,
+  .app-shell,
+  .app-header,
+  .app-nav,
+  .overlay,
+  .modal,
+  .backdrop,
+  .drawer,
+  .toast,
+  .notifications,
+  .fixed,
+  .floating,
+  .toggle-button,
+  .print-hidden {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Forzar que el contenido imprimible use todo el ancho */
+  .print-optimized {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  /* Eliminar TODAS las restricciones de max-width en impresión */
+  .print-optimized *,
+  .print-optimized .container,
+  .print-optimized .max-w-4xl,
+  .print-optimized .max-w-5xl,
+  .print-optimized .max-w-6xl,
+  .print-optimized .max-w-7xl,
+  .print-optimized .mx-auto {
+    max-width: 100% !important;
+  }
+
+  /* Eliminar padding lateral para maximizar ancho */
+  .print-optimized .px-6,
+  .print-optimized .px-4 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Asegurar que las tablas ocupen el ancho completo */
+  .print-optimized table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  /* Ocultar controles interactivos */
+  .print-optimized button,
+  .print-optimized input,
+  .print-optimized select,
+  .print-optimized textarea {
+    display: none !important;
+  }
+
+  @page {
+    margin: 10mm;
+    size: A4;
+  }
+}

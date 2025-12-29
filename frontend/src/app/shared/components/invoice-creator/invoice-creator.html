@@ -142,6 +142,10 @@
                 class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-lg font-semibold mt-5">
                 🖨️ Imprimir Factura
             </button>
+            <button (click)="createInvoice()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold mt-3">
+                {{ backendId ? 'Guardar cambios' : '💾 Crear Factura' }}
+            </button>
         </div>
     </div>
 

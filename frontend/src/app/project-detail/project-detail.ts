@@ -4,6 +4,7 @@ import { IProject, Media } from '../../core/models/project.model';
 import { ActivatedRoute } from '@angular/router';
 import { Project } from '../../core/services/project';
 import { environment } from '../../env/environment';
+import { FormsModule } from '@angular/forms';
 
 interface MediaPair {
   before: Media | null;
@@ -13,7 +14,7 @@ interface MediaPair {
 
 @Component({
   selector: 'app-project-detail',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './project-detail.html',
   styleUrls: ['./project-detail.css'],
 })

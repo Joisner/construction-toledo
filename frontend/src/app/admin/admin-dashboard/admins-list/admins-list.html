@@ -1,0 +1,182 @@
+<div>
+    <!-- Stats & Action Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+            <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-cyan-500">
+                <p class="text-sm text-gray-600 mb-1">Total Usuarios</p>
+                <p class="text-2xl font-bold text-slate-900">{{ admins().length }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
+                <p class="text-sm text-gray-600 mb-1">Activos</p>
+                <p class="text-2xl font-bold text-slate-900">{{ getActiveCount() }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-purple-500">
+                <p class="text-sm text-gray-600 mb-1">Administradores</p>
+                <p class="text-2xl font-bold text-slate-900">{{ getAdminCount() }}</p>
+            </div>
+        </div>
+
+        <button (click)="openCreateModal()"
+            class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center whitespace-nowrap">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo Usuario
+        </button>
+    </div>
+
+    <!-- Admins Table -->
+    @if (admins().length > 0) {
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Usuario</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Rol</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-4 text-right text-sm font-bold uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @for (admin of admins(); track admin.id) {
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <!-- Username -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center font-bold text-white text-sm mr-3">
+                                    {{ getInitials(admin.username) }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900">{{ admin.username }}</p>
+                                    @if (admin.id === 1) {
+                                    <p class="text-xs text-cyan-600 font-semibold">Cuenta principal</p>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Email -->
+                        <td class="px-6 py-4">
+                            <a [href]="'mailto:' + admin.email"
+                                class="text-sm text-gray-700 hover:text-cyan-600 transition-colors flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                {{ admin.email }}
+                            </a>
+                        </td>
+
+                        <!-- Role -->
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
+                                [class.bg-purple-100]="admin.is_admin" [class.text-purple-700]="admin.is_admin"
+                                [class.bg-blue-100]="!admin.is_admin" [class.text-blue-700]="!admin.is_admin">
+                                @if (admin.is_admin) {
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Administrador
+                                } @else {
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Usuario
+                                }
+                            </span>
+                        </td>
+
+                        <!-- Status -->
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
+                                [class.bg-green-100]="admin.is_active" [class.text-green-700]="admin.is_active"
+                                [class.bg-red-100]="!admin.is_active" [class.text-red-700]="!admin.is_active">
+                                <span class="w-2 h-2 rounded-full mr-2" [class.bg-green-500]="admin.is_active"
+                                    [class.bg-red-500]="!admin.is_active"></span>
+                                {{ admin.is_active ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end space-x-2">
+                                <button (click)="openEditModal(admin)"
+                                    class="p-2 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg transition-colors group relative">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    <span
+                                        class="absolute bottom-full right-0 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Editar
+                                    </span>
+                                </button>
+
+                                @if (admin.id !== 1) {
+                                <button (click)="openDeleteConfirm(admin)"
+                                    class="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors group relative">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span
+                                        class="absolute bottom-full right-0 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Eliminar
+                                    </span>
+                                </button>
+                                } @else {
+                                <div class="p-2 opacity-50 cursor-not-allowed group relative">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    <span
+                                        class="absolute bottom-full right-0 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Protegido
+                                    </span>
+                                </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    } @else {
+    <!-- Empty State -->
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay usuarios</h3>
+        <p class="text-gray-500 mb-4">Comienza agregando usuarios administradores</p>
+        <button (click)="openCreateModal()"
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-xl shadow-lg transition-all">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Crear Usuario
+        </button>
+    </div>
+    }
+
+    <!-- Admin Modal -->
+    <app-admin-modal [isOpen]="showModal()" [admin]="selectedAdmin()" (close)="closeModal()" (save)="saveAdmin($event)">
+    </app-admin-modal>
+
+    <!-- Delete Confirmation -->
+    <app-delete-confirmation [isOpen]="showDeleteModal()" title="¿Eliminar usuario?"
+        [message]="'Se eliminará el usuario ' + (adminToDelete()?.username || '') + '. Esta acción no se puede deshacer.'"
+        (confirm)="deleteAdmin()" (cancel)="closeDeleteConfirm()">
+    </app-delete-confirmation>
+</div>

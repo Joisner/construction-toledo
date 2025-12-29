@@ -20,7 +20,8 @@
                         <p class="text-xs text-cyan-400">Gestión Total</p>
                     </div>
                 </div>
-                } @else {
+                }
+                @else {
                 <div class="bg-cyan-400 p-2 rounded-lg mx-auto">
                     <svg class="w-6 h-6 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -34,46 +35,72 @@
         <!-- Navigation Menu -->
         <nav class="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
             @for (item of menuItems; track item.id) {
-            <button (click)="setTab(item.id)" [class.bg-cyan-400]="currentTab() === item.id"
+
+            <!-- Menu item -->
+            <button (click)="onMenuClick(item)" [class.bg-cyan-400]="currentTab() === item.id"
                 [class.text-slate-900]="currentTab() === item.id" [class.shadow-lg]="currentTab() === item.id"
                 [class.text-gray-300]="currentTab() !== item.id" [class.hover:bg-slate-700]="currentTab() !== item.id"
                 [class.justify-center]="sidebarCollapsed()"
                 class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group relative">
 
                 <svg class="w-5 h-5 flex-shrink-0" [class.text-slate-900]="currentTab() === item.id"
-                    [class.text-gray-300]="currentTab() !== item.id"
-                    [class.group-hover:text-cyan-400]="currentTab() !== item.id" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
+                    [class.text-gray-300]="currentTab() !== item.id" [class.group-hover:text-cyan-400]="currentTab() !== item.id"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
                 </svg>
 
                 @if (!sidebarCollapsed()) {
                 <span class="font-semibold flex-1 text-left">{{ item.label }}</span>
 
-                @if (item.badge) {
-                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    {{ item.badge }}
-                </span>
+                @if (item.subItems) {
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    [class.rotate-90]="expandedGroup() === item.id">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
                 }
-                } @else if (item.badge) {
-                <span
-                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                    {{ item.badge }}
-                </span>
+
+                @if (!item.subItems && item.badge) {
+                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ item.badge }}</span>
+                }
+                }
+
+                @else {
+                @if (item.badge) {
+                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{{ item.badge }}</span>
+                }
                 }
 
                 <!-- Tooltip when collapsed -->
                 @if (sidebarCollapsed()) {
-                <div
-                    class="absolute left-full ml-6 px-3 py-2 bg-slate-800 text-white text-sm rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                <div class="absolute left-full ml-6 px-3 py-2 bg-slate-800 text-white text-sm rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                     {{ item.label }}
                     @if (item.badge) {
                     <span class="ml-2 bg-red-500 px-2 py-0.5 rounded-full text-xs">{{ item.badge }}</span>
                     }
                 </div>
                 }
+
             </button>
+
+            <!-- Sub-items (render when expanded) -->
+            @if (item.subItems && expandedGroup() === item.id) {
+            <div class="pl-6 mt-2 space-y-1">
+                @for (sub of item.subItems; track sub.id) {
+                <button (click)="setTab(sub.id)" [class.bg-cyan-400]="currentTab() === sub.id"
+                    class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-slate-900 hover:bg-slate-700 transition">
+                    <svg class="w-4 h-4 flex-shrink-0 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="sub.icon || 'M5 12h14'" />
+                    </svg>
+                    @if (!sidebarCollapsed()) {
+                    <span class="flex-1 text-left">{{ sub.label }}</span>
+                    }
+                </button>
+                }
+            </div>
             }
+
+            }
+
         </nav>
 
         <!-- User Section -->
@@ -138,7 +165,7 @@
 
             <div class="flex items-center space-x-4">
                 <!-- Stats Cards -->
-           <!--      <app-stats-card icon="bell" label="Pendientes" [value]="pendingCount()" color="red">
+                <!--      <app-stats-card icon="bell" label="Pendientes" [value]="pendingCount()" color="red">
                 </app-stats-card>
 
                 <app-stats-card icon="dollar" label="Ingresos" value="€45.2K" color="green">
@@ -156,8 +183,26 @@
                 @case ('services') {
                 <app-services-list />
                 }
-            }
-               <!--  @switch (currentTab()) {
+                @case ('quotes') {
+                <app-quotes-list />
+                }
+                @case ('documents') {
+                <app-documents-list />
+                }
+                @case ('budgets') {
+                <app-budget />
+                }
+                @case ('invoice') {
+                <app-invoice-creator />
+                }
+                @case ('admins') {
+                <app-admins-list />
+                }
+                @case ('accounting') {
+                <div class="text-sm text-gray-500">Selecciona una opción de Contabilidad en el sidebar.</div>
+                }
+                }
+                <!--  @switch (currentTab()) {
                 @case ('quotes') {
                 <app-quotes-list />
                 }

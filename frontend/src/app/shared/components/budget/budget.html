@@ -5,14 +5,14 @@
   }
 
   <!-- Botones de acción -->
-  <div class="fixed bottom-4 left-4 sm:bottom-5 sm:left-5 flex flex-col sm:flex-row gap-2 sm:gap-3 z-30">
+  <div class="fixed bottom-4 left-4 sm:bottom-5 sm:left-5 flex flex-col sm:flex-row gap-2 sm:gap-3 z-30 print:hidden">
     <button (click)="print()"
-      class="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 font-semibold transition-all hover:-translate-y-1 print:hidden text-sm sm:text-base">
+      class="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 font-semibold transition-all hover:-translate-y-1 text-sm sm:text-base">
       <span>🖨️</span>
       <span class="hidden sm:inline">Imprimir</span>
     </button>
     <button (click)="downloadPDF()"
-      class="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 font-semibold transition-all hover:-translate-y-1 print:hidden text-sm sm:text-base">
+      class="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 font-semibold transition-all hover:-translate-y-1 text-sm sm:text-base">
       <span>📄</span>
       <span class="hidden sm:inline">PDF</span>
     </button>
@@ -21,9 +21,8 @@
   <!-- Botón toggle editor -->
   <button (click)="toggleEditor()" [class.right-0]="!isEditorOpen" [class.right-[350px]]="isEditorOpen"
     class="fixed top-4 sm:top-5 bg-blue-700 hover:bg-blue-800 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-l-lg shadow-lg font-semibold z-40 transition-all print:hidden text-sm sm:text-base"
-    [class.bottom-4]="!isEditorOpen" [class.sm:bottom-5]="!isEditorOpen"
-    [class.w-12]="!isEditorOpen" [class.h-12]="!isEditorOpen"
-    [class.sm:w-14]="!isEditorOpen" [class.sm:h-14]="!isEditorOpen"
+    [class.bottom-4]="!isEditorOpen" [class.sm:bottom-5]="!isEditorOpen" [class.w-12]="!isEditorOpen"
+    [class.h-12]="!isEditorOpen" [class.sm:w-14]="!isEditorOpen" [class.sm:h-14]="!isEditorOpen"
     [class.rounded-full]="!isEditorOpen" [class.lg:w-auto]="isEditorOpen" [class.lg:h-auto]="isEditorOpen"
     [class.lg:rounded-l-lg]="isEditorOpen">
 
@@ -142,7 +141,8 @@
 
       <!-- Condiciones -->
       <div>
-        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Condiciones del Presupuesto</label>
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Condiciones del
+          Presupuesto</label>
         <textarea [(ngModel)]="conditions" rows="8"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
       </div>
@@ -166,7 +166,7 @@
 
   <!-- Diálogo de confirmación -->
   @if (showConvertDialog) {
-  <div class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 print:hidden">
     <div class="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 animate-scale">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -192,7 +192,8 @@
 
       <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
         <p class="text-xs text-gray-700">
-          <strong>⚠️ Nota:</strong> El presupuesto se marcará como "Convertido" y se guardará la referencia a la factura creada.
+          <strong>⚠️ Nota:</strong> El presupuesto se marcará como "Convertido" y se guardará la referencia a la factura
+          creada.
         </p>
       </div>
 
@@ -211,7 +212,7 @@
   }
 
   <!-- Presupuesto -->
-  <div class="max-w-4xl mx-auto bg-white shadow-xl print-optimized">
+  <div id="budget-content" class="w-full mx-auto bg-white shadow-xl print-optimized">
 
     <!-- Header: Logo LEFT, Company info CENTER, Budget info RIGHT -->
     <div class="bg-gradient-to-r from-blue-700 to-blue-600 text-white p-4 sm:p-6 lg:p-10 print-header">
@@ -221,8 +222,7 @@
         <div class="flex justify-between items-start">
           <div class="flex-shrink-0 print-logo-container">
             <div class="w-20 h-20 bg-white rounded-lg p-3 shadow-lg print-logo">
-              <img src="/assets/logos/logo.png" alt="Construcciones Toledo"
-                class="w-full h-full object-contain" />
+              <img src="/assets/logos/logo.png" alt="Construcciones Toledo" class="w-full h-full object-contain" />
             </div>
           </div>
           <div class="flex flex-col items-end print-budget-section">
@@ -234,7 +234,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Company Information -->
         <div class="print-company-info">
           <h1 class="text-xl font-bold mb-2 print-title">{{ companyInfo.name }}</h1>
@@ -252,15 +252,16 @@
       <div class="hidden sm:flex flex-row items-center justify-between gap-4 md:gap-6 lg:gap-8">
         <!-- LEFT: Logo -->
         <div class="flex-shrink-0 print-logo-container">
-          <div class="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-40 xl:h-40 bg-white rounded-xl p-3 md:p-4 lg:p-6 shadow-lg print-logo">
-            <img src="/assets/logos/logo.png" alt="Construcciones Toledo"
-              class="w-full h-full object-contain" />
+          <div
+            class="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-40 xl:h-40 bg-white rounded-xl p-3 md:p-4 lg:p-6 shadow-lg print-logo">
+            <img src="/assets/logos/logo.png" alt="Construcciones Toledo" class="w-full h-full object-contain" />
           </div>
         </div>
 
         <!-- CENTER: Company Information - minimal width -->
         <div class="flex flex-col justify-center flex-shrink-0 print-company-info" style="max-width: 350px;">
-          <h1 class="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 lg:mb-3 print-title">{{ companyInfo.name }}</h1>
+          <h1 class="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 lg:mb-3 print-title">{{ companyInfo.name
+            }}</h1>
           <p class="text-xs md:text-sm lg:text-base opacity-95 leading-relaxed print-company-text">
             {{ companyInfo.owner }}<br>
             {{ companyInfo.address }}<br>
@@ -272,7 +273,8 @@
 
         <!-- RIGHT: Budget Number - pegado completamente a la derecha -->
         <div class="flex flex-col items-end justify-center gap-2 flex-shrink-0 ml-auto print-budget-section">
-          <div class="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold print-budget-title whitespace-nowrap">PRESUPUESTO</div>
+          <div class="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold print-budget-title whitespace-nowrap">
+            PRESUPUESTO</div>
           <div class="text-xs md:text-sm opacity-90 text-right print-budget-details whitespace-nowrap">
             <div class="mb-1"><strong>Nº:</strong> {{ budgetNumber }}</div>
             <div class="mb-1"><strong>Fecha:</strong> {{ formatDate(budgetDate) }}</div>
@@ -288,7 +290,9 @@
       <div class="flex items-center">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd" />
           </svg>
         </div>
         <div class="ml-3">
@@ -300,12 +304,13 @@
     </div>
     }
 
-    @if (getDaysRemaining() < 0) {
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 print:hidden">
+    @if (getDaysRemaining() < 0) { <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 print:hidden">
       <div class="flex items-center">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd" />
           </svg>
         </div>
         <div class="ml-3">
@@ -314,141 +319,151 @@
           </p>
         </div>
       </div>
-    </div>
-    }
+  </div>
+  }
 
-    <!-- Cliente info -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 p-4 sm:p-6 lg:p-10 border-b-2 border-gray-200 print-client-section print-border">
-      <div>
-        <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Presupuesto Para</h3>
-        <div class="text-gray-700 leading-relaxed text-sm sm:text-base print-compact">
-          <p class="print-table-cell">
-            <strong class="text-black text-lg">{{ clientName || 'Nombre del cliente' }}</strong><br>
-            @if (clientAddress) {
-            <span [innerHTML]="formatText(clientAddress)"></span>
-            } @else {
-            <span class="text-gray-400">Dirección del cliente</span>
-            }
-          </p>
-          <div class="mt-3 space-y-1">
-            @if (clientPhone) {
-            <p class="flex items-center gap-2">
-              <span class="text-blue-700">📞</span> {{ clientPhone }}
-            </p>
-            }
-            @if (clientEmail) {
-            <p class="flex items-center gap-2">
-              <span class="text-blue-700">✉️</span> {{ clientEmail }}
-            </p>
-            }
-          </div>
-        </div>
-      </div>
-      <div>
-        <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Datos de Contacto</h3>
-        <div class="text-gray-700 leading-relaxed text-sm sm:text-base space-y-2 print-compact">
+  <!-- Cliente info -->
+  <div
+    class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 p-4 sm:p-6 lg:p-10 border-b-2 border-gray-200 print-client-section print-border">
+    <div>
+      <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Presupuesto
+        Para</h3>
+      <div class="text-gray-700 leading-relaxed text-sm sm:text-base print-compact">
+        <p class="print-table-cell">
+          <strong class="text-black text-lg">{{ clientName || 'Nombre del cliente' }}</strong><br>
+          @if (clientAddress) {
+          <span [innerHTML]="formatText(clientAddress)"></span>
+          } @else {
+          <span class="text-gray-400">Dirección del cliente</span>
+          }
+        </p>
+        <div class="mt-3 space-y-1">
+          @if (clientPhone) {
           <p class="flex items-center gap-2">
-            <span class="text-blue-700">📞</span> {{ companyInfo.phone }}
+            <span class="text-blue-700">📞</span> {{ clientPhone }}
           </p>
+          }
+          @if (clientEmail) {
           <p class="flex items-center gap-2">
-            <span class="text-blue-700">✉️</span> {{ companyInfo.email }}
+            <span class="text-blue-700">✉️</span> {{ clientEmail }}
           </p>
-          <p class="text-sm text-gray-500 mt-3">
-            No dude en contactarnos para cualquier aclaración
-          </p>
+          }
         </div>
       </div>
     </div>
-
-    <!-- Items -->
-    <div class="p-4 sm:p-6 lg:p-10 print-table-section">
-      <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-4 sm:mb-5 print-section-title">Detalle de Trabajos</h3>
-
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[400px]">
-          <thead class="bg-blue-700 text-white">
-            <tr>
-              <th
-                class="text-left px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs uppercase tracking-wide print-table-header">
-                Descripción del Trabajo</th>
-              <th
-                class="text-right px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs uppercase tracking-wide print-table-header w-24 sm:w-32">
-                Precio</th>
-            </tr>
-          </thead>
-          <tbody>
-
-            @for (item of items; track $index) {
-            <tr class="border-b border-gray-200 hover:bg-gray-50">
-              <td class="px-3 sm:px-4 py-4 sm:py-5 text-gray-700 text-xs sm:text-sm leading-relaxed print-table-cell print-compact"
-                [innerHTML]="formatText(item.description)"></td>
-              <td class="px-3 sm:px-4 py-4 sm:py-5 text-right font-semibold text-black text-xs sm:text-base print-table-cell whitespace-nowrap">
-                {{ formatCurrency(item.amount) }}
-              </td>
-            </tr>
-            }
-
-          </tbody>
-        </table>
+    <div>
+      <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Datos de
+        Contacto</h3>
+      <div class="text-gray-700 leading-relaxed text-sm sm:text-base space-y-2 print-compact">
+        <p class="flex items-center gap-2">
+          <span class="text-blue-700">📞</span> {{ companyInfo.phone }}
+        </p>
+        <p class="flex items-center gap-2">
+          <span class="text-blue-700">✉️</span> {{ companyInfo.email }}
+        </p>
+        <p class="text-sm text-gray-500 mt-3">
+          No dude en contactarnos para cualquier aclaración
+        </p>
       </div>
-    </div>
-
-    <!-- Totales -->
-    <div class="px-4 sm:px-6 lg:px-10 pb-6 sm:pb-8 lg:pb-10 flex justify-end print-totals-section">
-      <div class="w-full sm:w-80 lg:w-96">
-        <div class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-gray-100 text-gray-600 text-xs sm:text-sm print-total-row">
-          <span>Subtotal</span>
-          <span>{{ formatCurrency(getSubtotal()) }}</span>
-        </div>
-        <div class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-gray-200 text-gray-600 text-xs sm:text-sm print-total-row">
-          <span>IVA {{ taxRate.toFixed(2) }}%</span>
-          <span>{{ formatCurrency(getTax()) }}</span>
-        </div>
-        <div
-          class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-blue-700 text-white text-base sm:text-lg font-bold mt-1 print-total-row-main">
-          <span>TOTAL PRESUPUESTO</span>
-          <span>{{ formatCurrency(getTotal()) }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Condiciones -->
-    <div class="bg-gray-100 p-4 sm:p-6 lg:p-10 border-t-2 border-gray-300 print-conditions-section print-border">
-      <h3 class="text-blue-700 text-xs sm:text-sm font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Condiciones del Presupuesto</h3>
-      <div class="bg-white p-4 sm:p-5 rounded-lg border border-gray-300 print-conditions-box">
-        <p class="text-gray-700 text-xs sm:text-sm leading-loose whitespace-pre-line print-conditions-text">{{ conditions }}</p>
-      </div>
-    </div>
-
-    <!-- Firma y aceptación -->
-    <div class="p-4 sm:p-6 lg:p-10 border-t-2 border-gray-300 print-signature-section print-border">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-        <div>
-          <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Aceptación del Cliente</h3>
-          <div class="border-2 border-gray-300 rounded-lg p-4 sm:p-6 h-28 sm:h-32 print-signature-box">
-            <p class="text-gray-400 text-xs sm:text-sm mb-3 print-signature-label">Firma del cliente:</p>
-            <div class="border-b-2 border-gray-400 w-full print-signature-line"></div>
-          </div>
-          <p class="text-xs text-gray-500 mt-2 print-signature-date">
-            Fecha de aceptación: _________________
-          </p>
-        </div>
-        <div>
-          <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Construcciones Toledo</h3>
-          <div class="border-2 border-gray-300 rounded-lg p-4 sm:p-6 h-28 sm:h-32 print-signature-box">
-            <p class="text-gray-400 text-xs sm:text-sm mb-3 print-signature-label">Firma autorizada:</p>
-            <div class="border-b-2 border-gray-400 w-full print-signature-line"></div>
-          </div>
-          <p class="text-xs text-gray-500 mt-2 print-signature-date">
-            {{ companyInfo.owner }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="bg-blue-700 text-white text-center py-4 sm:py-5 lg:py-6 text-xs sm:text-sm print-footer">
-      GRACIAS POR CONFIAR EN NOSOTROS
     </div>
   </div>
+
+  <!-- Items - TABLA SIN RESTRICCIONES DE ANCHO -->
+  <div class="p-4 sm:p-6 lg:p-10 print-table-section">
+    <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-4 sm:mb-5 print-section-title">Detalle de
+      Trabajos</h3>
+
+    <table class="w-full">
+      <thead class="bg-blue-700 text-white">
+        <tr>
+          <th
+            class="text-left px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs uppercase tracking-wide print-table-header">
+            Descripción del Trabajo</th>
+          <th
+            class="text-right px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs uppercase tracking-wide print-table-header w-24 sm:w-32">
+            Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        @for (item of items; track $index) {
+        <tr class="border-b border-gray-200 hover:bg-gray-50">
+          <td
+            class="px-3 sm:px-4 py-4 sm:py-5 text-gray-700 text-xs sm:text-sm leading-relaxed print-table-cell print-compact"
+            [innerHTML]="formatText(item.description)"></td>
+          <td
+            class="px-3 sm:px-4 py-4 sm:py-5 text-right font-semibold text-black text-xs sm:text-base print-table-cell whitespace-nowrap">
+            {{ formatCurrency(item.amount) }}
+          </td>
+        </tr>
+        }
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Totales -->
+  <div class="px-4 sm:px-6 lg:px-10 pb-6 sm:pb-8 lg:pb-10 flex justify-end print-totals-section">
+    <div class="w-full sm:w-80 lg:w-96">
+      <div
+        class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-gray-100 text-gray-600 text-xs sm:text-sm print-total-row">
+        <span>Subtotal</span>
+        <span>{{ formatCurrency(getSubtotal()) }}</span>
+      </div>
+      <div
+        class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-gray-200 text-gray-600 text-xs sm:text-sm print-total-row">
+        <span>IVA {{ taxRate.toFixed(2) }}%</span>
+        <span>{{ formatCurrency(getTax()) }}</span>
+      </div>
+      <div
+        class="flex justify-between px-4 sm:px-5 py-2 sm:py-3 bg-blue-700 text-white text-base sm:text-lg font-bold mt-1 print-total-row-main">
+        <span>TOTAL PRESUPUESTO</span>
+        <span>{{ formatCurrency(getTotal()) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Condiciones -->
+  <div class="bg-gray-100 p-4 sm:p-6 lg:p-10 border-t-2 border-gray-300 print-conditions-section print-border">
+    <h3 class="text-blue-700 text-xs sm:text-sm font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">
+      Condiciones del Presupuesto</h3>
+    <div class="bg-white p-4 sm:p-5 rounded-lg border border-gray-300 print-conditions-box">
+      <p class="text-gray-700 text-xs sm:text-sm leading-loose whitespace-pre-line print-conditions-text">{{ conditions
+        }}</p>
+    </div>
+  </div>
+
+  <!-- Firma y aceptación -->
+  <div class="p-4 sm:p-6 lg:p-10 border-t-2 border-gray-300 print-signature-section print-border">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
+      <div>
+        <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">Aceptación
+          del Cliente</h3>
+        <div class="border-2 border-gray-300 rounded-lg p-4 sm:p-6 h-28 sm:h-32 print-signature-box">
+          <p class="text-gray-400 text-xs sm:text-sm mb-3 print-signature-label">Firma del cliente:</p>
+          <div class="border-b-2 border-gray-400 w-full print-signature-line"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2 print-signature-date">
+          Fecha de aceptación: _________________
+        </p>
+      </div>
+      <div>
+        <h3 class="text-blue-700 text-xs font-bold uppercase tracking-wide mb-3 sm:mb-4 print-section-title">
+          Construcciones Toledo</h3>
+        <div class="border-2 border-gray-300 rounded-lg p-4 sm:p-6 h-28 sm:h-32 print-signature-box">
+          <p class="text-gray-400 text-xs sm:text-sm mb-3 print-signature-label">Firma autorizada:</p>
+          <div class="border-b-2 border-gray-400 w-full print-signature-line"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2 print-signature-date">
+          {{ companyInfo.owner }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="bg-blue-700 text-white text-center py-4 sm:py-5 lg:py-6 text-xs sm:text-sm print-footer">
+    GRACIAS POR CONFIAR EN NOSOTROS
+  </div>
+</div>
 </div>

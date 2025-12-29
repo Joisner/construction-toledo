@@ -1,0 +1,205 @@
+<div>
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-yellow-500">
+            <p class="text-sm text-gray-600 mb-1">Pendientes</p>
+            <p class="text-2xl font-bold text-slate-900">{{ getCountByStatus('pending') }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-blue-500">
+            <p class="text-sm text-gray-600 mb-1">Contactados</p>
+            <p class="text-2xl font-bold text-slate-900">{{ getCountByStatus('contacted') }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
+            <p class="text-sm text-gray-600 mb-1">Aceptados</p>
+            <p class="text-2xl font-bold text-slate-900">{{ getCountByStatus('accepted') }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-red-500">
+            <p class="text-sm text-gray-600 mb-1">Rechazados</p>
+            <p class="text-2xl font-bold text-slate-900">{{ getCountByStatus('rejected') }}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+        <div class="flex flex-wrap gap-2">
+            <button (click)="setFilter('all')" [class.bg-cyan-400]="currentFilter() === 'all'"
+                [class.text-slate-900]="currentFilter() === 'all'" [class.bg-gray-100]="currentFilter() !== 'all'"
+                [class.text-gray-700]="currentFilter() !== 'all'"
+                class="px-4 py-2 rounded-lg font-semibold transition-colors">
+                Todas ({{ quotes().length }})
+            </button>
+            <button (click)="setFilter('pending')" [class.bg-yellow-400]="currentFilter() === 'pending'"
+                [class.text-slate-900]="currentFilter() === 'pending'"
+                [class.bg-gray-100]="currentFilter() !== 'pending'"
+                [class.text-gray-700]="currentFilter() !== 'pending'"
+                class="px-4 py-2 rounded-lg font-semibold transition-colors">
+                Pendientes
+            </button>
+            <button (click)="setFilter('contacted')" [class.bg-blue-400]="currentFilter() === 'contacted'"
+                [class.text-white]="currentFilter() === 'contacted'"
+                [class.bg-gray-100]="currentFilter() !== 'contacted'"
+                [class.text-gray-700]="currentFilter() !== 'contacted'"
+                class="px-4 py-2 rounded-lg font-semibold transition-colors">
+                Contactados
+            </button>
+            <button (click)="setFilter('accepted')" [class.bg-green-400]="currentFilter() === 'accepted'"
+                [class.text-white]="currentFilter() === 'accepted'" [class.bg-gray-100]="currentFilter() !== 'accepted'"
+                [class.text-gray-700]="currentFilter() !== 'accepted'"
+                class="px-4 py-2 rounded-lg font-semibold transition-colors">
+                Aceptados
+            </button>
+            <button (click)="setFilter('rejected')" [class.bg-red-400]="currentFilter() === 'rejected'"
+                [class.text-white]="currentFilter() === 'rejected'" [class.bg-gray-100]="currentFilter() !== 'rejected'"
+                [class.text-gray-700]="currentFilter() !== 'rejected'"
+                class="px-4 py-2 rounded-lg font-semibold transition-colors">
+                Rechazados
+            </button>
+        </div>
+    </div>
+
+    <!-- Quotes List -->
+    @if (filteredQuotes().length > 0) {
+    <div class="space-y-4">
+        @for (quote of filteredQuotes(); track quote.id) {
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+            <div class="flex flex-col md:flex-row">
+
+                <!-- Status Indicator -->
+                <div class="w-full md:w-2 flex-shrink-0" [class.bg-yellow-500]="quote.status === 'pending'"
+                    [class.bg-blue-500]="quote.status === 'contacted'"
+                    [class.bg-green-500]="quote.status === 'accepted'" [class.bg-red-500]="quote.status === 'rejected'">
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 p-6">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+
+                        <!-- Client Info -->
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-slate-900 mb-1">{{ quote.name }}</h3>
+                                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            <a [href]="'mailto:' + quote.email" class="hover:text-cyan-500">{{
+                                                quote.email }}</a>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                            </svg>
+                                            <a [href]="'tel:' + quote.phone" class="hover:text-cyan-500">{{ quote.phone
+                                                }}</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                                    [class.bg-yellow-100]="quote.status === 'pending'"
+                                    [class.text-yellow-700]="quote.status === 'pending'"
+                                    [class.bg-blue-100]="quote.status === 'contacted'"
+                                    [class.text-blue-700]="quote.status === 'contacted'"
+                                    [class.bg-green-100]="quote.status === 'accepted'"
+                                    [class.text-green-700]="quote.status === 'accepted'"
+                                    [class.bg-red-100]="quote.status === 'rejected'"
+                                    [class.text-red-700]="quote.status === 'rejected'">
+                                    {{ getStatusLabel(quote.status) }}
+                                </span>
+                            </div>
+
+                            <!-- Service Badge -->
+                            <div class="mb-3">
+                                <span
+                                    class="inline-flex items-center px-3 py-1 bg-cyan-100 text-cyan-700 rounded-lg text-sm font-semibold">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    {{ quote.service }}
+                                </span>
+                            </div>
+
+                            <!-- Message -->
+                            <div class="bg-gray-50 rounded-lg p-4 mb-3">
+                                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ quote.message }}</p>
+                            </div>
+
+                            <!-- Timestamp -->
+                            @if (quote.created_at) {
+                            <p class="text-xs text-gray-500">
+                                Recibida: {{ formatDate(quote.created_at) }}
+                            </p>
+                            }
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex md:flex-col gap-2">
+                            <!-- Status Actions -->
+                            @if (quote.status === 'pending') {
+                            <button (click)="updateStatus(quote, 'contacted')"
+                                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm whitespace-nowrap">
+                                Marcar Contactado
+                            </button>
+                            }
+
+                            @if (quote.status === 'contacted') {
+                            <button (click)="updateStatus(quote, 'accepted')"
+                                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors text-sm whitespace-nowrap">
+                                ✓ Aceptar
+                            </button>
+                            <button (click)="updateStatus(quote, 'rejected')"
+                                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors text-sm whitespace-nowrap">
+                                ✗ Rechazar
+                            </button>
+                            }
+
+                            <button (click)="openViewModal(quote)"
+                                class="px-4 py-2 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 font-semibold rounded-lg transition-colors text-sm whitespace-nowrap">
+                                Ver Detalles
+                            </button>
+
+                            <button (click)="openDeleteConfirm(quote)"
+                                class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition-colors text-sm whitespace-nowrap">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    } @else {
+    <!-- Empty State -->
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">
+            {{ currentFilter() === 'all' ? 'No hay cotizaciones' : 'No hay cotizaciones con este estado' }}
+        </h3>
+        <p class="text-gray-500">
+            {{ currentFilter() === 'all' ? 'Las solicitudes de los clientes aparecerán aquí' : 'Intenta con otro filtro'
+            }}
+        </p>
+    </div>
+    }
+
+    <!-- View/Edit Modal -->
+    <app-quote-modal [isOpen]="showModal()" [quote]="selectedQuote()" [readOnly]="true" (close)="closeModal()">
+    </app-quote-modal>
+
+    <!-- Delete Confirmation -->
+    <app-delete-confirmation [isOpen]="showDeleteModal()" title="¿Eliminar cotización?"
+        message="Esta acción no se puede deshacer. Se eliminará la solicitud de forma permanente."
+        (confirm)="deleteQuote()" (cancel)="closeDeleteConfirm()">
+    </app-delete-confirmation>
+</div>

@@ -1,18 +1,31 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { ProjectsGrid } from '../projects-grid/projects-grid';
-import { ServicesList } from '../services-list/services-list';
-type TabType = 'quotes' | 'projects' | 'services' | 'accounting' | 'admins';
+import { ServicesList } from '../admin-services/services-list/services-list';
+import { QuotesList } from '../admin-quotes/quotes-list/quotes-list';
+import { Budget } from '../../shared/components/budget/budget';
+import { DocumentsList } from '../../shared/components/documents-list/documents-list';
+import { InvoiceEditor } from '../../shared/components/invoice-creator/invoice-creator';
+import { AdminsList } from './admins-list/admins-list';
+type TabType = 'quotes' | 'projects' | 'services' | 'accounting' | 'admins'
+  | 'budgets' | 'invoice' | 'documents';
 
 interface MenuItem {
   id: TabType;
   label: string;
   icon: string;
   badge?: number;
+  // optional nested sub-items for expandable groups (e.g. Contabilidad)
+  subItems?: Array<{
+    id: TabType;
+    label: string;
+    icon?: string;
+    badge?: number;
+  }>;
 }
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [ProjectsGrid, ServicesList],
+  imports: [ProjectsGrid, ServicesList, QuotesList, DocumentsList, Budget, InvoiceEditor, AdminsList],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
@@ -42,7 +55,16 @@ export class AdminDashboard {
       id: 'accounting',
       label: 'Contabilidad',
       icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-      badge: 3
+      badge: 3,
+      // subItems will be shown when this group is expanded
+      subItems: [
+        // Document list (document with text lines)
+        { id: 'documents', label: 'Documentos', icon: 'M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z M7 7h10 M7 11h10 M7 15h6' },
+        // Budgets (receipt/paper with lines)
+        { id: 'budgets', label: 'Presupuestos', icon: 'M3 5a2 2 0 012-2h14a2 2 0 012 2v14l-4-2-4 2-4-2-4 2V5z M7 10h10 M7 14h6' },
+        // Invoices (receipt with currency/lines)
+        { id: 'invoice', label: 'Facturas', icon: 'M21 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2v-2 M7 10h10 M7 14h6' }
+      ]
     },
     {
       id: 'admins',
@@ -60,25 +82,90 @@ export class AdminDashboard {
   }
 
   getCurrentTitle(): string {
-    const titles = {
+    const titles: Record<TabType, string> = {
       quotes: 'Cotizaciones',
       projects: 'Proyectos',
       services: 'Servicios',
       accounting: 'Contabilidad',
-      admins: 'Administradores'
+      admins: 'Administradores',
+      'budgets': 'Presupuestos',
+      'invoice': 'Facturas',
+      'documents': 'Documentos'
     };
     return titles[this.currentTab()];
   }
 
   getCurrentDescription(): string {
-    const descriptions = {
+    const descriptions: Record<TabType, string> = {
       quotes: 'Gestiona solicitudes y cotizaciones de clientes',
       projects: 'Administra tu portafolio de proyectos',
       services: 'Configura los servicios que ofreces',
       accounting: 'Control financiero de tu negocio',
-      admins: 'Gestión de usuarios administradores'
+      admins: 'Gestión de usuarios administradores',
+      'budgets': 'Crear y editar presupuestos',
+      'invoice': 'Crear y editar facturas',
+      'documents': 'Listado y exportación de documentos'
     };
     return descriptions[this.currentTab()];
+  }
+
+  // track which sidebar group is expanded (e.g. 'accounting')
+  expandedGroup = signal<string | null>(null);
+
+  private _openDocumentHandler = (e: any) => {
+    const detail = e?.detail;
+    if (!detail || !detail.type) return;
+    if (detail.type === 'budget') {
+      this.expandedGroup.set('accounting');
+      this.currentTab.set('budgets');
+    } else if (detail.type === 'invoice') {
+      this.expandedGroup.set('accounting');
+      this.currentTab.set('invoice');
+    } else if (detail.type === 'documents') {
+      this.currentTab.set('documents');
+    }
+  }
+
+  ngOnInit(): void {
+    // Listen to embedded edit/view events from lists
+    try {
+      window.addEventListener('open-document', this._openDocumentHandler as EventListener);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  ngOnDestroy(): void {
+    try {
+      window.removeEventListener('open-document', this._openDocumentHandler as EventListener);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  toggleGroup(groupId: string) {
+    this.expandedGroup.update(g => (g === groupId ? null : groupId));
+  }
+
+  onMenuClick(item: MenuItem) {
+    if (item.subItems && item.subItems.length > 0) {
+      this.toggleGroup(item.id);
+    } else {
+      this.setTab(item.id as TabType);
+    }
+  }
+
+  // helpers used from template to avoid direct string-literal comparisons
+  isAccountingDocuments(): boolean {
+    return this.currentTab() === 'documents';
+  }
+
+  isAccountingBudgets(): boolean {
+    return this.currentTab() === 'budgets';
+  }
+
+  isAccountingInvoice(): boolean {
+    return this.currentTab() === 'invoice';
   }
 
   logout() {

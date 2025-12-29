@@ -54,4 +54,30 @@ export class Auth {
       })
     )
   }
+
+  // Devuelve HttpHeaders con Authorization Bearer <token> o lanza si no hay token.
+  getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+    console.log('=== DEBUG TOKEN ===');
+    console.log('Token from service:', token);
+    console.log('Token length:', token?.length);
+    console.log('Token starts with:', token?.substring(0, 20));
+
+    if (!token) {
+      console.error('No token found!');
+      throw new Error('No authentication token available');
+    }
+
+    // Only set the Authorization header here. Let HttpClient set Content-Type
+    // automatically depending on the request body. Some backends can reject
+    // requests when a Content-Type is present on DELETE or multipart requests.
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token.trim()}`
+    });
+
+    console.log('Headers created:', headers.get('Authorization'));
+    console.log('===================');
+
+    return headers;
+  }
 }

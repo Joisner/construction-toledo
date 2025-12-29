@@ -2,10 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Invoice, InvoiceData } from '../../core/services/invoice';
+import { Budgets } from '../../../../core/services/budget';
+import { Invoices } from '../../../../core/services/invoice';
+import { forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-documents-list',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './documents-list.html',
   styleUrl: './documents-list.css',
@@ -46,8 +50,14 @@ export class DocumentsList {
 
   constructor(
     private invoiceService: Invoice,
+    private budgetsService: Budgets,
+    private invoicesService: Invoices,
     private router: Router
   ) {}
+
+  // Raw backend arrays (to keep backend ids for deletes)
+  allBudgetsRaw: any[] = [];
+  allInvoicesRaw: any[] = [];
 
   ngOnInit(): void {
     this.loadDocuments();
@@ -56,9 +66,79 @@ export class DocumentsList {
   }
 
   loadDocuments(): void {
-    this.allBudgets = this.invoiceService.getAllBudgets();
-    this.allInvoices = this.invoiceService.getAllInvoices();
-    this.applyFilters();
+    // Load from backend (budgets + invoices)
+    forkJoin({
+      budgets: this.budgetsService.getBudgets(),
+      invoices: this.invoicesService.getInvoices()
+    }).subscribe({
+      next: ({ budgets, invoices }) => {
+        // Keep raw arrays for id-based operations
+        this.allBudgetsRaw = budgets as any[];
+        this.allInvoicesRaw = invoices as any[];
+
+        // Map backend models to local InvoiceData shape
+        this.allBudgets = (budgets as any[]).map(b => ({
+          type: 'budget',
+          number: b.number,
+          date: b.date,
+          clientName: b.clientName,
+          clientAddress: b.clientAddress,
+          clientDNI: b.clientDNI || '',
+          clientPhone: b.clientPhone,
+          clientEmail: b.clientEmail,
+          items: (b.items || []).map((it: any) => {
+            const qty = it.quantity || 1;
+            const taxFactor = 1 + ((b.taxRate || 0) / 100);
+            // Determine base price: prefer explicit price, otherwise derive from total or amount
+            let basePrice = 0;
+            if (it.price !== undefined) basePrice = Number(it.price);
+            else if (it.total !== undefined) basePrice = Math.round((Number(it.total) / taxFactor) * 100) / 100;
+            else if (it.amount !== undefined) basePrice = Math.round((Number(it.amount) / taxFactor) * 100) / 100;
+            const amountForUI = basePrice;
+            return { description: it.description, amount: amountForUI };
+          }),
+          taxRate: b.taxRate,
+          validUntil: b.validUntil,
+          conditions: b.conditions,
+          iban: b.iban
+        }));
+
+        this.allInvoices = (invoices as any[]).map(i => ({
+          type: 'invoice',
+          number: i.number,
+          date: i.date,
+          clientName: i.clientName,
+          clientAddress: i.clientAddress,
+          clientDNI: i.clientDNI || '',
+          clientPhone: i.clientPhone,
+          clientEmail: i.clientEmail,
+          items: (i.items || []).map((it: any) => {
+            const qty = it.quantity || 1;
+            const taxFactor = 1 + ((i.taxRate || 0) / 100);
+            let basePrice = 0;
+            if (it.price !== undefined) basePrice = Number(it.price);
+            else if (it.total !== undefined) basePrice = Math.round((Number(it.total) / taxFactor) * 100) / 100;
+            else if (it.amount !== undefined) basePrice = Math.round((Number(it.amount) / taxFactor) * 100) / 100;
+            return { description: it.description, amount: basePrice };
+          }),
+          taxRate: i.taxRate,
+          iban: i.iban
+        }));
+
+        this.applyFilters();
+        this.calculateStats();
+        this.extractYears();
+      },
+      error: (err) => {
+        console.error('Error loading documents from backend', err);
+        // Fallback to local storage implementation
+        this.allBudgets = this.invoiceService.getAllBudgets();
+        this.allInvoices = this.invoiceService.getAllInvoices();
+        this.applyFilters();
+        this.calculateStats();
+        this.extractYears();
+      }
+    });
   }
 
   applyFilters(): void {
@@ -206,16 +286,41 @@ export class DocumentsList {
 
   viewDocument(doc: InvoiceData): void {
     // Navegar al componente correspondiente con los datos cargados
-    if (doc.type === 'budget') {
-      this.router.navigate(['/budget'], { state: { data: doc } });
-    } else {
-      this.router.navigate(['/invoice'], { state: { data: doc } });
-    }
+        // Guardar en el servicio compartido para que el editor integrado pueda leer los datos
+        // Añadir backend id cuando esté disponible (para permitir actualizaciones)
+        const payload = { ...doc } as any;
+        if (doc.type === 'budget') {
+          const raw = this.allBudgetsRaw.find(b => b.number === doc.number);
+          if (raw && raw.id) payload.backendId = raw.id;
+        } else {
+          const raw = this.allInvoicesRaw.find(i => i.number === doc.number);
+          if (raw && raw.id) payload.backendId = raw.id;
+        }
+
+        this.invoiceService.saveData(payload);
+
+        // Si estamos embebidos dentro del admin dashboard, abrir inline en lugar de navegar
+        const isEmbedded = !!document.querySelector('app-admin-dashboard');
+        try {
+          window.dispatchEvent(new CustomEvent('open-document', { detail: { type: payload.type, number: payload.number } }));
+        } catch (e) {
+          // ignore
+        }
+
+        if (!isEmbedded) {
+          // fallback: navegar para flujos independientes
+          if (doc.type === 'budget') {
+            this.router.navigate(['/budget'], { state: { data: payload } });
+          } else {
+            this.router.navigate(['/invoice'], { state: { data: payload } });
+          }
+        }
   }
 
   editDocument(doc: InvoiceData): void {
-    this.invoiceService.saveData(doc);
-    this.viewDocument(doc);
+    // Save into shared service so editor components can pick it up
+        // Prefer the same flow as viewDocument but keep a semantic edit action
+        this.viewDocument(doc);
   }
 
   confirmDelete(doc: InvoiceData): void {
@@ -230,23 +335,113 @@ export class DocumentsList {
 
   deleteDocument(): void {
     if (this.documentToDelete) {
-      this.invoiceService.deleteData(
-        this.documentToDelete.type,
-        this.documentToDelete.number
-      );
-      this.showDeleteConfirm = false;
-      this.documentToDelete = null;
-      this.loadDocuments();
-      this.calculateStats();
+      // Try to delete from backend when possible
+      const doc = this.documentToDelete;
+      if (doc.type === 'budget') {
+        const raw = this.allBudgetsRaw.find(b => b.number === doc.number);
+        if (raw && raw.id) {
+          this.budgetsService.deleteBudget(raw.id).subscribe({
+            next: () => {
+              this.showDeleteConfirm = false;
+              this.documentToDelete = null;
+              this.loadDocuments();
+            },
+            error: (err) => {
+              console.error('Error deleting budget on backend', err);
+              alert('Error al eliminar presupuesto en el servidor');
+            }
+          });
+        } else {
+          // Fallback to local
+          this.invoiceService.deleteData('budget', doc.number);
+          this.showDeleteConfirm = false;
+          this.documentToDelete = null;
+          this.loadDocuments();
+          this.calculateStats();
+        }
+      } else {
+        const raw = this.allInvoicesRaw.find(i => i.number === doc.number);
+        if (raw && raw.id) {
+          this.invoicesService.deleteInvoice(raw.id).subscribe({
+            next: () => {
+              this.showDeleteConfirm = false;
+              this.documentToDelete = null;
+              this.loadDocuments();
+            },
+            error: (err) => {
+              console.error('Error deleting invoice on backend', err);
+              alert('Error al eliminar factura en el servidor');
+            }
+          });
+        } else {
+          this.invoiceService.deleteData('invoice', doc.number);
+          this.showDeleteConfirm = false;
+          this.documentToDelete = null;
+          this.loadDocuments();
+          this.calculateStats();
+        }
+      }
     }
   }
 
   convertBudgetToInvoice(budget: InvoiceData): void {
-    const invoice = this.invoiceService.convertBudgetToInvoice(budget);
-    alert(`Presupuesto convertido a Factura Nº ${invoice.number}`);
-    this.loadDocuments();
-    this.calculateStats();
-    this.router.navigate(['/invoice'], { state: { data: invoice } });
+    // Create invoice in backend from budget
+    // Find backend budget raw (to get items with price/quantity)
+    const raw = this.allBudgetsRaw.find(b => b.number === budget.number);
+    const invoicePayload: any = {
+      number: '',
+      date: new Date().toISOString().split('T')[0],
+      clientName: budget.clientName,
+      clientAddress: budget.clientAddress,
+      clientDNI: budget.clientDNI || '',
+      clientPhone: budget.clientPhone,
+      clientEmail: budget.clientEmail,
+      items: raw ? (raw.items || []).map((it: any) => {
+        const qty = it.quantity || 1;
+        const price = Number(it.price) || 0;
+        const total = (it.total !== undefined) ? Number(it.total) : Math.round(price * qty * (1 + (budget.taxRate / 100)) * 100) / 100;
+        const amount = (it.amount !== undefined) ? Number(it.amount) : total;
+        return { description: it.description, quantity: qty, price, total, amount };
+      }) : (budget.items || []).map(it => {
+        const base = Number(it.amount) || 0;
+        const totalWithTax = Math.round(base * (1 + (budget.taxRate / 100)) * 100) / 100;
+        return { description: it.description, quantity: 1, price: base, total: totalWithTax, amount: totalWithTax };
+      }),
+      taxRate: budget.taxRate,
+      iban: budget.iban || ''
+    };
+
+    this.invoicesService.createInvoice(invoicePayload).subscribe({
+      next: (created) => {
+        // Optionally delete the budget on backend
+        if (raw && raw.id) {
+          this.budgetsService.deleteBudget(raw.id).subscribe({
+            next: () => {
+              alert(`Presupuesto convertido a Factura Nº ${created.number}`);
+              this.loadDocuments();
+              this.calculateStats();
+              this.router.navigate(['/invoice'], { state: { data: created } });
+            },
+            error: (err) => {
+              console.error('Error deleting original budget after conversion', err);
+              alert('Factura creada, pero no se pudo eliminar el presupuesto original');
+              this.loadDocuments();
+            }
+          });
+        } else {
+          // Fallback: use local conversion
+          const invoice = this.invoiceService.convertBudgetToInvoice(budget);
+          alert(`Presupuesto convertido a Factura Nº ${invoice.number}`);
+          this.loadDocuments();
+          this.calculateStats();
+          this.router.navigate(['/invoice'], { state: { data: invoice } });
+        }
+      },
+      error: (err) => {
+        console.error('Error converting budget to invoice', err);
+        alert('Error al convertir presupuesto en el servidor');
+      }
+    });
   }
 
   // Exportar

@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CompanyInfo, Invoice, InvoiceData, InvoiceItem } from '../../core/services/invoice';
+import { Budgets } from '../../../../core/services/budget';
+import { IBudget } from '../../../../core/models/budget.model';
 import { Router } from '@angular/router';
 
 interface BudgetItem {
@@ -10,17 +12,19 @@ interface BudgetItem {
 }
 @Component({
   selector: 'app-budget',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './budget.html',
-  styleUrl: './budget.css',
+  styleUrls: ['./budget.css'],
 })
 export class Budget {
- // Budget data
+  // Budget data
   budgetNumber: string = '';
   budgetDate: string = '';
   validUntil: string = '';
   clientName: string = '';
   clientAddress: string = '';
+  clientDNI: string = '';
   clientPhone: string = '';
   clientEmail: string = '';
   taxRate: number = 21;
@@ -34,6 +38,8 @@ export class Budget {
 
   // UI state
   isEditorOpen: boolean = false;
+  // backend id when editing existing budget
+  backendId: string | null = null;
   showConvertDialog: boolean = false;
 
   // Company info
@@ -49,6 +55,7 @@ export class Budget {
 
   constructor(
     private invoiceService: Invoice,
+    private budgetsService: Budgets,
     private router: Router
   ) {
     this.companyInfo = this.invoiceService.getCompanyInfo();
@@ -57,14 +64,52 @@ export class Budget {
   ngOnInit(): void {
     // Generar número de presupuesto automático
     this.budgetNumber = this.invoiceService.getNextBudgetNumber();
-    
+
     // Establecer fecha de hoy
     this.budgetDate = new Date().toISOString().split('T')[0];
-    
+
     // Establecer validez a 30 días
     const validDate = new Date();
     validDate.setDate(validDate.getDate() + 30);
     this.validUntil = validDate.toISOString().split('T')[0];
+
+    // Si venimos con datos desde la navegación (editar / ver) — cargar
+    try {
+      const navState: any = (this.router.getCurrentNavigation && this.router.getCurrentNavigation()?.extras?.state) || (window.history && (window.history.state as any));
+      const incoming = navState?.data || null;
+      if (incoming && incoming.type === 'budget') {
+        this.loadBudgetData(incoming);
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // Suscribirse al servicio para recibir datos cuando otra vista solicita editar/mostrar
+    this.invoiceService.invoiceData$.subscribe((data) => {
+      if (data && data.type === 'budget') {
+        this.loadBudgetData(data);
+      }
+    });
+  }
+
+  // Cargar datos en el editor desde un InvoiceData
+  loadBudgetData(data: InvoiceData): void {
+    this.budgetNumber = data.number || this.budgetNumber;
+    this.budgetDate = data.date || this.budgetDate;
+    this.validUntil = data.validUntil || this.validUntil;
+    this.clientName = data.clientName || this.clientName;
+    this.clientAddress = data.clientAddress || this.clientAddress;
+    this.clientDNI = data.clientDNI || this.clientDNI || '';
+    this.clientPhone = data.clientPhone || this.clientPhone || '';
+    this.clientEmail = data.clientEmail || this.clientEmail || '';
+    this.taxRate = (data.taxRate !== undefined) ? data.taxRate : this.taxRate;
+    this.conditions = data.conditions || this.conditions;
+    this.items = Array.isArray(data.items) ? [...data.items] : this.items;
+    if (data.iban) (this.companyInfo as any).iban = data.iban;
+    // Abrir editor para editar/visualizar
+    this.isEditorOpen = true;
+    // keep backend id if provided so saveBudget can update instead of create
+    (this as any).backendId = (data as any).backendId || null;
   }
 
   toggleEditor(): void {
@@ -109,18 +154,118 @@ export class Budget {
   formatText(text: string): string {
     return text.replace(/\n/g, '<br>');
   }
+ print(): void {
+    // Buscar el contenido a imprimir por ID
+    const printContent = document.getElementById("budget-content")
+    if (!printContent) {
+      console.error("No se encontró el contenido a imprimir")
+      // Fallback al método tradicional
+      window.scrollTo(0, 0)
+      setTimeout(() => window.print(), 100)
+      return
+    }
 
-  print(): void {
-    window.print();
+    // Crear un iframe oculto para la impresión
+    const iframe = document.createElement("iframe")
+    iframe.style.position = "fixed"
+    iframe.style.right = "0"
+    iframe.style.bottom = "0"
+    iframe.style.width = "0"
+    iframe.style.height = "0"
+    iframe.style.border = "none"
+    document.body.appendChild(iframe)
+
+    // Obtener el documento del iframe
+    const iframeDoc = iframe.contentWindow?.document
+    if (!iframeDoc) {
+      console.error("No se pudo acceder al documento del iframe")
+      document.body.removeChild(iframe)
+      window.print()
+      return
+    }
+
+    // Copiar los estilos
+    const styles = Array.from(document.styleSheets)
+      .map((styleSheet) => {
+        try {
+          return Array.from(styleSheet.cssRules)
+            .map((rule) => rule.cssText)
+            .join("\n")
+        } catch (e) {
+          return ""
+        }
+      })
+      .join("\n")
+
+    // Escribir el contenido en el iframe con estilos inline críticos
+    iframeDoc.open()
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html style="width: 100%; max-width: 100%; margin: 0; padding: 0; box-sizing: border-box;">
+        <head>
+          <meta charset="UTF-8">
+          <style>${styles}</style>
+          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+          <style>
+            @media print {
+              html, body {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+              }
+              .print-optimized {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+              }
+              .max-w-4xl, .max-w-5xl, .max-w-6xl, .max-w-7xl {
+                max-width: 100% !important;
+              }
+            }
+          </style>
+        </head>
+        <body style="margin: 0; padding: 0; width: 100%; max-width: 100%; box-sizing: border-box;">
+          ${printContent.outerHTML}
+        </body>
+      </html>
+    `)
+    iframeDoc.close()
+
+    // Esperar a que cargue y luego imprimir
+    iframe.contentWindow?.focus()
+    setTimeout(() => {
+      try {
+        iframe.contentWindow?.print()
+      } catch (error) {
+        console.error("Error al imprimir:", error)
+        // Si falla el iframe, intentar con el método tradicional
+        window.print()
+      }
+
+      // Limpiar después de imprimir
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe)
+        }
+      }, 1000)
+    }, 500)
   }
+
 
   downloadPDF(): void {
     const originalTitle = document.title;
     document.title = `Presupuesto_${this.budgetNumber}_${this.clientName.replace(/\s+/g, '_')}`;
-    window.print();
+
+    // Usar el mismo método de impresión
+    this.print();
+
     setTimeout(() => {
       document.title = originalTitle;
-    }, 1000);
+    }, 2000);
   }
 
   // Calcular días de validez restantes
@@ -148,8 +293,69 @@ export class Budget {
       conditions: this.conditions
     };
 
+    // Save locally (keeps existing behaviour)
     this.invoiceService.saveData(budgetData);
-    alert('Presupuesto guardado correctamente');
+
+    // Prepare payload for backend (map InvoiceItem -> IItem)
+    const payload: Partial<IBudget> = {
+      number: this.budgetNumber,
+      date: this.budgetDate,
+      clientName: this.clientName,
+      clientAddress: this.clientAddress,
+      clientDNI: this.clientDNI || '',
+      clientPhone: this.clientPhone,
+      clientEmail: this.clientEmail,
+      items: this.items.map(it => {
+        const base = Number(it.amount) || 0;
+        const totalWithTax = Math.round(base * (1 + (this.taxRate / 100)) * 100) / 100;
+        return {
+          description: it.description,
+          quantity: 1,
+          price: base,
+          total: totalWithTax,
+          amount: totalWithTax // campo obligatorio para el backend (importe con IVA)
+        };
+      }),
+      taxRate: this.taxRate,
+      validUntil: this.validUntil,
+      conditions: this.conditions,
+      iban: 'ES44 0049 2685 7420 1400 8200'
+    };
+
+    // If editing an existing backend budget, attempt create+delete to emulate update
+    const existingBackendId = (this as any).backendId || null;
+    if (existingBackendId) {
+      this.budgetsService.createBudget(payload).subscribe({
+        next: () => {
+          // Try to delete the old record to avoid duplicates
+          this.budgetsService.deleteBudget(existingBackendId!).subscribe({
+            next: () => {
+              alert('Presupuesto actualizado correctamente (backend)');
+              // clear backendId to prevent accidental re-update
+              (this as any).backendId = null;
+            },
+            error: (delErr) => {
+              console.warn('Presupuesto creado pero no se pudo eliminar el original', delErr);
+              alert('Presupuesto guardado, pero no se pudo reemplazar el original en el servidor');
+            }
+          });
+        },
+        error: (err) => {
+          console.error('Error updating budget on backend', err);
+          alert('Error al actualizar presupuesto en el servidor');
+        }
+      });
+    } else {
+      this.budgetsService.createBudget(payload).subscribe({
+        next: () => {
+          alert('Presupuesto guardado correctamente (backend)');
+        },
+        error: (err) => {
+          console.error('Error saving budget to backend', err);
+          alert('Error al guardar presupuesto en el servidor');
+        }
+      });
+    }
   }
 
   // Mostrar diálogo de confirmación para convertir
@@ -189,7 +395,7 @@ export class Budget {
 
     // Pasar datos a la factura y navegar
     this.invoiceService.saveData(invoiceData);
-    
+
     alert(`Presupuesto convertido a Factura Nº ${invoiceData.number}`);
     this.showConvertDialog = false;
 

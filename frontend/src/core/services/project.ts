@@ -14,30 +14,6 @@ export class Project {
     private http: HttpClient,
     private authService: Auth
   ) { }
-  private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    console.log('=== DEBUG TOKEN ===');
-    console.log('Token from service:', token);
-    console.log('Token length:', token?.length);
-    console.log('Token starts with:', token?.substring(0, 20));
-
-    if (!token) {
-      console.error('No token found!');
-      throw new Error('No authentication token available');
-    }
-
-    // Only set the Authorization header here. Let HttpClient set Content-Type
-    // automatically depending on the request body. Some backends can reject
-    // requests when a Content-Type is present on DELETE or multipart requests.
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token.trim()}`
-    });
-
-    console.log('Headers created:', headers.get('Authorization'));
-    console.log('===================');
-
-    return headers;
-  }
 
   getAllProjects() {
     return this.http.get(`${environment.urlServer}${environment.projectService}`).pipe(
@@ -56,7 +32,7 @@ export class Project {
   }
 
   createProject(project: Partial<IProject>): Observable<any> {
-    return this.http.post(`${environment.urlServer}${environment.projectService}`, project, { headers: this.getHeaders() }).pipe(
+    return this.http.post(`${environment.urlServer}${environment.projectService}`, project, { headers: this.authService.getAuthHeaders() }).pipe(
       map((res: any) => {
         return res;
       })
@@ -68,7 +44,7 @@ export class Project {
     return this.http.put(
       `${environment.urlServer}${environment.projectService}${projectId}`,
       project,
-      { headers: this.getHeaders() }
+      { headers: this.authService.getAuthHeaders() }
     ).pipe(
       map((res: any) => res)
     );
@@ -77,7 +53,7 @@ export class Project {
   deleteProject(projectId: string): Observable<any> {
     return this.http.delete(
       `${environment.urlServer}${environment.projectService}${projectId}`,
-      { headers: this.getHeaders() }
+      { headers: this.authService.getAuthHeaders() }
     ).pipe(
       map((res: any) => res)
     );
@@ -88,14 +64,7 @@ export class Project {
    * Each PendingMediaItem will be appended as repeated multipart fields: file, description, is_before, media_type
    */
   uploadMediaBatch(projectId: string, items: PendingMediaItem[]): Observable<any> {
-    const token = this.authService.getToken();
-    if (!token) {
-      throw new Error('No authentication token available');
-    }
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token.trim()}`
-    });
+    const headers = this.authService.getAuthHeaders();
 
     const formData = new FormData();
 
@@ -120,14 +89,7 @@ export class Project {
   uploadMedia(projectId: string, formData: FormData): Observable<any> {
     // When uploading FormData we must NOT set the Content-Type header manually.
     // Let the browser set the correct multipart/form-data boundary.
-    const token = this.authService.getToken();
-    if (!token) {
-      throw new Error('No authentication token available');
-    }
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token.trim()}`
-    });
+    const headers = this.authService.getAuthHeaders();
 
     return this.http.post(
       `${environment.urlServer}/api/v1/projects/${projectId}/media`,
@@ -139,15 +101,7 @@ export class Project {
   // También puedes necesitar estos métodos auxiliares:
 
   deleteMedia(projectId: string, mediaId: string): Observable<any> {
-    const token = this.authService.getToken();
-    if (!token) {
-      throw new Error('No authentication token available');
-    }
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token.trim()}`,
-      'Content-Type': 'application/json'
-    });
+    const headers = this.authService.getAuthHeaders().set('Content-Type', 'application/json');
 
     return this.http.delete(
       `${environment.urlServer}/api/v1/projects/${projectId}/media/${mediaId}`,
