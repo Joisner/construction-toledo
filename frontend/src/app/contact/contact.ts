@@ -1,48 +1,96 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators
+} from '@angular/forms';
+import { Quotes } from '../../core/services/quotes';
+import { Services } from '../../core/services/services';
+import { IService } from '../../core/models/service';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './contact.html',
   styleUrls: ['./contact.css']
 })
 export class Contact {
-  // Save submission to localStorage and open mailto to notify admin
-  onSubmit(e: Event) {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const fd = new FormData(form);
+  contactForm: FormGroup;
+  loading = false;
+  success = false;
+  errorMsg = '';
+  services = signal<IService[]>([]);
 
-    // Honeypot field to reduce bots
-    const hp = fd.get('website');
-    if (hp) {
-      // likely bot, ignore
+  constructor(
+    private fb: FormBuilder,
+    private quotesService: Quotes,
+    private serviceService: Services,
+  ) {
+    this.loadAllData();
+    this.contactForm = this.fb.group({
+      website: [''], // honeypot
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: [''],
+      service: ['', Validators.required],
+      message: ['']
+    });
+  }
+
+  loadAllData(){
+    this.loadService();
+  }
+
+  loadService(){
+    this.serviceService.getServices().subscribe({
+      next: (response) => { this.services.set(response)},
+      error: (err) => {console.error(err)}
+    })
+  }
+
+  onSend() {
+    if (this.contactForm.invalid) {
+      this.contactForm.markAllAsTouched();
       return;
     }
 
-    const submission = {
-      name: String(fd.get('name') || ''),
-      email: String(fd.get('email') || ''),
-      phone: String(fd.get('phone') || ''),
-      service: String(fd.get('service') || ''),
-      message: String(fd.get('message') || ''),
-      date: new Date().toISOString()
+    const value = this.contactForm.value;
+
+    // Honeypot (anti bots)
+    if (value.website) {
+      return;
+    }
+
+    const quotePayload = {
+      name: value.name,
+      email: value.email,
+      phone: value.phone,
+      service: value.service,
+      message: value.message
     };
 
-    const key = 'cotizaciones';
-    const existing = JSON.parse(localStorage.getItem(key) || '[]');
-    existing.unshift(submission);
-    localStorage.setItem(key, JSON.stringify(existing));
+    this.loading = true;
+    this.errorMsg = '';
+    this.success = false;
 
-    // Prefill mailto to notify admin (replace with real admin address later)
-    const adminEmail = 'admin@construccionestoledo.example';
-    const subject = encodeURIComponent('Nueva solicitud de cotización - ' + submission.name);
-    const body = encodeURIComponent(`Servicio: ${submission.service}\nNombre: ${submission.name}\nEmail: ${submission.email}\nTeléfono: ${submission.phone}\n\nMensaje:\n${submission.message}`);
+    this.quotesService.createQuote(quotePayload).subscribe({
+      next: () => {
+        this.success = true;
+        this.loading = false;
 
-    window.location.href = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
-
-    // Reset form
-    form.reset();
-    alert('Solicitud enviada. También se ha guardado localmente para revisión del administrador.');
+        this.contactForm.reset({
+          service: 'Enpisado'
+        });
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.loading = false;
+        this.errorMsg = 'No se pudo enviar la cotización. Inténtalo más tarde.';
+      }
+    });
   }
 }

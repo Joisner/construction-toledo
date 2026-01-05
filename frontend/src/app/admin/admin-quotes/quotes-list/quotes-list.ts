@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { QuoteModal } from '../quote-modal/quote-modal';
 import { DeleteConfirmation } from '../../../shared/components/delete-confirmation/delete-confirmation';
 import { Quotes } from '../../../../core/services/quotes';
+import { IService } from '../../../../core/models/service';
+import { Services } from '../../../../core/services/services';
 
 @Component({
   selector: 'app-quotes-list',
@@ -13,6 +15,7 @@ import { Quotes } from '../../../../core/services/quotes';
 })
 export class QuotesList {
   quotes = signal<IQuote[]>([]);
+  service: IService[] = [];
 
   currentFilter = signal<'all' | 'pending' | 'contacted' | 'accepted' | 'rejected'>('all');
   showModal = signal(false);
@@ -22,14 +25,34 @@ export class QuotesList {
 
   filteredQuotes = signal<IQuote[]>([]);
 
-  constructor(private quotesService: Quotes) {
+  constructor(private quotesService: Quotes, private serviceService: Services) {
+    this.loadAllData();
+
+  }
+
+  loadAllData() {
+    this.loadServices();
     this.loadQuotes();
+  }
+
+  loadServices() {
+    this.serviceService.getServices().subscribe({
+      next: (response) => { this.service = response },
+      error: (err) => { console.error(err) }
+    })
   }
 
   loadQuotes() {
     this.quotesService.getQuotes().subscribe({
       next: (res: IQuote[]) => {
         debugger;
+        res.forEach((quote) => {
+          const serviceName = this.service.find(
+            s => s.id === quote.service
+          );
+
+          quote.service_title = serviceName?.title || 'Servicio no encontrado';
+        });
         this.quotes.set(res || []);
         this.updateFilteredQuotes();
       },

@@ -6,6 +6,8 @@ import { Budget } from '../../shared/components/budget/budget';
 import { DocumentsList } from '../../shared/components/documents-list/documents-list';
 import { InvoiceEditor } from '../../shared/components/invoice-creator/invoice-creator';
 import { AdminsList } from './admins-list/admins-list';
+import { Quotes } from '../../../core/services/quotes';
+import { Subscription } from 'rxjs';
 type TabType = 'quotes' | 'projects' | 'services' | 'accounting' | 'admins'
   | 'budgets' | 'invoice' | 'documents';
 
@@ -32,14 +34,16 @@ interface MenuItem {
 export class AdminDashboard {
   currentTab = signal<TabType>('quotes');
   sidebarCollapsed = signal(false);
-  pendingCount = signal(5);
+  pendingCount = signal(0);
+
+  private subscriptions: Subscription = new Subscription();
 
   menuItems: MenuItem[] = [
     {
       id: 'quotes',
       label: 'Cotizaciones',
       icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-      badge: 5
+      badge: this.pendingCount()
     },
     {
       id: 'projects',
@@ -72,6 +76,8 @@ export class AdminDashboard {
       icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
     }
   ];
+
+  constructor(private quotesService: Quotes){}
 
   toggleSidebar() {
     this.sidebarCollapsed.update(v => !v);
@@ -130,17 +136,32 @@ export class AdminDashboard {
     // Listen to embedded edit/view events from lists
     try {
       window.addEventListener('open-document', this._openDocumentHandler as EventListener);
+      this.loadAllData();
     } catch (e) {
       // ignore
     }
   }
 
-  ngOnDestroy(): void {
-    try {
-      window.removeEventListener('open-document', this._openDocumentHandler as EventListener);
-    } catch (e) {
-      // ignore
-    }
+  loadAllData(){
+    this.loadQuotes();
+  }
+
+ngOnDestroy(): void {
+    window.removeEventListener('open-document', this._openDocumentHandler as EventListener);
+    this.subscriptions.unsubscribe();
+  }
+
+  loadQuotes() {
+    const sub = this.quotesService.getQuotes().subscribe(quotes => {
+      // Actualizamos el badge con la cantidad real
+      this.pendingCount.set(quotes.length);
+
+      // Si quieres que el badge del menú se actualice dinámicamente:
+      const quoteItem = this.menuItems.find(item => item.id === 'quotes');
+      if (quoteItem) quoteItem.badge = quotes.length;
+    });
+
+    this.subscriptions.add(sub);
   }
 
   toggleGroup(groupId: string) {

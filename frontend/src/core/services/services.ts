@@ -27,7 +27,7 @@ export class Services {
     );
   }
 
-  updateService(id: number, body: Partial<IService>): Observable<IService> {
+  updateService(id: string, body: Partial<IService>): Observable<IService> {
     return this.http.put<IService>(
       `${environment.urlServer}${environment.serviceService}${id}`,
       body,

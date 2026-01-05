@@ -14,7 +14,7 @@ export class Quotes {
   constructor(
     private http: HttpClient,
     private authService: Auth
-  ) {}
+  ) { }
 
   // Crear una nueva quote (probablemente pública)
   createQuote(quote: Partial<IQuote>): Observable<any> {
@@ -42,10 +42,22 @@ export class Quotes {
   // Actualizar una quote (admin)
   updateQuote(quoteId: number | string, data: Partial<IQuote>): Observable<any> {
     const headers = this.authService.getAuthHeaders();
-    return this.http.put(`${environment.urlServer}${environment.quoteService}${quoteId}`, data, { headers }).pipe(
+
+    // Extraemos status si existe
+    const { status, ...rest } = data;
+
+    return this.http.put(
+      `${environment.urlServer}${environment.quoteService}${quoteId}`,
+      rest, // body sin status
+      {
+        headers,
+        params: status ? { status } : {} // status en query
+      }
+    ).pipe(
       map((res: any) => res)
     );
   }
+
 
   // Eliminar una quote (admin)
   deleteQuote(quoteId: number | string): Observable<any> {

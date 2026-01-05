@@ -8,4 +8,5 @@ export interface IQuote {
   status: 'pending' | 'contacted' | 'accepted' | 'rejected';
   created_at?: string;
   updated_at?: string;
+  service_title?: string;
 }

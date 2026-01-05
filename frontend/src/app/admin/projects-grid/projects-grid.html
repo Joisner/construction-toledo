@@ -42,7 +42,7 @@
                 <select [(ngModel)]="editingItem().service" name="service" required class="w-full border-2 border-gray-200 rounded-xl p-3 bg-white
            focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all">
                     <!-- Placeholder -->
-                    <option [ngValue]="null">
+                    <option [ngValue]="null" disabled>
                         Selecciona un servicio
                     </option>
 
@@ -53,6 +53,7 @@
                     }
                 </select>
             </div>
+
 
 
             <div>
