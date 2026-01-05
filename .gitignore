@@ -1,0 +1,5 @@
+node_modules
+dist
+.angular
+ng_serve.log
+/home/jules/verification/node_modules/

@@ -55,7 +55,8 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "node_modules/toastr/build/toastr.css"
             ]
           },
           "configurations": {
@@ -114,11 +115,6 @@
             "styles": [
               "src/styles.css"
             ]
-              ,
-              "tailwindConfiguration": {
-                "package": "tailwindcss",
-                "file": "tailwind.config.js"
-              }
           }
         }
       }
