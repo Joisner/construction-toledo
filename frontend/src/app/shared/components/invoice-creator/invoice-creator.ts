@@ -1,5 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CompanyInfo, Invoice as LocalInvoice, InvoiceData } from '../../core/services/invoice';
 import { Invoices } from '../../../../core/services/invoice';
 import { CommonModule } from '@angular/common';
@@ -44,7 +45,7 @@ export class InvoiceEditor {
   // Company info
   companyInfo: CompanyInfo;
 
-  constructor(private invoiceService: LocalInvoice, private invoicesService: Invoices) {
+  constructor(private invoiceService: LocalInvoice, private invoicesService: Invoices, private sanitizer: DomSanitizer) {
     this.companyInfo = this.invoiceService.getCompanyInfo();
   }
 
@@ -218,7 +219,8 @@ export class InvoiceEditor {
     }, 1000);
   }
 
-  formatText(text: string): string {
-    return text ? text.replace(/\n/g, '<br>') : '';
+  formatText(text: string): SafeHtml {
+    const sanitizedText = text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+    return this.sanitizer.bypassSecurityTrustHtml(sanitizedText.replace(/\n/g, '<br>'));
   }
 }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CompanyInfo, Invoice, InvoiceData, InvoiceItem } from '../../core/services/invoice';
 import { Budgets } from '../../../../core/services/budget';
 import { IBudget } from '../../../../core/models/budget.model';
@@ -56,7 +57,8 @@ export class Budget {
   constructor(
     private invoiceService: Invoice,
     private budgetsService: Budgets,
-    private router: Router
+    private router: Router,
+    private sanitizer: DomSanitizer
   ) {
     this.companyInfo = this.invoiceService.getCompanyInfo();
   }
@@ -151,8 +153,9 @@ export class Budget {
     return date.toLocaleDateString('es-ES');
   }
 
-  formatText(text: string): string {
-    return text.replace(/\n/g, '<br>');
+  formatText(text: string): SafeHtml {
+    const sanitizedText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return this.sanitizer.bypassSecurityTrustHtml(sanitizedText.replace(/\n/g, '<br>'));
   }
  print(): void {
     // Buscar el contenido a imprimir por ID
