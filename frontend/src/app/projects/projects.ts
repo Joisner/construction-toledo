@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { IProject } from '../../core/models/project.model';
 import { Project } from '../../core/services/project';
+import { environment } from '../../env/environment';
 
 
 @Component({
@@ -27,8 +28,11 @@ export class Projects {
     this.projectService.getAllProjects().subscribe({
       next: (projects: IProject[]) => {
         debugger;
+        // Normalizar rutas de media y main_image antes de setear
+        const normalized = projects.map(p => this.normalizeProjectMedia(p));
+
         // Solo mostrar proyectos activos
-        this.projects.set(projects.filter(p => p.is_active));
+        this.projects.set(normalized.filter(p => p.is_active));
         this.loading.set(false);
       },
       error: (err) => {
@@ -36,6 +40,29 @@ export class Projects {
         this.loading.set(false);
       }
     });
+  }
+
+  // Normaliza URLs relativas a absolutas usando environment.urlServer
+  private getMediaUrl(fileUrl?: string): string {
+    if (!fileUrl) return '';
+
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://') || fileUrl.startsWith('//')) {
+      return fileUrl;
+    }
+
+    if (fileUrl.startsWith('/')) {
+      return `${environment.urlServer}${fileUrl}`;
+    }
+
+    return `${environment.urlServer}/${fileUrl}`;
+  }
+
+  private normalizeProjectMedia(project: IProject): IProject {
+    return {
+      ...project,
+      media: (project.media || []).map(m => ({ ...m, file_url: this.getMediaUrl((m as any).file_url) })),
+      main_image: (project as any).main_image ? this.getMediaUrl((project as any).main_image) : (project as any).main_image
+    } as IProject;
   }
 
   filtered() {

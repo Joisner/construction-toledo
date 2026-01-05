@@ -24,6 +24,7 @@ export class MediaManagement implements OnInit {
     is_before: boolean;
     media_type: 'image' | 'video';
     preview_url: string;
+    is_main?: boolean;
   }>({
     file: null,
     description: '',
@@ -78,9 +79,16 @@ export class MediaManagement implements OnInit {
       is_before: current.is_before,
       media_type: current.media_type,
       preview_url: current.preview_url
+      , is_main: current.is_main ?? false
     };
 
-    this.pendingMediaList.set([...this.pendingMediaList(), pendingItem]);
+    // Si el nuevo item está marcado como principal, desmarcar cualquier otro pendiente
+    if (pendingItem.is_main) {
+      const updated = this.pendingMediaList().map(p => ({ ...p, is_main: false }));
+      this.pendingMediaList.set([...updated, pendingItem]);
+    } else {
+      this.pendingMediaList.set([...this.pendingMediaList(), pendingItem]);
+    }
     console.log('Media added to pending list. Count:', this.pendingMediaList().length);
     
     this.resetNewMediaItem();
@@ -129,8 +137,16 @@ export class MediaManagement implements OnInit {
       description: '',
       is_before: true,
       media_type: 'image',
-      preview_url: ''
+      preview_url: '',
+      is_main: false
     });
+  }
+
+  // Permite marcar un item pendiente existente como principal (solo uno)
+  setPendingMain(index: number) {
+    const items = this.pendingMediaList();
+    const updated = items.map((it, i) => ({ ...it, is_main: i === index }));
+    this.pendingMediaList.set(updated);
   }
 
   // Helper para obtener el conteo total (media guardada + pendiente)

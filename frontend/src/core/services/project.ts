@@ -86,13 +86,13 @@ export class Project {
     );
   }
 
-  uploadMedia(projectId: string, formData: FormData): Observable<any> {
+  uploadMedia(projectId: string, formData: FormData, isMain?: boolean): Observable<any> {
     // When uploading FormData we must NOT set the Content-Type header manually.
     // Let the browser set the correct multipart/form-data boundary.
     const headers = this.authService.getAuthHeaders();
-
+    const typeMedia = isMain ? '/main-image' : '/media'
     return this.http.post(
-      `${environment.urlServer}/api/v1/projects/${projectId}/media`,
+      `${environment.urlServer}/api/v1/projects/${projectId}${typeMedia}`,
       formData,
       { headers }
     );

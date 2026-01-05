@@ -1,28 +1,34 @@
-<section class="container mx-auto px-4 py-8">
-  <h2 class="text-3xl font-bold mb-6">Servicios</h2>
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div *ngFor="let s of services" class="bg-white rounded shadow overflow-hidden">
-      <img [src]="s.image" [alt]="s.title" class="w-full h-40 object-cover">
-      <div class="p-4">
-        <h3 class="font-bold text-lg">{{ s.title }}</h3>
-        <p class="text-gray-600">{{ s.description }}</p>
-        <div class="mt-4">
-          <button (click)="showDetails(s)" class="px-4 py-2 bg-blue-600 text-white rounded">Ver más</button>
-        </div>
-      </div>
-    </div>
+<section class="container mx-auto px-4 py-12">
+  <div class="flex items-center justify-between mb-10">
+    <h2 class="text-4xl font-bold text-gray-800">Servicios</h2>
+    <button class="flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-all duration-300 hover:shadow-md">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+      </svg>
+      Regresar
+    </button>
   </div>
 
-  <!-- Modal -->
-  <div *ngIf="selected()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg max-w-2xl w-full p-6">
-      <div class="flex justify-between items-start">
-        <h3 class="text-xl font-bold">{{ selected()?.title }}</h3>
-        <button (click)="close()" class="text-gray-500">✕</button>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    @for(service of services(); track service){
+      <div class="group bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+        <div class="relative overflow-hidden h-56">
+          <img 
+            [src]="service.image_url" 
+            [alt]="service.title" 
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
+        
+        <div class="p-6">
+          <h3 class="font-bold text-xl mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+            {{ service.title }}
+          </h3>
+          <p class="text-gray-600 leading-relaxed">
+            {{ service.description }}
+          </p>
+        </div>
       </div>
-      <img [src]="selected()?.image" [alt]="selected()?.title" class="w-full h-56 object-cover my-4 rounded">
-      <p class="text-gray-700">{{ selected()?.details }}</p>
-    </div>
+    }
   </div>
 </section>

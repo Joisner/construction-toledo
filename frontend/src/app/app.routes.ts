@@ -3,7 +3,7 @@ import { Router, Routes } from '@angular/router';
 import { ProjectDetail } from './project-detail/project-detail';
 import { Projects } from './projects/projects';
 import { Home } from './home/home';
-import { Services } from './services/services';
+import { ServicesComponent } from './services/services';
 import { About } from './about/about';
 import { Contact } from './contact/contact';
 import { Testimonials } from './testimonials/testimonials';
@@ -44,7 +44,7 @@ export const routes: Routes = [
     component: Budget,
     title: 'Nuevo Presupuesto - Construcciones Toledo'
   },
-  { path: 'services', component: Services },
+  { path: 'services', component: ServicesComponent },
   { path: 'projects', component: Projects },
   { path: 'project/:id', component: ProjectDetail },
   { path: 'about', component: About },

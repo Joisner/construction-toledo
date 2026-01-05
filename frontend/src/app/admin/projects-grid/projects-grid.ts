@@ -8,6 +8,8 @@ import { MediaManagement } from '../../shared/components/media-management/media-
 import { DeleteConfirmation } from '../../shared/components/delete-confirmation/delete-confirmation';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Services } from '../../../core/services/services';
+import { IService } from '../../../core/models/service';
 
 @Component({
   selector: 'app-projects-grid',
@@ -28,11 +30,13 @@ export class ProjectsGrid {
 
 
   projects = signal<IProject[]>([]);
+  services = signal<IService[]>([]);
 
   pendingMediaFiles = signal<PendingMediaItem[]>([]);
   constructor(
     private router: Router,
-    private projectService: Project
+    private projectService: Project,
+    private serviceService: Services
   ) {
     this.loadAllData();
   }
@@ -65,7 +69,14 @@ export class ProjectsGrid {
 
   normalizeProjectMedia(project: IProject): IProject {
     // Copiamos para no mutar directamente el objeto original (buena práctica)
-    const copy: IProject = { ...project, media: (project.media || []).map(m => ({ ...m, file_url: this.getMediaUrl((m as any).file_url) })) };
+    // Normalizar tanto las URLs de los media como la posible propiedad `main_image`
+    const copy: IProject = {
+      ...project,
+      media: (project.media || []).map(m => ({ ...m, file_url: this.getMediaUrl((m as any).file_url) })),
+      // Normalizar main_image si existe (puede venir como ruta relativa desde el backend)
+      main_image: (project as any).main_image ? this.getMediaUrl((project as any).main_image) : (project as any).main_image
+    };
+
     return copy;
   }
 
@@ -104,6 +115,17 @@ export class ProjectsGrid {
     // Cerrar el modal
     this.showMediaModal.set(false);
     console.log('Modal closed. Files ready to upload after project creation.');
+
+    // Si entre los archivos pendientes hay alguno marcado como principal,
+    // asignarlo al editingItem() para que el form incluya la referencia
+    const main = pendingMedia.find(p => p.is_main);
+    if (main) {
+      const current = this.editingItem() || {};
+      // usar preview_url temporal como referencia hasta que se suba
+      current.main_image = main.preview_url;
+      this.editingItem.set(current);
+      console.log('Main image set on editingItem (preview):', main.preview_url);
+    }
   }
 
   // ✅ MÉTODO CORREGIDO: addProject
@@ -133,6 +155,9 @@ export class ProjectsGrid {
       completion_date: project.completion_date || new Date().toISOString().split('T')[0],
       is_active: project.is_active ?? true,
       media: [], // ✅ Sin media por ahora
+      // Si el formulario ya contiene un valor para main_image (por ejemplo el usuario marcó
+      // un pending media como principal), incluirlo aquí como referencia inicial.
+      main_image: (project as any).main_image || '',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -185,12 +210,17 @@ export class ProjectsGrid {
     const totalFiles = files.length;
 
     console.log(`📤 Starting upload of ${totalFiles} files for project ${projectId}`);
-
+    debugger
     files.forEach((item, index) => {
       const formData = new FormData();
       formData.append('file', item.file);
       formData.append('description', item.description);
       formData.append('is_before', item.is_before.toString());
+      // Si el item está marcado como principal, incluir esa metadata para que el backend
+      // pueda marcar la media como imagen principal del proyecto.
+      if (item.is_main) {
+        formData.append('is_main', 'true');
+      }
 
       console.log(`📤 Uploading file ${index + 1}/${totalFiles}: ${item.file.name}`);
 
@@ -199,7 +229,12 @@ export class ProjectsGrid {
         next: (response) => {
           uploadedCount++;
           console.log(`✅ Media ${uploadedCount}/${totalFiles} uploaded successfully:`, response);
-
+          if(!!item.is_main){
+            this.projectService.uploadMedia(projectId, formData, item.is_main!).subscribe({
+              next: () => { console.log(`Principal subida`)},
+              error: (err) => {}
+            })
+          }
           // Si es el último archivo, recargar la lista
           if (uploadedCount + errorCount === totalFiles) {
             this.finalizeUpload(uploadedCount, errorCount);
@@ -233,6 +268,19 @@ export class ProjectsGrid {
     this.previewMedia.set([]);
     this.editingItem.set(null);
     this.getProjects();
+  }
+
+  // Devuelve la URL a usar en la tarjeta del proyecto, priorizando `main_image` si existe
+  getProjectThumbnail(project: IProject): string {
+    // Si el proyecto trae explícitamente una main_image (path o URL), normalizarla
+    if ((project as any).main_image) {
+      return this.getMediaUrl((project as any).main_image);
+    }
+
+    const after = this.getAfterMedia(project)[0];
+    if (after) return after.file_url;
+
+    return '';
   }
 
   // ✅ MÉTODO CORREGIDO: openMediaModal
@@ -286,6 +334,7 @@ export class ProjectsGrid {
 
   private loadAllData() {
     this.getProjects();
+    this.getServices();
   }
 
   private getProjects() {
@@ -299,6 +348,15 @@ export class ProjectsGrid {
         console.error('Error loading projects:', err);
       }
     });
+  }
+
+  private getServices(){
+    this.serviceService.getServices().subscribe({
+      next: (service: IService[]) => {
+        this.services.set(service);
+      },
+      error: (err) => {}
+    })
   }
 
   updateProject(project: IProject) {
@@ -418,6 +476,8 @@ export class ProjectsGrid {
   getAfterMedia(project: IProject): Media[] {
     return project.media.filter(m => !m.is_before);
   }
+
+
 
   getMediaByType(media: Media[]): { images: Media[], videos: Media[] } {
     return {

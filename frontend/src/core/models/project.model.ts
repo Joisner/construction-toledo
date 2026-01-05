@@ -23,6 +23,8 @@ export interface IProject {
   created_at: string;
   updated_at: string;
   media: Media[];
+  // Nueva propiedad opcional para almacenar la URL/id de la imagen principal del proyecto
+  main_image?: string;
 }
 
 // Utilidades para trabajar con Media
