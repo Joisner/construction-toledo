@@ -6,6 +6,8 @@ import { Project } from '../../core/services/project';
 import { ToastrService } from '../../core/services/toastr';
 import { environment } from '../../env/environment';
 import { FormsModule } from '@angular/forms';
+import { Services } from '../../core/services/services';
+import { IService } from '../../core/models/service';
 
 interface MediaPair {
   before: Media | null;
@@ -42,6 +44,7 @@ export class ProjectDetail implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private projectService: Project,
+    private serviceService: Services,
     private toastr: ToastrService
   ) { }
 
@@ -82,9 +85,11 @@ export class ProjectDetail implements OnInit {
   private loadProject(id: string): void {
     this.projectService.getProjectById(id).subscribe({
       next: (project: IProject) => {
+        debugger;
         // Normalize media URLs immediately so templates can use them directly
         project.media = this.normalizeMediaList(project.media || []);
         this.project = project;
+        this.loadServiceByProject();
         this.allMedia = project.media || [];
         this.organizePairs();
         this.loading = false;
@@ -95,6 +100,24 @@ export class ProjectDetail implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  loadServiceByProject() {
+    this.serviceService.getServices().subscribe({
+      next: (listService) => {
+        debugger;
+        const serviceObj = listService.find(
+          s => s.id === this.project?.service
+        )
+
+        if(serviceObj){
+          this.project!.service = serviceObj.title
+        }
+      },
+      error: (error) => {
+        console.error(error)
+      }
+    })
   }
 
   private organizePairs(): void {

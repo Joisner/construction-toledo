@@ -21,20 +21,20 @@ interface InvoiceItem {
 
 export class InvoiceEditor {
   // Invoice data
-  invoiceNumber: string = '';
+ invoiceNumber: string = '';
   invoiceDate: string = '';
-  clientName: string = 'FRANCISCA RODRIGUEZ ORDOÑEZ';
-  clientAddress: string = 'C/ PINTOR FRANCISCO RIBALTA Nº 724\n46702 GANDIA';
-  clientDNI: string = '19 987 173 N';
+  clientName: string = '';
+  clientAddress: string = '';
+  clientDNI: string = '';
   clientPhone: string = '';
   clientEmail: string = '';
   taxRate: number = 21;
-  iban: string = 'ES44 0049 2685 7420 1400 8200';
+  iban: string = '';
 
   items: InvoiceItem[] = [
     {
-      description: 'Quitar gotele y lucidos de paredes, techo, pasillos, salon y cuartos\nInstalación pladur techo salón y cuartos',
-      amount: 9800
+      description: 'Descripción del servicio o producto',
+      amount: 0
     }
   ];
 
@@ -174,7 +174,7 @@ export class InvoiceEditor {
 
   addItem(): void {
     this.items.push({
-      description: 'Nuevo concepto',
+      description: 'Descripción del concepto',
       amount: 0
     });
   }
