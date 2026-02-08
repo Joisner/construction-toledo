@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CompanyInfo, Invoice, InvoiceData, InvoiceItem } from '../../core/services/invoice';
 import { Budgets } from '../../../../core/services/budget';
+import { ToastrService } from '../../../../core/services/toastr';
 import { IBudget } from '../../../../core/models/budget.model';
 import { Router } from '@angular/router';
 
@@ -58,7 +59,8 @@ export class Budget {
     private invoiceService: Invoice,
     private budgetsService: Budgets,
     private router: Router,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private toastr: ToastrService
   ) {
     this.companyInfo = this.invoiceService.getCompanyInfo();
   }
@@ -333,29 +335,29 @@ export class Budget {
           // Try to delete the old record to avoid duplicates
           this.budgetsService.deleteBudget(existingBackendId!).subscribe({
             next: () => {
-              alert('Presupuesto actualizado correctamente (backend)');
+              this.toastr.success('Presupuesto actualizado correctamente', 'Éxito');
               // clear backendId to prevent accidental re-update
               (this as any).backendId = null;
             },
             error: (delErr) => {
               console.warn('Presupuesto creado pero no se pudo eliminar el original', delErr);
-              alert('Presupuesto guardado, pero no se pudo reemplazar el original en el servidor');
+              this.toastr.warning('Presupuesto guardado, pero no se pudo reemplazar el original en el servidor', 'Advertencia');
             }
           });
         },
         error: (err) => {
           console.error('Error updating budget on backend', err);
-          alert('Error al actualizar presupuesto en el servidor');
+          this.toastr.error('Error al actualizar presupuesto en el servidor', 'Error');
         }
       });
     } else {
       this.budgetsService.createBudget(payload).subscribe({
         next: () => {
-          alert('Presupuesto guardado correctamente (backend)');
+          this.toastr.success('Presupuesto guardado correctamente', 'Éxito');
         },
         error: (err) => {
           console.error('Error saving budget to backend', err);
-          alert('Error al guardar presupuesto en el servidor');
+          this.toastr.error('Error al guardar presupuesto en el servidor', 'Error');
         }
       });
     }
@@ -399,7 +401,7 @@ export class Budget {
     // Pasar datos a la factura y navegar
     this.invoiceService.saveData(invoiceData);
 
-    alert(`Presupuesto convertido a Factura Nº ${invoiceData.number}`);
+    this.toastr.success(`Presupuesto convertido a Factura Nº ${invoiceData.number}`, 'Conversión exitosa');
     this.showConvertDialog = false;
 
     // Navegar al componente de factura (opcional)

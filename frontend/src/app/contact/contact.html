@@ -7,8 +7,8 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Formulario -->
     <div class="lg:col-span-2">
-      <form [formGroup]="contactForm" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-        <!-- Honeypot -->
+      <form [formGroup]="contactForm" (ngSubmit)="onSend()" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <!-- Honeypot (anti-spam) -->
         <input type="text" formControlName="website" tabindex="-1" autocomplete="off" class="hidden" />
 
         <!-- Nombre -->
@@ -16,90 +16,125 @@
           <label class="block text-sm font-semibold text-gray-700 mb-2">
             Nombre completo *
           </label>
-          <input formControlName="name"
+          <input 
+            formControlName="name"
             class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            [class.border-red-500]="contactForm.get('name')?.invalid && (contactForm.get('name')?.touched || formSubmitted)"
             placeholder="Ej: Juan Pérez" />
-          <p *ngIf="contactForm.get('name')?.touched && contactForm.get('name')?.invalid"
-            class="text-red-600 text-sm mt-1">
-            El nombre es obligatorio
+          
+          <p *ngIf="(contactForm.get('name')?.invalid && contactForm.get('name')?.touched) || (formSubmitted && contactForm.get('name')?.invalid)"
+             class="text-red-600 text-sm mt-1">
+            {{ getErrorMessage('name') }}
+          </p>
+          
+          <p class="text-xs text-gray-500 mt-1">
+            {{ contactForm.get('name')?.value?.length || 0 }}/100 caracteres
           </p>
         </div>
 
         <!-- Email / Teléfono -->
         <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Email -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
               Correo electrónico *
             </label>
-            <input type="email" formControlName="email"
+            <input 
+              type="email" 
+              formControlName="email"
               class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              [class.border-red-500]="contactForm.get('email')?.invalid && (contactForm.get('email')?.touched || formSubmitted)"
               placeholder="correo@ejemplo.com" />
-            <p *ngIf="contactForm.get('email')?.touched && contactForm.get('email')?.invalid"
-              class="text-red-600 text-sm mt-1">
-              Introduzca un email válido
+            
+            <p *ngIf="(contactForm.get('email')?.invalid && contactForm.get('email')?.touched) || (formSubmitted && contactForm.get('email')?.invalid)"
+               class="text-red-600 text-sm mt-1">
+              {{ getErrorMessage('email') }}
             </p>
           </div>
 
+          <!-- Teléfono -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
               Teléfono
             </label>
-            <input formControlName="phone"
+            <input 
+              formControlName="phone"
               class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              [class.border-red-500]="contactForm.get('phone')?.invalid && (contactForm.get('phone')?.touched || formSubmitted)"
               placeholder="+34 600 000 000" />
+            
+            <p *ngIf="(contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched) || (formSubmitted && contactForm.get('phone')?.invalid)"
+               class="text-red-600 text-sm mt-1">
+              {{ getErrorMessage('phone') }}
+            </p>
           </div>
         </div>
 
         <!-- Servicio -->
         <div class="mb-6">
           <label class="block text-sm font-semibold text-gray-700 mb-2">
-            Servicio que le interesa
+            Servicio que le interesa *
           </label>
 
-          <select formControlName="service"
-            class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white">
+          <select 
+            formControlName="service"
+            class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white"
+            [class.border-red-500]="contactForm.get('service')?.invalid && (contactForm.get('service')?.touched || formSubmitted)">
             <!-- Opción placeholder -->
-            <option value="" disabled selected>
+            <option value="" disabled>
               Seleccione un servicio
             </option>
 
             @for (service of services(); track service) {
-            <option [value]="service.id">
-              {{ service.title }}
-            </option>
+              <option [value]="service.id">
+                {{ service.title }}
+              </option>
             }
           </select>
 
-          <!-- Validación -->
-          <p *ngIf="contactForm.get('service')?.touched && contactForm.get('service')?.invalid"
-            class="text-red-600 text-sm mt-1">
-            Debe seleccionar un servicio
+          <p *ngIf="(contactForm.get('service')?.invalid && contactForm.get('service')?.touched) || (formSubmitted && contactForm.get('service')?.invalid)"
+             class="text-red-600 text-sm mt-1">
+            {{ getErrorMessage('service') }}
           </p>
         </div>
-
 
         <!-- Mensaje -->
         <div class="mb-6">
           <label class="block text-sm font-semibold text-gray-700 mb-2">
             Descripción / Mensaje
           </label>
-          <textarea formControlName="message" rows="5"
+          <textarea 
+            formControlName="message" 
+            rows="5"
             class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition resize-none"
+            [class.border-red-500]="contactForm.get('message')?.invalid && (contactForm.get('message')?.touched || formSubmitted)"
             placeholder="Cuéntenos sobre su proyecto..."></textarea>
+          
+          <div class="flex justify-between mt-1">
+            <p *ngIf="(contactForm.get('message')?.invalid && contactForm.get('message')?.touched) || (formSubmitted && contactForm.get('message')?.invalid)"
+               class="text-red-600 text-xs">
+              {{ getErrorMessage('message') }}
+            </p>
+            <p class="text-xs text-gray-500 ml-auto">
+              {{ contactForm.get('message')?.value?.length || 0 }}/1000 caracteres
+            </p>
+          </div>
         </div>
 
         <!-- Botón -->
         <div class="flex justify-end">
-          <button type="button" (click)="onSend()" [disabled]="loading"
-            class="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+          <button 
+            type="submit" 
+            [disabled]="loading || (formSubmitted && contactForm.invalid)"
+            class="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+            [class.opacity-50]="contactForm.invalid && !loading">
             {{ loading ? 'Enviando...' : 'Enviar solicitud' }}
           </button>
         </div>
 
         <!-- Feedback -->
         <p *ngIf="success" class="mt-4 text-green-700 bg-green-100 border border-green-200 rounded-lg p-3 text-sm">
-          ✅ Solicitud enviada correctamente. Nos pondremos en contacto contigo
-          en breve.
+          ✅ Solicitud enviada correctamente. Nos pondremos en contacto contigo en breve.
         </p>
 
         <p *ngIf="errorMsg" class="mt-4 text-red-700 bg-red-100 border border-red-200 rounded-lg p-3 text-sm">
@@ -115,7 +150,7 @@
 
         <div class="space-y-5">
           <div class="flex items-start">
-            <svg class="w-6 h-6 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -128,7 +163,7 @@
           </div>
 
           <div class="flex items-start">
-            <svg class="w-6 h-6 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
@@ -139,7 +174,7 @@
           </div>
 
           <div class="flex items-start">
-            <svg class="w-6 h-6 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>

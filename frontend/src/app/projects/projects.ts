@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { IProject } from '../../core/models/project.model';
 import { Project } from '../../core/services/project';
+import { ToastrService } from '../../core/services/toastr';
 import { environment } from '../../env/environment';
 
 
@@ -18,7 +19,7 @@ export class Projects {
   filter = signal<string>('all');
   loading = signal<boolean>(true);
 
-  constructor(private projectService: Project) { }
+  constructor(private projectService: Project, private toastr: ToastrService) { }
 
   ngOnInit() {
     this.loadProjects();
@@ -37,6 +38,7 @@ export class Projects {
       },
       error: (err) => {
         console.error('Error loading projects:', err);
+        this.toastr.error('Error al cargar los proyectos', 'Error');
         this.loading.set(false);
       }
     });

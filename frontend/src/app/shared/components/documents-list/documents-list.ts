@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Invoice, InvoiceData } from '../../core/services/invoice';
 import { Budgets } from '../../../../core/services/budget';
 import { Invoices } from '../../../../core/services/invoice';
+import { ToastrService } from '../../../../core/services/toastr';
 import { forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
 
@@ -52,7 +53,8 @@ export class DocumentsList {
     private invoiceService: Invoice,
     private budgetsService: Budgets,
     private invoicesService: Invoices,
-    private router: Router
+    private router: Router,
+    private toastr: ToastrService
   ) {}
 
   // Raw backend arrays (to keep backend ids for deletes)
@@ -131,6 +133,7 @@ export class DocumentsList {
       },
       error: (err) => {
         console.error('Error loading documents from backend', err);
+        this.toastr.warning('Error al cargar documentos del servidor, usando almacenamiento local', 'Advertencia');
         // Fallback to local storage implementation
         this.allBudgets = this.invoiceService.getAllBudgets();
         this.allInvoices = this.invoiceService.getAllInvoices();
@@ -348,7 +351,7 @@ export class DocumentsList {
             },
             error: (err) => {
               console.error('Error deleting budget on backend', err);
-              alert('Error al eliminar presupuesto en el servidor');
+              this.toastr.error('Error al eliminar presupuesto en el servidor', 'Error');
             }
           });
         } else {
@@ -370,7 +373,7 @@ export class DocumentsList {
             },
             error: (err) => {
               console.error('Error deleting invoice on backend', err);
-              alert('Error al eliminar factura en el servidor');
+              this.toastr.error('Error al eliminar factura en el servidor', 'Error');
             }
           });
         } else {
@@ -417,21 +420,21 @@ export class DocumentsList {
         if (raw && raw.id) {
           this.budgetsService.deleteBudget(raw.id).subscribe({
             next: () => {
-              alert(`Presupuesto convertido a Factura Nº ${created.number}`);
+              this.toastr.success(`Presupuesto convertido a Factura Nº ${created.number}`, 'Conversión exitosa');
               this.loadDocuments();
               this.calculateStats();
               this.router.navigate(['/invoice'], { state: { data: created } });
             },
             error: (err) => {
               console.error('Error deleting original budget after conversion', err);
-              alert('Factura creada, pero no se pudo eliminar el presupuesto original');
+              this.toastr.warning('Factura creada, pero no se pudo eliminar el presupuesto original', 'Advertencia');
               this.loadDocuments();
             }
           });
         } else {
           // Fallback: use local conversion
           const invoice = this.invoiceService.convertBudgetToInvoice(budget);
-          alert(`Presupuesto convertido a Factura Nº ${invoice.number}`);
+          this.toastr.success(`Presupuesto convertido a Factura Nº ${invoice.number}`, 'Conversión exitosa');
           this.loadDocuments();
           this.calculateStats();
           this.router.navigate(['/invoice'], { state: { data: invoice } });
@@ -439,7 +442,7 @@ export class DocumentsList {
       },
       error: (err) => {
         console.error('Error converting budget to invoice', err);
-        alert('Error al convertir presupuesto en el servidor');
+        this.toastr.error('Error al convertir presupuesto en el servidor', 'Error');
       }
     });
   }
@@ -541,12 +544,12 @@ export class DocumentsList {
       reader.onload = (e: any) => {
         const success = this.invoiceService.importData(e.target.result);
         if (success) {
-          alert('Datos importados correctamente');
+          this.toastr.success('Datos importados correctamente', '\u00c9xito');
           this.loadDocuments();
           this.calculateStats();
           this.extractYears();
         } else {
-          alert('Error al importar datos');
+          this.toastr.error('Error al importar datos', 'Error');
         }
       };
       reader.readAsText(file);
@@ -558,7 +561,7 @@ export class DocumentsList {
       this.invoiceService.clearAllData();
       this.loadDocuments();
       this.calculateStats();
-      alert('Todos los datos han sido eliminados');
+      this.toastr.success('Todos los datos han sido eliminados', '\u00c9xito');
     }
   }
 }

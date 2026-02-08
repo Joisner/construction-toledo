@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Services } from '../../../core/services/services';
 import { IService } from '../../../core/models/service';
+import { ToastrService } from '../../../core/services/toastr';
 
 @Component({
   selector: 'app-projects-grid',
@@ -33,10 +34,12 @@ export class ProjectsGrid {
   services = signal<IService[]>([]);
 
   pendingMediaFiles = signal<PendingMediaItem[]>([]);
+  formSubmitted = false;
   constructor(
     private router: Router,
     private projectService: Project,
-    private serviceService: Services
+    private serviceService: Services,
+    private toastr: ToastrService
   ) {
     this.loadAllData();
   }
@@ -46,6 +49,79 @@ export class ProjectsGrid {
     if (!authId) {
       this.router.navigate(['/login']);
       return;
+    }
+  }
+
+  private validateProjectForm(): boolean {
+    const item = this.editingItem();
+    const errors: string[] = [];
+
+    // Validar título
+    if (!item.title || item.title.trim().length === 0) {
+      errors.push('El título es obligatorio');
+    } else if (item.title.trim().length < 3) {
+      errors.push('El título debe tener al menos 3 caracteres');
+    } else if (item.title.trim().length > 100) {
+      errors.push('El título no puede exceder 100 caracteres');
+    }
+
+    // Validar ubicación
+    if (!item.location || item.location.trim().length === 0) {
+      errors.push('La ubicación es obligatoria');
+    } else if (item.location.trim().length < 3) {
+      errors.push('La ubicación debe tener al menos 3 caracteres');
+    }
+
+    // Validar servicio
+    if (!item.service) {
+      errors.push('Debe seleccionar un servicio');
+    }
+
+    // Validar fecha (opcional pero si existe debe ser válida)
+    if (item.completion_date) {
+      const date = new Date(item.completion_date);
+      if (isNaN(date.getTime())) {
+        errors.push('La fecha de finalización no es válida');
+      }
+    }
+
+    // Validar descripción (opcional pero con límite)
+    if (item.description && item.description.length > 1000) {
+      errors.push('La descripción no puede exceder 1000 caracteres');
+    }
+
+    // Mostrar errores si existen
+    if (errors.length > 0) {
+      this.toastr.error(errors.join('\n'), 'Errores de validación');
+
+      // Scroll al primer campo con error
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+
+      return false;
+    }
+
+    return true;
+  }
+
+  // ✅ Método que se ejecuta al hacer submit
+  onSubmitProject() {
+    this.formSubmitted = true;
+
+    if (!this.validateProjectForm()) {
+      return;
+    }
+
+    const item = this.editingItem();
+
+    if (item.id) {
+      this.updateProject(item);
+    } else {
+      this.addProject(item);
     }
   }
 
@@ -134,29 +210,21 @@ export class ProjectsGrid {
 
     if (!token) {
       console.error('Cannot create project: No authentication token');
-      alert('Debes iniciar sesión nuevamente');
+      this.toastr.error('Debes iniciar sesión nuevamente', 'Error de autenticación');
       this.router.navigate(['/login']);
       return;
     }
 
-    // Validar campos requeridos
-    if (!project.title || !project.location || !project.service) {
-      alert('Por favor completa todos los campos requeridos (Título, Ubicación, Servicio)');
-      return;
-    }
-
-    // 1. Crear el proyecto SIN media
+    // ✅ Limpiar espacios en blanco antes de crear
     const newProject: IProject = {
       id: Date.now().toString(),
-      title: project.title,
-      description: project.description || '',
-      location: project.location,
-      service: project.service,
+      title: project.title!.trim(),
+      description: project.description?.trim() || '',
+      location: project.location!.trim(),
+      service: project.service!,
       completion_date: project.completion_date || new Date().toISOString().split('T')[0],
       is_active: project.is_active ?? true,
-      media: [], // ✅ Sin media por ahora
-      // Si el formulario ya contiene un valor para main_image (por ejemplo el usuario marcó
-      // un pending media como principal), incluirlo aquí como referencia inicial.
+      media: [],
       main_image: (project as any).main_image || '',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -168,17 +236,14 @@ export class ProjectsGrid {
       next: (createdProject) => {
         console.log('✅ Project created successfully:', createdProject);
 
-        // 2. Si hay archivos pendientes, subirlos ahora
         const pendingFiles = this.pendingMediaFiles();
         if (pendingFiles.length > 0) {
           console.log(`📤 Uploading ${pendingFiles.length} media files...`);
           this.uploadMediaFiles(createdProject.id, pendingFiles);
         } else {
-          // No hay archivos, solo recargar la lista
-          alert('Proyecto creado exitosamente');
+          this.toastr.success('Proyecto creado exitosamente', 'Éxito');
           this.getProjects();
-          this.editingItem.set(null);
-          this.pendingMediaFiles.set([]);
+          this.cancelEdit();
         }
       },
       error: (err) => {
@@ -190,18 +255,51 @@ export class ProjectsGrid {
 
         if (err.status === 403) {
           const errorMsg = err.error?.detail || err.error?.message || 'Sin detalles adicionales';
-          alert(`Error de autenticación: ${errorMsg}\n\nPor favor, inicia sesión nuevamente.`);
+          this.toastr.error(`Error de autenticación: ${errorMsg}`, 'Acceso denegado');
           this.router.navigate(['/login']);
         } else if (err.status === 401) {
-          alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+          this.toastr.error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'Sesión expirada');
           this.router.navigate(['/login']);
         } else {
           const errorMsg = err.error?.detail || err.message || 'Error desconocido';
-          alert(`Error al crear el proyecto: ${errorMsg}`);
+          this.toastr.error(`Error al crear el proyecto: ${errorMsg}`, 'Error');
         }
       }
     });
   }
+
+  // ✅ Método corregido con validación
+  updateProject(project: IProject) {
+    const pendingFiles = this.pendingMediaFiles();
+
+    // ✅ Limpiar espacios en blanco antes de actualizar
+    const { media, ...projectWithoutMedia } = project as any;
+    const updatedProject = {
+      ...projectWithoutMedia,
+      title: project.title.trim(),
+      location: project.location.trim(),
+      description: project.description?.trim() || '',
+      updated_at: new Date().toISOString()
+    };
+
+    this.projectService.updateProject(project.id, updatedProject).subscribe({
+      next: (res) => {
+        if (pendingFiles && pendingFiles.length > 0) {
+          console.log(`Uploading ${pendingFiles.length} new media files for project ${project.id} after update`);
+          this.uploadMediaFiles(project.id, pendingFiles);
+        } else {
+          this.toastr.success('Proyecto actualizado exitosamente', 'Éxito');
+          this.getProjects();
+          this.cancelEdit();
+        }
+      },
+      error: (err) => {
+        console.error('Error updating project:', err);
+        this.toastr.error('Error al actualizar el proyecto', 'Error');
+      }
+    });
+  }
+
 
   // ✅ NUEVO MÉTODO: uploadMediaFiles
   private uploadMediaFiles(projectId: string, files: PendingMediaItem[]) {
@@ -229,10 +327,10 @@ export class ProjectsGrid {
         next: (response) => {
           uploadedCount++;
           console.log(`✅ Media ${uploadedCount}/${totalFiles} uploaded successfully:`, response);
-          if(!!item.is_main){
+          if (!!item.is_main) {
             this.projectService.uploadMedia(projectId, formData, item.is_main!).subscribe({
-              next: () => { console.log(`Principal subida`)},
-              error: (err) => {}
+              next: () => { console.log(`Principal subida`) },
+              error: (err) => { }
             })
           }
           // Si es el último archivo, recargar la lista
@@ -258,9 +356,9 @@ export class ProjectsGrid {
     console.log(`🏁 Upload complete: ${successCount} successful, ${errorCount} failed`);
 
     if (errorCount > 0) {
-      alert(`⚠️ Proyecto creado pero hubo ${errorCount} error(es) al subir las imágenes`);
+      this.toastr.warning(`Proyecto creado pero hubo ${errorCount} error(es) al subir las imágenes`, 'Advertencia');
     } else {
-      alert(`✅ Proyecto creado exitosamente con ${successCount} imagen(es)`);
+      this.toastr.success(`Proyecto creado exitosamente con ${successCount} imagen(es)`, 'Éxito');
     }
 
     // Limpiar y recargar
@@ -308,23 +406,24 @@ export class ProjectsGrid {
     // No limpiar pendingMediaFiles aquí, se limpian después de subir o cancelar
   }
 
-  // ✅ MÉTODO CORREGIDO: cancelEdit
+  // ✅ Método mejorado con reset de validaciones
+  startEdit(item: any) {
+    console.log('✏️ Starting edit:', item);
+    this.pendingMediaFiles.set([]);
+    this.editingItem.set({ ...item, media: item.media || [] });
+    this.previewMedia.set(this.normalizeMediaList(item.media || []));
+    this.formSubmitted = false; // ✅ Resetear validaciones
+  }
+
+  // ✅ Método mejorado con reset de validaciones
   cancelEdit() {
     console.log('🚫 Canceling edit - clearing pending media');
     this.editingItem.set(null);
-    this.pendingMediaFiles.set([]); // Limpiar archivos pendientes al cancelar
+    this.pendingMediaFiles.set([]);
     this.previewMedia.set([]);
+    this.formSubmitted = false; // ✅ Resetear validaciones
   }
 
-  // ✅ MÉTODO CORREGIDO: startEdit
-  startEdit(item: any) {
-    console.log('✏️ Starting edit:', item);
-    // Limpiar archivos pendientes al empezar una nueva edición
-    this.pendingMediaFiles.set([]);
-    this.editingItem.set({ ...item, media: item.media || [] });
-    // Set preview media from item.media so UI shows current media
-    this.previewMedia.set(this.normalizeMediaList(item.media || []));
-  }
 
 
   logout() {
@@ -350,45 +449,13 @@ export class ProjectsGrid {
     });
   }
 
-  private getServices(){
+  private getServices() {
     this.serviceService.getServices().subscribe({
       next: (service: IService[]) => {
         this.services.set(service);
       },
-      error: (err) => {}
+      error: (err) => { }
     })
-  }
-
-  updateProject(project: IProject) {
-    // Don't send the `media` array when updating the project, because media
-    // are managed via separate endpoints. Sending `media` here can overwrite
-    // or remove existing entries on the backend. Instead: update the project
-    // fields, then upload any pending media items separately.
-    const pendingFiles = this.pendingMediaFiles();
-
-    const { media, ...projectWithoutMedia } = project as any;
-    const updatedProject = {
-      ...projectWithoutMedia,
-      updated_at: new Date().toISOString()
-    };
-
-    this.projectService.updateProject(project.id, updatedProject).subscribe({
-      next: (res) => {
-        // If there are pending files, upload them and then refresh.
-        if (pendingFiles && pendingFiles.length > 0) {
-          console.log(`Uploading ${pendingFiles.length} new media files for project ${project.id} after update`);
-          // Use the existing single-file uploader which appends media instead of replacing
-          this.uploadMediaFiles(project.id, pendingFiles);
-        } else {
-          this.getProjects();
-          this.editingItem.set(null);
-        }
-      },
-      error: (err) => {
-        console.error('Error updating project:', err);
-        alert('Error al actualizar el proyecto');
-      }
-    });
   }
 
   deleteProject(id: string) {
@@ -402,14 +469,14 @@ export class ProjectsGrid {
         // Show backend detail when available
         const detail = err?.error?.detail || err?.error?.message || err?.message || 'Sin detalles';
         if (err.status === 403) {
-          alert(`No tienes permisos para eliminar este proyecto: ${detail}`);
+          this.toastr.error(`No tienes permisos para eliminar este proyecto: ${detail}`, 'Acceso denegado');
           // Optional: redirect to login if token invalid/expired
           // this.router.navigate(['/login']);
         } else if (err.status === 401) {
-          alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+          this.toastr.error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'Sesión expirada');
           this.router.navigate(['/login']);
         } else {
-          alert(`Error al eliminar el proyecto: ${detail}`);
+          this.toastr.error(`Error al eliminar el proyecto: ${detail}`, 'Error');
         }
       }
     });
@@ -420,28 +487,28 @@ export class ProjectsGrid {
     this.showDeleteConfirm.set({ item, type });
   }
 
- /*  executeDelete() {
-    const confirm = this.showDeleteConfirm();
-    if (!confirm) return;
-
-    const { item, type } = confirm;
-
-    switch (type) {
-      case 'quote':
-        this.deleteQuote(item.id);
-        break;
-      case 'project':
-        this.deleteProject(item.id);
-        break;
-      case 'service':
-        this.deleteService(item.id);
-        break;
-      case 'admin':
-        this.deleteAdmin(item.id);
-        break;
-    }
-  }
- */
+  /*  executeDelete() {
+     const confirm = this.showDeleteConfirm();
+     if (!confirm) return;
+ 
+     const { item, type } = confirm;
+ 
+     switch (type) {
+       case 'quote':
+         this.deleteQuote(item.id);
+         break;
+       case 'project':
+         this.deleteProject(item.id);
+         break;
+       case 'service':
+         this.deleteService(item.id);
+         break;
+       case 'admin':
+         this.deleteAdmin(item.id);
+         break;
+     }
+   }
+  */
   cancelDelete() {
     this.showDeleteConfirm.set(null);
   }

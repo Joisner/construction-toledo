@@ -3,6 +3,7 @@ import { Media } from '../../../../core/models/project.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PendingMediaItem } from '../../../../core/models/media.model';
+import { ToastrService } from '../../../../core/services/toastr';
 @Component({
   selector: 'app-media-management',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -17,6 +18,8 @@ export class MediaManagement implements OnInit {
 
   // Lista de archivos pendientes a subir
   pendingMediaList = signal<PendingMediaItem[]>([]);
+  
+  constructor(private toastr: ToastrService) { }
   
   newMediaItem = signal<{
     file: File | null;
@@ -69,7 +72,7 @@ export class MediaManagement implements OnInit {
     const current = this.newMediaItem();
 
     if (!current.file || !current.description.trim()) {
-      alert('Por favor completa el archivo y descripción del media');
+      this.toastr.warning('Por favor completa el archivo y descripción del media', 'Datos incompletos');
       return;
     }
 

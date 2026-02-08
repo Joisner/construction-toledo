@@ -8,6 +8,7 @@ import { InvoiceEditor } from '../../shared/components/invoice-creator/invoice-c
 import { AdminsList } from './admins-list/admins-list';
 import { Quotes } from '../../../core/services/quotes';
 import { Subscription } from 'rxjs';
+import { Auth } from '../../../core/services/auth';
 type TabType = 'quotes' | 'projects' | 'services' | 'accounting' | 'admins'
   | 'budgets' | 'invoice' | 'documents';
 
@@ -77,7 +78,7 @@ export class AdminDashboard {
     }
   ];
 
-  constructor(private quotesService: Quotes){}
+  constructor(private quotesService: Quotes, private authService: Auth){}
 
   toggleSidebar() {
     this.sidebarCollapsed.update(v => !v);
@@ -190,9 +191,6 @@ ngOnDestroy(): void {
   }
 
   logout() {
-    if (confirm('¿Cerrar sesión?')) {
-      console.log('Logging out...');
-      // Implementar lógica de logout
-    }
+    this.authService.clearToken();
   }
 }

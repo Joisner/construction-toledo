@@ -3,6 +3,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CompanyInfo, Invoice as LocalInvoice, InvoiceData } from '../../core/services/invoice';
 import { Invoices } from '../../../../core/services/invoice';
+import { ToastrService } from '../../../../core/services/toastr';
 import { CommonModule } from '@angular/common';
 
 interface InvoiceItem {
@@ -45,7 +46,7 @@ export class InvoiceEditor {
   // Company info
   companyInfo: CompanyInfo;
 
-  constructor(private invoiceService: LocalInvoice, private invoicesService: Invoices, private sanitizer: DomSanitizer) {
+  constructor(private invoiceService: LocalInvoice, private invoicesService: Invoices, private sanitizer: DomSanitizer, private toastr: ToastrService) {
     this.companyInfo = this.invoiceService.getCompanyInfo();
   }
 
@@ -126,28 +127,28 @@ export class InvoiceEditor {
         next: (res) => {
           this.invoicesService.deleteInvoice(existingBackendId!).subscribe({
             next: () => {
-              alert('Factura actualizada correctamente (backend)');
+              this.toastr.success('Factura actualizada correctamente', 'Éxito');
               (this as any).backendId = null;
             },
             error: (delErr) => {
               console.warn('Factura creada pero no se pudo eliminar la original', delErr);
-              alert('Factura guardada, pero no se pudo reemplazar la original en el servidor');
+              this.toastr.warning('Factura guardada, pero no se pudo reemplazar la original en el servidor', 'Advertencia');
             }
           });
         },
         error: (err) => {
           console.error('Error updating invoice on backend', err);
-          alert('Error al actualizar factura en el servidor');
+          this.toastr.error('Error al actualizar factura en el servidor', 'Error');
         }
       });
     } else {
       this.invoicesService.createInvoice(payload).subscribe({
         next: () => {
-          alert('Factura creada correctamente (backend)');
+          this.toastr.success('Factura creada correctamente', 'Éxito');
         },
         error: (err) => {
           console.error('Error creating invoice', err);
-          alert('Error al crear factura en el servidor');
+          this.toastr.error('Error al crear factura en el servidor', 'Error');
         }
       });
     }

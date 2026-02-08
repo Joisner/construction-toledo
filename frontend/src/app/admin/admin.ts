@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Project } from '../../core/services/project';
+import { ToastrService } from '../../core/services/toastr';
 import { IProject, Media } from '../../core/models/project.model';
 import { MediaManagement } from '../shared/components/media-management/media-management';
 import { environment } from '../../env/environment';
@@ -68,7 +69,8 @@ export class Admin implements OnInit {
   pendingMediaFiles = signal<PendingMediaItem[]>([]);
   constructor(
     private router: Router,
-    private projectService: Project
+    private projectService: Project,
+    private toastr: ToastrService
   ) {
     this.loadAllData();
   }
@@ -148,14 +150,14 @@ export class Admin implements OnInit {
 
     if (!token) {
       console.error('Cannot create project: No authentication token');
-      alert('Debes iniciar sesión nuevamente');
+      this.toastr.error('Debes iniciar sesión nuevamente', 'Error de autenticación');
       this.router.navigate(['/login']);
       return;
     }
 
     // Validar campos requeridos
     if (!project.title || !project.location || !project.service) {
-      alert('Por favor completa todos los campos requeridos (Título, Ubicación, Servicio)');
+      this.toastr.error('Por favor completa todos los campos requeridos (Título, Ubicación, Servicio)', 'Validación');
       return;
     }
 
@@ -186,7 +188,7 @@ export class Admin implements OnInit {
           this.uploadMediaFiles(createdProject.id, pendingFiles);
         } else {
           // No hay archivos, solo recargar la lista
-          alert('Proyecto creado exitosamente');
+          this.toastr.success('Proyecto creado exitosamente', 'Éxito');
           this.getProjects();
           this.editingItem.set(null);
           this.pendingMediaFiles.set([]);
@@ -201,14 +203,14 @@ export class Admin implements OnInit {
 
         if (err.status === 403) {
           const errorMsg = err.error?.detail || err.error?.message || 'Sin detalles adicionales';
-          alert(`Error de autenticación: ${errorMsg}\n\nPor favor, inicia sesión nuevamente.`);
+          this.toastr.error(`Error de autenticación: ${errorMsg}`, 'Acceso denegado');
           this.router.navigate(['/login']);
         } else if (err.status === 401) {
-          alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+          this.toastr.error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'Sesión expirada');
           this.router.navigate(['/login']);
         } else {
           const errorMsg = err.error?.detail || err.message || 'Error desconocido';
-          alert(`Error al crear el proyecto: ${errorMsg}`);
+          this.toastr.error(`Error al crear el proyecto: ${errorMsg}`, 'Error');
         }
       }
     });
@@ -259,9 +261,9 @@ export class Admin implements OnInit {
     console.log(`🏁 Upload complete: ${successCount} successful, ${errorCount} failed`);
 
     if (errorCount > 0) {
-      alert(`⚠️ Proyecto creado pero hubo ${errorCount} error(es) al subir las imágenes`);
+      this.toastr.warning(`Proyecto creado pero hubo ${errorCount} error(es) al subir las imágenes`, 'Advertencia');
     } else {
-      alert(`✅ Proyecto creado exitosamente con ${successCount} imagen(es)`);
+      this.toastr.success(`Proyecto creado exitosamente con ${successCount} imagen(es)`, 'Éxito');
     }
 
     // Limpiar y recargar
@@ -410,7 +412,7 @@ export class Admin implements OnInit {
       },
       error: (err) => {
         console.error('Error updating project:', err);
-        alert('Error al actualizar el proyecto');
+        this.toastr.error('Error al actualizar el proyecto', 'Error');
       }
     });
   }
@@ -426,14 +428,14 @@ export class Admin implements OnInit {
         // Show backend detail when available
         const detail = err?.error?.detail || err?.error?.message || err?.message || 'Sin detalles';
         if (err.status === 403) {
-          alert(`No tienes permisos para eliminar este proyecto: ${detail}`);
+          this.toastr.error(`No tienes permisos para eliminar este proyecto: ${detail}`, 'Acceso denegado');
           // Optional: redirect to login if token invalid/expired
           // this.router.navigate(['/login']);
         } else if (err.status === 401) {
-          alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+          this.toastr.error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'Sesión expirada');
           this.router.navigate(['/login']);
         } else {
-          alert(`Error al eliminar el proyecto: ${detail}`);
+          this.toastr.error(`Error al eliminar el proyecto: ${detail}`, 'Error');
         }
       }
     });
@@ -497,7 +499,7 @@ export class Admin implements OnInit {
 
   deleteAdmin(id: string) {
     if (this.admins().length <= 1) {
-      alert('No se puede eliminar el último administrador');
+      this.toastr.warning('No se puede eliminar el último administrador', 'Advertencia');
       return;
     }
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IProject, Media } from '../../core/models/project.model';
 import { ActivatedRoute } from '@angular/router';
 import { Project } from '../../core/services/project';
+import { ToastrService } from '../../core/services/toastr';
 import { environment } from '../../env/environment';
 import { FormsModule } from '@angular/forms';
 
@@ -40,7 +41,8 @@ export class ProjectDetail implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private projectService: Project
+    private projectService: Project,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
@@ -89,6 +91,7 @@ export class ProjectDetail implements OnInit {
       },
       error: (err) => {
         console.error('Error loading project:', err);
+        this.toastr.error('Error al cargar el proyecto', 'Error');
         this.loading = false;
       }
     });

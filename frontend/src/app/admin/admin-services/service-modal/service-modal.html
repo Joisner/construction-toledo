@@ -1,181 +1,241 @@
-  @if (isOpen) {
-      <div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl my-8">
-          
-          <!-- Header -->
-          <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-6 flex items-center justify-between flex-shrink-0">
-            <div class="flex items-center space-x-3">
-              <div class="bg-white/20 p-3 rounded-xl">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <h2 class="text-2xl font-bold">
-                  {{ formData().id ? 'Editar' : 'Nuevo' }} Servicio
-                </h2>
-                <p class="text-cyan-100 text-sm">Complete la información del servicio</p>
-              </div>
-            </div>
-            <button (click)="close.emit()" class="hover:bg-white/20 p-2 rounded-lg transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+@if (isOpen) {
+  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl my-8">
+      
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-6 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white/20 p-3 rounded-xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
           </div>
+          <div>
+            <h2 class="text-2xl font-bold">
+              {{ formData().id ? 'Editar' : 'Nuevo' }} Servicio
+            </h2>
+            <p class="text-cyan-100 text-sm">Complete la información del servicio</p>
+          </div>
+        </div>
+        <button (click)="close.emit()" class="hover:bg-white/20 p-2 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-          <!-- Form Content -->
-          <form (submit)="$event.preventDefault(); handleSave()" class="flex-1 overflow-y-auto p-6">
-            
-            <!-- Basic Information -->
-            <div class="bg-gray-50 rounded-xl p-6 mb-6">
-              <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Información Básica
-              </h3>
-              
-              <div class="space-y-4">
-                <!-- Title -->
+      <!-- Form Content -->
+      <form (submit)="$event.preventDefault(); handleSave()" class="flex-1 overflow-y-auto p-6">
+        
+        <!-- Basic Information -->
+        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Información Básica
+          </h3>
+          
+          <div class="space-y-4">
+            <!-- Title -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Título del Servicio *
+              </label>
+              <input 
+                [(ngModel)]="formData().title" 
+                name="title"
+                placeholder="Ej: Remodelación Integral"
+                minlength="3"
+                maxlength="100"
+                class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                [class.border-red-500]="formSubmitted && (!formData().title || formData().title.trim().length < 3)"
+                required>
+              <div class="flex justify-between mt-1">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Título del Servicio *
-                  </label>
-                  <input 
-                    [(ngModel)]="formData().title" 
-                    name="title"
-                    placeholder="Ej: Remodelación Integral"
-                    class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
-                    required>
-                </div>
-                
-                <!-- Description -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Descripción Breve *
-                  </label>
-                  <textarea 
-                    [(ngModel)]="formData().description" 
-                    name="description"
-                    rows="2"
-                    placeholder="Descripción corta del servicio (aparecerá en las tarjetas)"
-                    class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all resize-none"
-                    required></textarea>
-                  <p class="text-xs text-gray-500 mt-1">Máximo 100 caracteres recomendado</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Detailed Information -->
-            <div class="bg-gray-50 rounded-xl p-6 mb-6">
-              <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Detalles Completos
-              </h3>
-              
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                  Detalles del Servicio *
-                </label>
-                <textarea 
-                  [(ngModel)]="formData().details" 
-                  name="details"
-                  rows="6"
-                  placeholder="Descripción detallada: qué incluye, procesos, materiales, garantías, etc."
-                  class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all resize-none"
-                  required></textarea>
-                <p class="text-xs text-gray-500 mt-1">Información completa que verán los clientes</p>
-              </div>
-            </div>
-
-            <!-- Image -->
-            <div class="bg-gray-50 rounded-xl p-6 mb-6">
-              <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Imagen del Servicio
-              </h3>
-              
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                  URL de la Imagen *
-                </label>
-                <input 
-                  [(ngModel)]="formData().image_url" 
-                  name="image_url"
-                  type="url"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
-                  required>
-                <p class="text-xs text-gray-500 mt-1">URL completa de la imagen (debe comenzar con http:// o https://)</p>
-                
-                <!-- Image Preview -->
-                @if (formData().image_url) {
-                  <div class="mt-4">
-                    <p class="text-xs font-semibold text-gray-600 mb-2">Vista Previa:</p>
-                    <div class="relative rounded-lg overflow-hidden border-2 border-gray-200 h-48">
-                      <img 
-                        [src]="formData().image_url" 
-                        alt="Preview"
-                        class="w-full h-full object-cover"
-                        (error)="onImageError($event)">
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <!-- Status -->
-            <div class="bg-gray-50 rounded-xl p-6 mb-6">
-              <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Estado
-              </h3>
-              
-              <div class="flex items-start space-x-3">
-                <input 
-                  type="checkbox" 
-                  [(ngModel)]="formData().is_active" 
-                  name="is_active"
-                  id="is_active"
-                  class="w-5 h-5 text-cyan-500 border-gray-300 rounded focus:ring-cyan-400 mt-0.5">
-                <div>
-                  <label for="is_active" class="block text-sm font-semibold text-gray-700 cursor-pointer">
-                    Servicio activo
-                  </label>
-                  <p class="text-xs text-gray-500 mt-1">
-                    Los servicios activos son visibles en el sitio web público
+                  <p *ngIf="formSubmitted && !formData().title" class="text-red-600 text-xs">
+                    El título es obligatorio
+                  </p>
+                  <p *ngIf="formSubmitted && formData().title && formData().title.trim().length < 3" class="text-red-600 text-xs">
+                    El título debe tener al menos 3 caracteres
                   </p>
                 </div>
+                <p class="text-xs text-gray-500">
+                  {{ formData().title.length || 0 }}/100
+                </p>
               </div>
             </div>
-
-            <!-- Actions -->
-            <div class="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200">
-              <button 
-                type="button"
-                (click)="close.emit()"
-                class="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-xl transition-colors">
-                Cancelar
-              </button>
-              <button 
-                type="submit"
-                class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-                {{ formData().id ? 'Actualizar' : 'Crear' }} Servicio
-              </button>
+            
+            <!-- Description -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Descripción Breve *
+              </label>
+              <textarea 
+                [(ngModel)]="formData().description" 
+                name="description"
+                rows="2"
+                minlength="10"
+                maxlength="200"
+                placeholder="Descripción corta del servicio (aparecerá en las tarjetas)"
+                class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all resize-none"
+                [class.border-red-500]="formSubmitted && (!formData().description || formData().description.trim().length < 10)"
+                required></textarea>
+              <div class="flex justify-between mt-1">
+                <div>
+                  <p *ngIf="formSubmitted && !formData().description" class="text-red-600 text-xs">
+                    La descripción es obligatoria
+                  </p>
+                  <p *ngIf="formSubmitted && formData().description && formData().description.trim().length < 10" class="text-red-600 text-xs">
+                    La descripción debe tener al menos 10 caracteres
+                  </p>
+                </div>
+                <p class="text-xs" 
+                   [class.text-yellow-600]="formData().description.length > 100"
+                   [class.text-gray-500]="formData().description.length <= 100">
+                  {{ formData().description.length || 0 }}/200
+                  <span *ngIf="formData().description.length > 100" class="font-semibold">
+                    (Recomendado: máx. 100)
+                  </span>
+                </p>
+              </div>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
-    }
+
+        <!-- Detailed Information -->
+        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Detalles Completos
+          </h3>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Detalles del Servicio *
+            </label>
+            <textarea 
+              [(ngModel)]="formData().details" 
+              name="details"
+              rows="6"
+              minlength="20"
+              maxlength="2000"
+              placeholder="Descripción detallada: qué incluye, procesos, materiales, garantías, etc."
+              class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all resize-none"
+              [class.border-red-500]="formSubmitted && (!formData().details || formData().details.trim().length < 20)"
+              required></textarea>
+            <div class="flex justify-between mt-1">
+              <div>
+                <p *ngIf="formSubmitted && !formData().details" class="text-red-600 text-xs">
+                  Los detalles son obligatorios
+                </p>
+                <p *ngIf="formSubmitted && formData().details && formData().details.trim().length < 20" class="text-red-600 text-xs">
+                  Los detalles deben tener al menos 20 caracteres
+                </p>
+              </div>
+              <p class="text-xs text-gray-500">
+                {{ formData().details.length || 0 }}/2000
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Imagen del Servicio
+          </h3>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              URL de la Imagen *
+            </label>
+            <input 
+              [(ngModel)]="formData().image_url" 
+              name="image_url"
+              type="url"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+              [class.border-red-500]="formSubmitted && (!formData().image_url || !isValidUrl(formData().image_url))"
+              required>
+            <p *ngIf="formSubmitted && !formData().image_url" class="text-red-600 text-xs mt-1">
+              La URL de la imagen es obligatoria
+            </p>
+            <p *ngIf="formSubmitted && formData().image_url && !isValidUrl(formData().image_url)" class="text-red-600 text-xs mt-1">
+              La URL de la imagen no es válida (debe comenzar con http:// o https://)
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+              URL completa de la imagen (debe comenzar con http:// o https://)
+            </p>
+            
+            <!-- Image Preview -->
+            @if (formData().image_url) {
+              <div class="mt-4">
+                <p class="text-xs font-semibold text-gray-600 mb-2">Vista Previa:</p>
+                <div class="relative rounded-lg overflow-hidden border-2 border-gray-200 h-48">
+                  <img 
+                    [src]="formData().image_url" 
+                    alt="Preview"
+                    class="w-full h-full object-cover"
+                    (error)="onImageError($event)">
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Estado
+          </h3>
+          
+          <div class="flex items-start space-x-3">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="formData().is_active" 
+              name="is_active"
+              id="is_active"
+              class="w-5 h-5 text-cyan-500 border-gray-300 rounded focus:ring-cyan-400 mt-0.5">
+            <div>
+              <label for="is_active" class="block text-sm font-semibold text-gray-700 cursor-pointer">
+                Servicio activo
+              </label>
+              <p class="text-xs text-gray-500 mt-1">
+                Los servicios activos son visibles en el sitio web público
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200">
+          <button 
+            type="button"
+            (click)="close.emit()"
+            class="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button 
+            type="submit"
+            class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+            {{ formData().id ? 'Actualizar' : 'Crear' }} Servicio
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

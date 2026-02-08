@@ -12,35 +12,73 @@
     <!-- Formulario de proyecto -->
     @if (editingItem()) {
     <form
-        (submit)="$event.preventDefault(); editingItem().id ? updateProject(editingItem()) : addProject(editingItem())"
+        (submit)="$event.preventDefault(); onSubmitProject()"
         class="bg-white rounded-2xl shadow-lg p-8 mb-8">
         <h3 class="text-2xl font-bold text-slate-900 mb-6">
             {{ editingItem().id ? 'Editar' : 'Nuevo' }} <span class="text-cyan-400">Proyecto</span>
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Título -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Título *</label>
-                <input [(ngModel)]="editingItem().title" name="title" placeholder="Nombre del proyecto"
+                <input 
+                    [(ngModel)]="editingItem().title" 
+                    name="title" 
+                    placeholder="Nombre del proyecto"
+                    minlength="3"
+                    maxlength="100"
                     class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                    [class.border-red-500]="formSubmitted && (!editingItem().title || editingItem().title.trim().length < 3)"
                     required>
+                <p *ngIf="formSubmitted && !editingItem().title" 
+                   class="text-red-600 text-sm mt-1">
+                    El título es obligatorio
+                </p>
+                <p *ngIf="formSubmitted && editingItem().title && editingItem().title.trim().length < 3" 
+                   class="text-red-600 text-sm mt-1">
+                    El título debe tener al menos 3 caracteres
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    {{ editingItem().title?.length || 0 }}/100 caracteres
+                </p>
             </div>
+
+            <!-- Ubicación -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Ubicación *</label>
-                <input [(ngModel)]="editingItem().location" name="location" placeholder="Ciudad, Estado"
+                <input 
+                    [(ngModel)]="editingItem().location" 
+                    name="location" 
+                    placeholder="Ciudad, Estado"
+                    minlength="3"
                     class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                    [class.border-red-500]="formSubmitted && (!editingItem().location || editingItem().location.trim().length < 3)"
                     required>
+                <p *ngIf="formSubmitted && !editingItem().location" 
+                   class="text-red-600 text-sm mt-1">
+                    La ubicación es obligatoria
+                </p>
+                <p *ngIf="formSubmitted && editingItem().location && editingItem().location.trim().length < 3" 
+                   class="text-red-600 text-sm mt-1">
+                    La ubicación debe tener al menos 3 caracteres
+                </p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Servicio -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Servicio *
                 </label>
 
-                <select [(ngModel)]="editingItem().service" name="service" required class="w-full border-2 border-gray-200 rounded-xl p-3 bg-white
-           focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all">
+                <select 
+                    [(ngModel)]="editingItem().service" 
+                    name="service" 
+                    required 
+                    class="w-full border-2 border-gray-200 rounded-xl p-3 bg-white focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all"
+                    [class.border-red-500]="formSubmitted && !editingItem().service">
                     <!-- Placeholder -->
                     <option [ngValue]="null" disabled>
                         Selecciona un servicio
@@ -52,22 +90,37 @@
                     </option>
                     }
                 </select>
+                <p *ngIf="formSubmitted && !editingItem().service" 
+                   class="text-red-600 text-sm mt-1">
+                    Debe seleccionar un servicio
+                </p>
             </div>
 
-
-
+            <!-- Fecha de finalización -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de finalización</label>
-                <input [(ngModel)]="editingItem().completion_date" name="completion_date" type="date"
+                <input 
+                    [(ngModel)]="editingItem().completion_date" 
+                    name="completion_date" 
+                    type="date"
                     class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all">
             </div>
         </div>
 
+        <!-- Descripción -->
         <div class="mb-6">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
-            <textarea [(ngModel)]="editingItem().description" name="description" rows="3"
+            <textarea 
+                [(ngModel)]="editingItem().description" 
+                name="description" 
+                rows="3"
+                maxlength="1000"
                 placeholder="Describe el proyecto..."
-                class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all resize-none"></textarea>
+                class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all resize-none"
+                [class.border-red-500]="formSubmitted && editingItem().description && editingItem().description.length > 1000"></textarea>
+            <p class="text-xs text-gray-500 mt-1">
+                {{ editingItem().description?.length || 0 }}/1000 caracteres
+            </p>
         </div>
 
         <!-- Gestión de Media -->
@@ -145,12 +198,14 @@
             }
         </div>
 
+        <!-- Proyecto activo -->
         <div class="flex items-center mb-6">
             <input type="checkbox" [(ngModel)]="editingItem().is_active" name="is_active"
                 class="w-5 h-5 text-cyan-400 border-gray-300 rounded focus:ring-cyan-400">
             <label class="ml-2 text-sm font-semibold text-gray-700">Proyecto activo</label>
         </div>
 
+        <!-- Botones -->
         <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
             <button type="button" (click)="cancelEdit()"
                 class="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-xl transition-colors">
@@ -269,7 +324,7 @@
 </div>
 
 
-<!-- Modal de Media Management - CORREGIDO -->
+<!-- Modal de Media Management -->
 @if (showMediaModal()) {
 <app-media-management [isOpen]="showMediaModal()" [mediaList]="currentMediaList()" (close)="closeMediaModal()"
     (save)="onMediaSaved($event)">
