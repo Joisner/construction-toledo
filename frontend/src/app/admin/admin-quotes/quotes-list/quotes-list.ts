@@ -45,7 +45,6 @@ export class QuotesList {
   loadQuotes() {
     this.quotesService.getQuotes().subscribe({
       next: (res: IQuote[]) => {
-        debugger;
         res.forEach((quote) => {
           const serviceName = this.service.find(
             s => s.id === quote.service

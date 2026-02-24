@@ -37,22 +37,30 @@
 
       <!-- Número de presupuesto -->
       <div>
-        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Número de Presupuesto</label>
-        <input type="text" [(ngModel)]="budgetNumber"
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Número de Presupuesto <span class="text-red-600">*</span></label>
+        <input type="text" [(ngModel)]="budgetNumber" (ngModelChange)="validateBudget()"
+          [class.border-red-500]="validationErrors['budgetNumber']"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        @if (validationErrors['budgetNumber']) {
+        <p class="text-red-600 text-xs mt-1">{{ validationErrors['budgetNumber'] }}</p>
+        }
       </div>
 
       <!-- Fecha -->
       <div>
-        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Fecha de Emisión</label>
-        <input type="date" [(ngModel)]="budgetDate"
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Fecha de Emisión <span class="text-red-600">*</span></label>
+        <input type="date" [(ngModel)]="budgetDate" (ngModelChange)="validateBudget()"
+          [class.border-red-500]="validationErrors['budgetDate']"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        @if (validationErrors['budgetDate']) {
+        <p class="text-red-600 text-xs mt-1">{{ validationErrors['budgetDate'] }}</p>
+        }
       </div>
 
       <!-- Válido hasta -->
       <div>
         <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Válido Hasta</label>
-        <input type="date" [(ngModel)]="validUntil"
+        <input type="date" [(ngModel)]="validUntil" (ngModelChange)="validateBudget()"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
       </div>
 
@@ -60,16 +68,35 @@
 
       <!-- Nombre cliente -->
       <div>
-        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Nombre del Cliente</label>
-        <input type="text" [(ngModel)]="clientName" placeholder="Nombre completo o empresa"
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Nombre del Cliente <span class="text-red-600">*</span></label>
+        <input type="text" [(ngModel)]="clientName" (ngModelChange)="validateBudget()" placeholder="Nombre completo o empresa"
+          [class.border-red-500]="validationErrors['clientName']"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        @if (validationErrors['clientName']) {
+        <p class="text-red-600 text-xs mt-1">{{ validationErrors['clientName'] }}</p>
+        }
       </div>
 
       <!-- Dirección cliente -->
       <div>
-        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Dirección del Cliente</label>
-        <textarea [(ngModel)]="clientAddress" rows="3" placeholder="Dirección completa"
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Dirección del Cliente <span class="text-red-600">*</span></label>
+        <textarea [(ngModel)]="clientAddress" (ngModelChange)="validateBudget()" rows="3" placeholder="Dirección completa"
+          [class.border-red-500]="validationErrors['clientAddress']"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+        @if (validationErrors['clientAddress']) {
+        <p class="text-red-600 text-xs mt-1">{{ validationErrors['clientAddress'] }}</p>
+        }
+      </div>
+
+      <!-- DNI/NIF cliente -->
+      <div>
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">DNI/NIF del Cliente <span class="text-red-600">*</span></label>
+        <input type="text" [(ngModel)]="clientDNI" (ngModelChange)="validateBudget()" placeholder="DNI / NIF"
+          [class.border-red-500]="validationErrors['clientDNI']"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        @if (validationErrors['clientDNI']) {
+        <p class="text-red-600 text-xs mt-1">{{ validationErrors['clientDNI'] }}</p>
+        }
       </div>
 
       <!-- Teléfono cliente -->
@@ -90,7 +117,13 @@
 
       <!-- Conceptos -->
       <div>
-        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Trabajos a Realizar</label>
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Trabajos a Realizar <span class="text-red-600">*</span></label>
+
+        @if (validationErrors['items']) {
+        <div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-3 text-xs">
+          {{ validationErrors['items'] }}
+        </div>
+        }
 
         @for (item of items; track $index) {
         <div class="bg-gray-100 p-4 rounded-lg mb-3 relative">
@@ -100,14 +133,14 @@
           </button>
 
           <div class="mb-3">
-            <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Descripción</label>
-            <textarea [(ngModel)]="item.description" rows="3" placeholder="Describe el trabajo a realizar"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+              <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Descripción</label>
+              <textarea [(ngModel)]="item.description" (ngModelChange)="validateBudget()" rows="3" placeholder="Describe el trabajo a realizar"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
           </div>
 
           <div>
             <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Precio (€)</label>
-            <input type="number" [(ngModel)]="item.amount" step="0.01" placeholder="0.00"
+            <input type="number" [(ngModel)]="item.amount" (ngModelChange)="validateBudget()" step="0.01" placeholder="0.00"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
           </div>
         </div>
@@ -121,9 +154,13 @@
 
       <!-- IVA -->
       <div>
-        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IVA (%)</label>
+        <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IVA (%) <span class="text-red-600">*</span></label>
         <input type="number" [(ngModel)]="taxRate" step="0.01"
+          [class.border-red-500]="validationErrors['taxRate']"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        @if (validationErrors['taxRate']) {
+        <p class="text-red-600 text-xs mt-1">{{ validationErrors['taxRate'] }}</p>
+        }
       </div>
 
       <!-- Condiciones -->
@@ -140,12 +177,18 @@
       </button>
 
       <button (click)="saveBudget()"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold mt-3">
+        [disabled]="hasValidationErrors()"
+        [class.opacity-50]="hasValidationErrors()"
+        [class.cursor-not-allowed]="hasValidationErrors()"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold mt-3 disabled:hover:bg-blue-600">
         💾 Guardar Presupuesto
       </button>
 
       <button (click)="confirmConvertToInvoice()"
-        class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-lg font-semibold mt-3">
+        [disabled]="hasValidationErrors()"
+        [class.opacity-50]="hasValidationErrors()"
+        [class.cursor-not-allowed]="hasValidationErrors()"
+        class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-lg font-semibold mt-3 disabled:hover:bg-purple-600">
         ✅ Convertir a Factura
       </button>
     </div>
@@ -325,6 +368,9 @@
           }
         </p>
         <div class="mt-3 space-y-1">
+          @if (clientDNI) {
+          <p class="text-xs sm:text-sm"><strong>DNI:</strong> {{ clientDNI }}</p>
+          }
           @if (clientPhone) {
           <p class="flex items-center gap-2">
             <span class="text-blue-700">📞</span> {{ clientPhone }}

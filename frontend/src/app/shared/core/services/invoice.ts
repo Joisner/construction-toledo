@@ -45,7 +45,7 @@ export class Invoice {
     address: 'C/ SAN CARLOS 33-1º',
     city: '03780 PEGO (ALICANTE)',
     nif: 'Z 0305882 X',
-    phone: '667 161 300',
+    phone: '614 648 123',
     email: 'iconstruccionestoledo38@gmail.com'
   };
 

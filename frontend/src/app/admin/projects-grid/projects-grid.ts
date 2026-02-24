@@ -308,7 +308,6 @@ export class ProjectsGrid {
     const totalFiles = files.length;
 
     console.log(`📤 Starting upload of ${totalFiles} files for project ${projectId}`);
-    debugger
     files.forEach((item, index) => {
       const formData = new FormData();
       formData.append('file', item.file);

@@ -28,7 +28,6 @@ export class Projects {
   private loadProjects() {
     this.projectService.getAllProjects().subscribe({
       next: (projects: IProject[]) => {
-        debugger;
         // Normalizar rutas de media y main_image antes de setear
         const normalized = projects.map(p => this.normalizeProjectMedia(p));
 

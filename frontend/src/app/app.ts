@@ -3,6 +3,7 @@ import { Component, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { environment } from '../env/environment';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ import { filter } from 'rxjs';
 export class App {
   protected readonly title = signal('frontend');
   showWhatsAppChat = false;
-  whatsappNumber = '+34667161300'; // Reemplaza con tu número
+  whatsappNumber = environment.whatsappNumber;
   currentUrl = ''; // <- Aquí guardaremos la URL actual
   showMobileMenu = false;
 
@@ -24,7 +25,6 @@ export class App {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
-        debugger
         this.currentUrl = event.urlAfterRedirects;
         console.log('URL actual:', this.currentUrl);
       });

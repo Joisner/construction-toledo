@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CompanyInfo, Invoice, InvoiceData, InvoiceItem } from '../../core/services/invoice';
 import { Budgets } from '../../../../core/services/budget';
+import { Invoices } from '../../../../core/services/invoice';
 import { ToastrService } from '../../../../core/services/toastr';
 import { IBudget } from '../../../../core/models/budget.model';
 import { Router } from '@angular/router';
@@ -44,6 +45,9 @@ export class Budget {
   backendId: string | null = null;
   showConvertDialog: boolean = false;
 
+  // Validation errors
+  validationErrors: { [key: string]: string } = {};
+
   // Company info
   companyInfo: CompanyInfo;
 
@@ -58,6 +62,7 @@ export class Budget {
   constructor(
     private invoiceService: Invoice,
     private budgetsService: Budgets,
+    private invoicesService: Invoices,
     private router: Router,
     private sanitizer: DomSanitizer,
     private toastr: ToastrService
@@ -120,15 +125,21 @@ export class Budget {
     this.isEditorOpen = !this.isEditorOpen;
   }
 
+  hasValidationErrors(): boolean {
+    return Object.keys(this.validationErrors).length > 0;
+  }
+
   addItem(): void {
     this.items.push({
       description: 'Nuevo concepto',
       amount: 0
     });
+    this.validateBudget();
   }
 
   removeItem(index: number): void {
     this.items.splice(index, 1);
+    this.validateBudget();
   }
 
   getSubtotal(): number {
@@ -281,9 +292,55 @@ export class Budget {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   }
+  validateBudget(): boolean {
+    this.validationErrors = {};
+
+    if (!this.budgetNumber || this.budgetNumber.trim() === '') {
+      this.validationErrors['budgetNumber'] = 'El número de presupuesto es obligatorio';
+    }
+
+    if (!this.budgetDate) {
+      this.validationErrors['budgetDate'] = 'La fecha de emisión es obligatoria';
+    }
+
+    if (!this.clientName || this.clientName.trim() === '') {
+      this.validationErrors['clientName'] = 'El nombre del cliente es obligatorio';
+    }
+
+    if (!this.clientAddress || this.clientAddress.trim() === '') {
+      this.validationErrors['clientAddress'] = 'La dirección del cliente es obligatoria';
+    }
+
+    if (!this.clientDNI || this.clientDNI.trim() === '') {
+      this.validationErrors['clientDNI'] = 'El DNI/NIF del cliente es obligatorio';
+    }
+
+    if (this.items.length === 0) {
+      this.validationErrors['items'] = 'Debe haber al menos un trabajo en el presupuesto';
+    }
+
+    this.items.forEach((item, index) => {
+      if (!item.description || item.description.trim() === '') {
+        this.validationErrors['items'] = `El trabajo ${index + 1} debe tener descripción`;
+      }
+      if (item.amount <= 0) {
+        this.validationErrors['items'] = `El trabajo ${index + 1} debe tener un importe mayor a 0`;
+      }
+    });
+
+    if (this.taxRate < 0 || this.taxRate > 100) {
+      this.validationErrors['taxRate'] = 'El IVA debe estar entre 0 y 100';
+    }
+
+    return Object.keys(this.validationErrors).length === 0;
+  }
 
   // Guardar presupuesto
   saveBudget(): void {
+    if (!this.validateBudget()) {
+      this.toastr.error('Por favor, corrige los errores en el formulario', 'Validación');
+      return;
+    }
     const budgetData: InvoiceData = {
       type: 'budget',
       number: this.budgetNumber,
@@ -385,7 +442,7 @@ export class Budget {
       date: this.budgetDate,
       clientName: this.clientName,
       clientAddress: this.clientAddress,
-      clientDNI: '', // Se pedirá en la factura
+      clientDNI: this.clientDNI, // Pasar el DNI del cliente
       clientPhone: this.clientPhone,
       clientEmail: this.clientEmail,
       items: this.items,
@@ -400,6 +457,40 @@ export class Budget {
 
     // Pasar datos a la factura y navegar
     this.invoiceService.saveData(invoiceData);
+
+    // ALSO: create the invoice on the backend so conversion actually results in a server-side invoice
+    const payload = {
+      number: invoiceData.number,
+      date: invoiceData.date,
+      clientName: invoiceData.clientName,
+      clientAddress: invoiceData.clientAddress,
+      clientDNI: invoiceData.clientDNI || '',
+      clientPhone: invoiceData.clientPhone || '',
+      clientEmail: invoiceData.clientEmail || '',
+      items: invoiceData.items.map(i => {
+        const base = Number(i.amount) || 0;
+        const totalWithTax = Math.round(base * (1 + (invoiceData.taxRate / 100)) * 100) / 100;
+        return {
+          description: i.description,
+          quantity: 1,
+          price: base,
+          total: totalWithTax,
+          amount: totalWithTax
+        };
+      }),
+      taxRate: invoiceData.taxRate,
+      iban: invoiceData.iban || ''
+    };
+
+    this.invoicesService.createInvoice(payload).subscribe({
+      next: () => {
+        this.toastr.success(`Presupuesto convertido y factura creada en servidor Nº ${invoiceData.number}`, 'Conversión y Guardado');
+      },
+      error: (err) => {
+        console.error('Error creating invoice on backend', err);
+        this.toastr.warning('Presupuesto convertido localmente pero no se pudo crear la factura en el servidor', 'Advertencia');
+      }
+    });
 
     this.toastr.success(`Presupuesto convertido a Factura Nº ${invoiceData.number}`, 'Conversión exitosa');
     this.showConvertDialog = false;

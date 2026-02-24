@@ -85,7 +85,7 @@ export class ProjectDetail implements OnInit {
   private loadProject(id: string): void {
     this.projectService.getProjectById(id).subscribe({
       next: (project: IProject) => {
-        debugger;
+        
         // Normalize media URLs immediately so templates can use them directly
         project.media = this.normalizeMediaList(project.media || []);
         this.project = project;
@@ -105,7 +105,7 @@ export class ProjectDetail implements OnInit {
   loadServiceByProject() {
     this.serviceService.getServices().subscribe({
       next: (listService) => {
-        debugger;
+        
         const serviceObj = listService.find(
           s => s.id === this.project?.service
         )

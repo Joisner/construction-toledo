@@ -9,6 +9,7 @@ import { AdminsList } from './admins-list/admins-list';
 import { Quotes } from '../../../core/services/quotes';
 import { Subscription } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
+import { Router } from '@angular/router';
 type TabType = 'quotes' | 'projects' | 'services' | 'accounting' | 'admins'
   | 'budgets' | 'invoice' | 'documents';
 
@@ -36,6 +37,7 @@ export class AdminDashboard {
   currentTab = signal<TabType>('quotes');
   sidebarCollapsed = signal(false);
   pendingCount = signal(0);
+  userInfo: any = null;
 
   private subscriptions: Subscription = new Subscription();
 
@@ -78,7 +80,7 @@ export class AdminDashboard {
     }
   ];
 
-  constructor(private quotesService: Quotes, private authService: Auth){}
+  constructor(private quotesService: Quotes, private authService: Auth, private router: Router){}
 
   toggleSidebar() {
     this.sidebarCollapsed.update(v => !v);
@@ -145,6 +147,7 @@ export class AdminDashboard {
 
   loadAllData(){
     this.loadQuotes();
+    this.loadUser();
   }
 
 ngOnDestroy(): void {
@@ -163,6 +166,16 @@ ngOnDestroy(): void {
     });
 
     this.subscriptions.add(sub);
+  }
+
+  loadUser(){
+    const userData = localStorage.getItem('user');
+    if (userData) {
+        const user = JSON.parse(userData);
+        if(user){
+          this.userInfo = user;
+        }
+    }
   }
 
   toggleGroup(groupId: string) {
@@ -190,7 +203,11 @@ ngOnDestroy(): void {
     return this.currentTab() === 'invoice';
   }
 
-  logout() {
-    this.authService.clearToken();
+  async logout() {
+    const logout = this.authService.clearToken();
+    if(logout === null){
+      localStorage.clear();
+      await this.router.navigate(['/login']);
+    }
   }
 }

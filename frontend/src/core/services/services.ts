@@ -13,7 +13,6 @@ export class Services {
   constructor(private http: HttpClient, private authService: Auth) { }
 
   getServices(): Observable<IService[]> {
-    debugger
     return this.http.get<IService[]>(
       `${environment.urlServer}${environment.serviceService}`
     );

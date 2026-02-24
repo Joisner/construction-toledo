@@ -43,6 +43,9 @@ export class InvoiceEditor {
   // backend id when editing existing invoice
   backendId: string | null = null;
 
+  // Validation errors
+  validationErrors: { [key: string]: string } = {};
+
   // Company info
   companyInfo: CompanyInfo;
 
@@ -82,8 +85,70 @@ export class InvoiceEditor {
     }
   }
 
+  // Validar datos de la factura
+  validateInvoice(): boolean {
+    this.validationErrors = {};
+
+    // Número de factura
+    if (!this.invoiceNumber || this.invoiceNumber.trim() === '') {
+      this.validationErrors['invoiceNumber'] = 'El número de factura es obligatorio';
+    }
+
+    // Fecha
+    if (!this.invoiceDate) {
+      this.validationErrors['invoiceDate'] = 'La fecha de factura es obligatoria';
+    }
+
+    // Nombre del cliente
+    if (!this.clientName || this.clientName.trim() === '') {
+      this.validationErrors['clientName'] = 'El nombre del cliente es obligatorio';
+    }
+
+    // Dirección del cliente
+    if (!this.clientAddress || this.clientAddress.trim() === '') {
+      this.validationErrors['clientAddress'] = 'La dirección del cliente es obligatoria';
+    }
+
+    // DNI del cliente
+    if (!this.clientDNI || this.clientDNI.trim() === '') {
+      this.validationErrors['clientDNI'] = 'El DNI/NIF del cliente es obligatorio';
+    }
+
+    // Al menos un concepto
+    if (this.items.length === 0) {
+      this.validationErrors['items'] = 'Debe haber al menos un concepto facturado';
+    }
+
+    // Validar que los conceptos tengan descripción y monto
+    this.items.forEach((item, index) => {
+      if (!item.description || item.description.trim() === '') {
+        this.validationErrors['items'] = `El concepto ${index + 1} debe tener una descripción`;
+      }
+      if (item.amount <= 0) {
+        this.validationErrors['items'] = `El concepto ${index + 1} debe tener un importe mayor a 0`;
+      }
+    });
+
+    // IBAN
+    if (!this.iban || this.iban.trim() === '') {
+      this.validationErrors['iban'] = 'El IBAN es obligatorio';
+    }
+
+    // IVA
+    if (this.taxRate < 0 || this.taxRate > 100) {
+      this.validationErrors['taxRate'] = 'El IVA debe estar entre 0 y 100';
+    }
+
+    return Object.keys(this.validationErrors).length === 0;
+  }
+
   // Crear factura en el backend
   createInvoice(): void {
+    // Validar antes de proceder
+    if (!this.validateInvoice()) {
+      this.toastr.error('Por favor, corrige los errores en el formulario', 'Validación');
+      return;
+    }
     const payload = {
       number: this.invoiceNumber,
       date: this.invoiceDate,
@@ -170,6 +235,10 @@ export class InvoiceEditor {
 
   toggleEditor(): void {
     this.isEditorOpen = !this.isEditorOpen;
+  }
+
+  hasValidationErrors(): boolean {
+    return Object.keys(this.validationErrors).length > 0;
   }
 
   addItem(): void {

@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { Auth } from '../../core/services/auth';
+import { Users } from '../../core/services/users';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ export class Login {
 
   constructor(
     private router: Router,
-    private authService: Auth
+    private authService: Auth,
+    private userService: Users
   ) { }
 
   onSubmit(e: Event): void {
@@ -38,6 +40,8 @@ export class Login {
           if (authId) {
             // Use Auth service as the single source of truth for tokens
             this.authService.setToken(String(authId));
+            localStorage.setItem('user', JSON.stringify(res.user || res));
+       /*      this.getUser(); */
           }
           this.error = '';
           this.router.navigate(['/admin']);
@@ -50,6 +54,20 @@ export class Login {
     }
   }
 
+/*   async getUser(){
+    const token = localStorage.getItem('authAdminId');
+    if (token) {
+      this.userService.getUser(token).subscribe({
+        next: (user) => {
+          console.log('User retrieved:', user);
+        },
+        error: (err) => {
+          console.error('Error retrieving user:', err);
+        }
+      });
+    }
+  }
+ */
   logoutAny() {
     localStorage.removeItem('authAdminId');
     this.router.navigate(['/']);

@@ -39,40 +39,60 @@
             <!-- Número de factura -->
             <div>
                 <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Número de
-                    Factura</label>
+                    Factura <span class="text-red-600">*</span></label>
                 <input type="text" [(ngModel)]="invoiceNumber"
+                    [class.border-red-500]="validationErrors['invoiceNumber']"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                @if (validationErrors['invoiceNumber']) {
+                <p class="text-red-600 text-xs mt-1">{{ validationErrors['invoiceNumber'] }}</p>
+                }
             </div>
 
             <!-- Fecha -->
             <div>
-                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Fecha</label>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Fecha <span class="text-red-600">*</span></label>
                 <input type="date" [(ngModel)]="invoiceDate"
+                    [class.border-red-500]="validationErrors['invoiceDate']"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                @if (validationErrors['invoiceDate']) {
+                <p class="text-red-600 text-xs mt-1">{{ validationErrors['invoiceDate'] }}</p>
+                }
             </div>
 
             <!-- Nombre cliente -->
             <div>
                 <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Nombre del
-                    Cliente</label>
+                    Cliente <span class="text-red-600">*</span></label>
                 <input type="text" [(ngModel)]="clientName"
+                    [class.border-red-500]="validationErrors['clientName']"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                @if (validationErrors['clientName']) {
+                <p class="text-red-600 text-xs mt-1">{{ validationErrors['clientName'] }}</p>
+                }
             </div>
 
             <!-- Dirección cliente -->
             <div>
                 <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Dirección del
-                    Cliente</label>
+                    Cliente <span class="text-red-600">*</span></label>
                 <textarea [(ngModel)]="clientAddress" rows="3"
+                    [class.border-red-500]="validationErrors['clientAddress']"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+                @if (validationErrors['clientAddress']) {
+                <p class="text-red-600 text-xs mt-1">{{ validationErrors['clientAddress'] }}</p>
+                }
             </div>
 
             <!-- DNI cliente -->
             <div>
                 <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">DNI/NIF del
-                    Cliente</label>
+                    Cliente <span class="text-red-600">*</span></label>
                 <input type="text" [(ngModel)]="clientDNI"
+                    [class.border-red-500]="validationErrors['clientDNI']"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                @if (validationErrors['clientDNI']) {
+                <p class="text-red-600 text-xs mt-1">{{ validationErrors['clientDNI'] }}</p>
+                }
             </div>
 
             <hr class="my-8 border-t-2 border-gray-200" />
@@ -80,7 +100,13 @@
             <!-- Conceptos -->
             <div>
                 <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">Conceptos de
-                    Factura</label>
+                    Factura <span class="text-red-600">*</span></label>
+
+                @if (validationErrors['items']) {
+                <div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-3 text-xs">
+                    {{ validationErrors['items'] }}
+                </div>
+                }
 
                 @for (item of items; track $index) {
                 <div class="bg-gray-100 p-4 rounded-lg mb-3 relative">
@@ -113,16 +139,24 @@
 
             <!-- IVA -->
             <div>
-                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IVA (%)</label>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IVA (%) <span class="text-red-600">*</span></label>
                 <input type="number" [(ngModel)]="taxRate" step="0.01"
+                    [class.border-red-500]="validationErrors['taxRate']"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                @if (validationErrors['taxRate']) {
+                <p class="text-red-600 text-xs mt-1">{{ validationErrors['taxRate'] }}</p>
+                }
             </div>
 
             <!-- IBAN -->
             <div>
-                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IBAN</label>
+                <label class="block text-blue-700 text-xs font-bold uppercase tracking-wide mb-2">IBAN <span class="text-red-600">*</span></label>
                 <input type="text" [(ngModel)]="iban"
+                    [class.border-red-500]="validationErrors['iban']"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                @if (validationErrors['iban']) {
+                <p class="text-red-600 text-xs mt-1">{{ validationErrors['iban'] }}</p>
+                }
             </div>
 
             <button (click)="print()"
@@ -130,7 +164,10 @@
                 🖨️ Imprimir Factura
             </button>
             <button (click)="createInvoice()"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold mt-3">
+                [disabled]="hasValidationErrors()"
+                [class.opacity-50]="hasValidationErrors()"
+                [class.cursor-not-allowed]="hasValidationErrors()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-lg font-semibold mt-3 disabled:hover:bg-blue-600">
                 {{ backendId ? 'Guardar cambios' : '💾 Crear Factura' }}
             </button>
         </div>

@@ -416,19 +416,55 @@ export class DocumentsList {
 
     this.invoicesService.createInvoice(invoicePayload).subscribe({
       next: (created) => {
+        // Construir objeto factura completo con todos los datos para mostrar inline
+        const completeInvoice: InvoiceData = {
+          type: 'invoice',
+          number: created.number, // Usar número generado por el backend
+          date: invoicePayload.date,
+          clientName: invoicePayload.clientName,
+          clientAddress: invoicePayload.clientAddress,
+          clientDNI: invoicePayload.clientDNI,
+          clientPhone: invoicePayload.clientPhone,
+          clientEmail: invoicePayload.clientEmail,
+          items: (budget.items || []).map((it: any) => ({
+            description: it.description,
+            amount: it.amount || 0
+          })),
+          taxRate: invoicePayload.taxRate,
+          iban: invoicePayload.iban
+        };
+
         // Optionally delete the budget on backend
         if (raw && raw.id) {
           this.budgetsService.deleteBudget(raw.id).subscribe({
             next: () => {
               this.toastr.success(`Presupuesto convertido a Factura Nº ${created.number}`, 'Conversión exitosa');
-              this.loadDocuments();
-              this.calculateStats();
-              this.router.navigate(['/invoice'], { state: { data: created } });
+              // Recargar documentos y luego abrir la factura cuando se complete
+              forkJoin({
+                budgets: this.budgetsService.getBudgets(),
+                invoices: this.invoicesService.getInvoices()
+              }).subscribe({
+                next: () => {
+                  this.loadDocuments();
+                  this.calculateStats();
+                  this.openInvoiceInline(completeInvoice);
+                }
+              });
             },
             error: (err) => {
               console.error('Error deleting original budget after conversion', err);
               this.toastr.warning('Factura creada, pero no se pudo eliminar el presupuesto original', 'Advertencia');
-              this.loadDocuments();
+              // Aún así recargar y abrir
+              forkJoin({
+                budgets: this.budgetsService.getBudgets(),
+                invoices: this.invoicesService.getInvoices()
+              }).subscribe({
+                next: () => {
+                  this.loadDocuments();
+                  this.calculateStats();
+                  this.openInvoiceInline(completeInvoice);
+                }
+              });
             }
           });
         } else {
@@ -437,7 +473,7 @@ export class DocumentsList {
           this.toastr.success(`Presupuesto convertido a Factura Nº ${invoice.number}`, 'Conversión exitosa');
           this.loadDocuments();
           this.calculateStats();
-          this.router.navigate(['/invoice'], { state: { data: invoice } });
+          this.openInvoiceInline(invoice);
         }
       },
       error: (err) => {
@@ -445,6 +481,24 @@ export class DocumentsList {
         this.toastr.error('Error al convertir presupuesto en el servidor', 'Error');
       }
     });
+  }
+
+  // Método auxiliar para abrir factura inline sin perder el sidebar
+  private openInvoiceInline(invoice: any): void {
+    const payload = { ...invoice } as any;
+    const raw = this.allInvoicesRaw.find(i => i.number === invoice.number);
+    if (raw && raw.id) payload.backendId = raw.id;
+    
+    this.invoiceService.saveData(payload);
+    
+    // Disparar evento para abrir el documento inline en el admin dashboard
+    try {
+      window.dispatchEvent(new CustomEvent('open-document', { detail: { type: 'invoice', number: payload.number } }));
+    } catch (e) {
+      console.error('Error dispatching open-document event', e);
+      // Fallback: navegar si el evento falla
+      this.router.navigate(['/invoice'], { state: { data: payload } });
+    }
   }
 
   // Exportar

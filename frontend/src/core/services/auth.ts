@@ -37,7 +37,9 @@ export class Auth {
 
   clearToken() {
     localStorage.removeItem('authAdminId');
+    localStorage.removeItem('user');
     this.tokenSubject.next(null);
+    return null;
   }
   authValidation(credentials: { username: string, password: string }) {
     // FastAPI expects form data for fields like username/password when using

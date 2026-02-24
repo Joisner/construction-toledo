@@ -75,7 +75,7 @@ export class Admin implements OnInit {
     this.loadAllData();
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     const authId = localStorage.getItem('authAdminId');
     if (!authId) {
       this.router.navigate(['/login']);
