@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../env/environment';
 
 @Component({
   selector: 'app-home',
@@ -8,4 +9,6 @@ import { RouterLink } from '@angular/router';
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
-export class Home {}
+export class Home {
+  whatsappNumber = environment.whatsappNumber;
+}

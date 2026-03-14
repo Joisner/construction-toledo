@@ -154,7 +154,8 @@ currentUrl !== '/documents'
     <!-- Footer -->
     <div class="bg-white p-3 border-t border-gray-200">
       <p class="text-xs text-gray-500 text-center mb-2">O escríbenos directamente:</p>
-      <a href="https://wa.me/34600000000?text=Hola,%20estoy%20interesado%20en%20sus%20servicios" target="_blank"
+      <a href="https://wa.me/{{ whatsappNumber }}?text=Hola,%20estoy%20interesado%20en%20sus%20servicios"
+        target="_blank"
         class="block w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 rounded-lg transition-all text-center shadow-md hover:shadow-lg">
         Abrir WhatsApp
       </a>
@@ -166,7 +167,7 @@ currentUrl !== '/documents'
 <nav class="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg print:hidden">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
-      
+
       <!-- Logo y nombre -->
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-white rounded-lg p-1.5 flex items-center justify-center">
@@ -180,7 +181,7 @@ currentUrl !== '/documents'
 
       <!-- Navegación desktop -->
       <div class="hidden md:flex items-center gap-2">
-        <a routerLink="/documents" routerLinkActive="bg-blue-800" 
+        <a routerLink="/documents" routerLinkActive="bg-blue-800"
           class="px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition flex items-center gap-2">
           <span>📋</span>
           <span>Documentos</span>
@@ -200,8 +201,10 @@ currentUrl !== '/documents'
       <!-- Menú móvil -->
       <button (click)="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-blue-800 transition">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path *ngIf="!showMobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          <path *ngIf="showMobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          <path *ngIf="!showMobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16" />
+          <path *ngIf="showMobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
@@ -228,3 +231,5 @@ currentUrl !== '/documents'
 <main class="min-h-screen bg-gray-50">
   <router-outlet></router-outlet>
 </main>
+
+<app-spinner />

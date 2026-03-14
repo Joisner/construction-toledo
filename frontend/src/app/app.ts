@@ -4,10 +4,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { environment } from '../env/environment';
+import { Spinner } from './shared/components/spinner/spinner';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, ReactiveFormsModule, CommonModule],
+  imports: [RouterOutlet, RouterLink, ReactiveFormsModule, CommonModule, Spinner],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -10,6 +10,7 @@ import {
 import { Quotes } from '../../core/services/quotes';
 import { Services } from '../../core/services/services';
 import { IService } from '../../core/models/service';
+import { environment } from '../../env/environment';
 
 @Component({
   selector: 'app-contact',
@@ -25,6 +26,7 @@ export class Contact {
   errorMsg = '';
   services = signal<IService[]>([]);
   formSubmitted = false;
+  whatsappNumber = environment.whatsappNumber;
 
   constructor(
     private fb: FormBuilder,
