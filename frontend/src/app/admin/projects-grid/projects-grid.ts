@@ -34,6 +34,8 @@ export class ProjectsGrid {
   services = signal<IService[]>([]);
 
   pendingMediaFiles = signal<PendingMediaItem[]>([]);
+  deletedMediaIds = signal<string[]>([]);
+  currentMainMediaUrl = signal<string | null>(null);
   formSubmitted = false;
   constructor(
     private router: Router,
@@ -161,47 +163,37 @@ export class ProjectsGrid {
   }
   // --------------------------------------------------------------------
 
-  onMediaSaved(pendingMedia: PendingMediaItem[]) {
+  onMediaSaved(result: { pendingMedia: PendingMediaItem[]; deletedMediaIds: string[]; previewMedia: Media[]; mainMediaUrl?: string }) {
     console.log('=== onMediaSaved called ===');
-    console.log('Received pending media:', pendingMedia.length, 'files');
+    console.log('Received pending media:', result.pendingMedia.length, 'files');
+    console.log('Deleted media IDs:', result.deletedMediaIds.length);
 
-    // Guardar los archivos pendientes (para subir luego)
-    this.pendingMediaFiles.set(pendingMedia);
+    this.pendingMediaFiles.set(result.pendingMedia);
+    this.deletedMediaIds.set(result.deletedMediaIds);
+    this.previewMedia.set(result.previewMedia || []);
 
-    // Crear media "mock" solo para mostrar el contador y preview
-    const mockMedia: Media[] = pendingMedia.map((item, index) => ({
-      id: `pending-${Date.now()}-${index}`,
-      file_url: item.preview_url, // URL temporal para preview
-      mime: item.file.type,
-      media_type: item.media_type,
-      description: item.description,
-      is_before: item.is_before,
-      is_pending: true,
-      project_id: '',
-      created_at: new Date().toISOString()
-    }));
-
-    // Merge into previewMedia so we don't mutate editingItem.media directly
-    const existingPreview = this.previewMedia() || (this.editingItem()?.media || []);
-    const merged = [...existingPreview, ...mockMedia];
-    this.previewMedia.set(merged);
-
-    console.log('Preview media updated with pending mocks. Added:', mockMedia.length, 'Preview total:', merged.length);
-
-    // Cerrar el modal
-    this.showMediaModal.set(false);
-    console.log('Modal closed. Files ready to upload after project creation.');
-
-    // Si entre los archivos pendientes hay alguno marcado como principal,
-    // asignarlo al editingItem() para que el form incluya la referencia
-    const main = pendingMedia.find(p => p.is_main);
-    if (main) {
+    if (result.mainMediaUrl) {
       const current = this.editingItem() || {};
-      // usar preview_url temporal como referencia hasta que se suba
-      current.main_image = main.preview_url;
+      current.main_image = result.mainMediaUrl;
       this.editingItem.set(current);
-      console.log('Main image set on editingItem (preview):', main.preview_url);
+      this.currentMainMediaUrl.set(result.mainMediaUrl);
+      console.log('Main image set to existing media URL:', result.mainMediaUrl);
     }
+
+    if (!result.mainMediaUrl && this.currentMainMediaUrl()) {
+      const currentMain = this.currentMainMediaUrl();
+      const stillExists = result.previewMedia.some(m => m.file_url === currentMain);
+      if (!stillExists) {
+        const current = this.editingItem() || {};
+        current.main_image = '';
+        this.editingItem.set(current);
+        this.currentMainMediaUrl.set(null);
+        console.log('Main image cleared because the selected item was removed.');
+      }
+    }
+
+    this.showMediaModal.set(false);
+    console.log('Modal closed. Pending files and delete instructions saved.');
   }
 
   // ✅ MÉTODO CORREGIDO: addProject
@@ -271,10 +263,11 @@ export class ProjectsGrid {
   // ✅ Método corregido con validación
   updateProject(project: IProject) {
     const pendingFiles = this.pendingMediaFiles();
+    const deletedIds = this.deletedMediaIds();
 
     // ✅ Limpiar espacios en blanco antes de actualizar
     const { media, ...projectWithoutMedia } = project as any;
-    const updatedProject = {
+    const updatedProject: any = {
       ...projectWithoutMedia,
       title: project.title.trim(),
       location: project.location.trim(),
@@ -282,22 +275,38 @@ export class ProjectsGrid {
       updated_at: new Date().toISOString()
     };
 
-    this.projectService.updateProject(project.id, updatedProject).subscribe({
-      next: (res) => {
-        if (pendingFiles && pendingFiles.length > 0) {
-          console.log(`Uploading ${pendingFiles.length} new media files for project ${project.id} after update`);
-          this.uploadMediaFiles(project.id, pendingFiles);
-        } else {
-          this.toastr.success('Proyecto actualizado exitosamente', 'Éxito');
-          this.getProjects();
-          this.cancelEdit();
+    if (this.currentMainMediaUrl()) {
+      updatedProject.main_image = this.currentMainMediaUrl();
+    }
+
+    const performUpdate = () => {
+      this.projectService.updateProject(project.id, updatedProject).subscribe({
+        next: (res) => {
+          if (pendingFiles && pendingFiles.length > 0) {
+            console.log(`Uploading ${pendingFiles.length} new media files for project ${project.id} after update`);
+            this.uploadMediaFiles(project.id, pendingFiles);
+          } else {
+            this.toastr.success('Proyecto actualizado exitosamente', 'Éxito');
+            this.getProjects();
+            this.cancelEdit();
+          }
+        },
+        error: (err) => {
+          console.error('Error updating project:', err);
+          this.toastr.error('Error al actualizar el proyecto', 'Error');
         }
-      },
-      error: (err) => {
-        console.error('Error updating project:', err);
-        this.toastr.error('Error al actualizar el proyecto', 'Error');
-      }
-    });
+      });
+    };
+
+    if (deletedIds && deletedIds.length > 0) {
+      console.log('Deleting existing media before project update:', deletedIds);
+      this.deleteProjectMedia(project.id, deletedIds, () => {
+        this.deletedMediaIds.set([]);
+        performUpdate();
+      });
+    } else {
+      performUpdate();
+    }
   }
 
 
@@ -307,47 +316,70 @@ export class ProjectsGrid {
     let errorCount = 0;
     const totalFiles = files.length;
 
-    console.log(`📤 Starting upload of ${totalFiles} files for project ${projectId}`);
-    files.forEach((item, index) => {
+    console.log(`📤 Starting sequential upload of ${totalFiles} files for project ${projectId}`);
+
+    const uploadNext = (index: number) => {
+      if (index >= totalFiles) {
+        this.finalizeUpload(uploadedCount, errorCount);
+        return;
+      }
+
+      const item = files[index];
       const formData = new FormData();
       formData.append('file', item.file);
       formData.append('description', item.description);
       formData.append('is_before', item.is_before.toString());
-      // Si el item está marcado como principal, incluir esa metadata para que el backend
-      // pueda marcar la media como imagen principal del proyecto.
       if (item.is_main) {
         formData.append('is_main', 'true');
       }
+      formData.append('order', index.toString());
 
       console.log(`📤 Uploading file ${index + 1}/${totalFiles}: ${item.file.name}`);
 
-      // Llamar al endpoint de tu API
-      this.projectService.uploadMedia(projectId, formData).subscribe({
+      this.projectService.uploadMedia(projectId, formData, item.is_main).subscribe({
         next: (response) => {
           uploadedCount++;
-          console.log(`✅ Media ${uploadedCount}/${totalFiles} uploaded successfully:`, response);
-          if (!!item.is_main) {
-            this.projectService.uploadMedia(projectId, formData, item.is_main!).subscribe({
-              next: () => { console.log(`Principal subida`) },
-              error: (err) => { }
-            })
-          }
-          // Si es el último archivo, recargar la lista
-          if (uploadedCount + errorCount === totalFiles) {
-            this.finalizeUpload(uploadedCount, errorCount);
-          }
+          console.log(`✅ Media ${index + 1}/${totalFiles} uploaded successfully:`, response);
+          uploadNext(index + 1);
         },
         error: (err) => {
           errorCount++;
           console.error(`❌ Error uploading media ${index + 1}/${totalFiles}:`, err);
-
-          // Si es el último archivo, recargar la lista
-          if (uploadedCount + errorCount === totalFiles) {
-            this.finalizeUpload(uploadedCount, errorCount);
-          }
+          uploadNext(index + 1);
         }
       });
-    });
+    };
+
+    uploadNext(0);
+  }
+
+  private deleteProjectMedia(projectId: string, deletedIds: string[], onComplete: () => void) {
+    if (!deletedIds || deletedIds.length === 0) {
+      onComplete();
+      return;
+    }
+
+    const remaining = [...deletedIds];
+    const deleteNext = () => {
+      if (remaining.length === 0) {
+        onComplete();
+        return;
+      }
+
+      const mediaId = remaining.shift()!;
+      this.projectService.deleteMedia(projectId, mediaId).subscribe({
+        next: () => {
+          console.log(`Deleted media ${mediaId}`);
+          deleteNext();
+        },
+        error: (err) => {
+          console.error(`Error deleting media ${mediaId}:`, err);
+          deleteNext();
+        }
+      });
+    };
+
+    deleteNext();
   }
 
   // ✅ NUEVO MÉTODO: finalizeUpload
@@ -409,6 +441,8 @@ export class ProjectsGrid {
   startEdit(item: any) {
     console.log('✏️ Starting edit:', item);
     this.pendingMediaFiles.set([]);
+    this.deletedMediaIds.set([]);
+    this.currentMainMediaUrl.set(item.main_image || null);
     this.editingItem.set({ ...item, media: item.media || [] });
     this.previewMedia.set(this.normalizeMediaList(item.media || []));
     this.formSubmitted = false; // ✅ Resetear validaciones
@@ -419,6 +453,8 @@ export class ProjectsGrid {
     console.log('🚫 Canceling edit - clearing pending media');
     this.editingItem.set(null);
     this.pendingMediaFiles.set([]);
+    this.deletedMediaIds.set([]);
+    this.currentMainMediaUrl.set(null);
     this.previewMedia.set([]);
     this.formSubmitted = false; // ✅ Resetear validaciones
   }

@@ -26,22 +26,32 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Estado *</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría *</label>
             <select [(ngModel)]="newMediaItem().is_before" name="is_before"
               class="w-full border-2 border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all bg-white">
               <option [ngValue]="true">🔴 ANTES</option>
               <option [ngValue]="false">🟢 DESPUÉS</option>
             </select>
+            <p class="mt-2 text-xs text-gray-500">Esta etiqueta se guarda como metadata, no condiciona la galería visual.</p>
           </div>
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Archivo *</label>
-          <input type="file" (change)="onFileSelected($event)" 
-            accept="image/*,video/*"
-            class="w-full border-2 border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
-          @if (newMediaItem().file) {
-            <p class="mt-2 text-sm text-green-600">✓ Archivo seleccionado: {{ newMediaItem().file?.name }}</p>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Archivos *</label>
+          <div class="border-2 rounded-xl p-4 transition-all"
+            [class.border-cyan-400]="dragOverZone"
+            [class.border-gray-200]="!dragOverZone"
+            (dragover)="onDragEnter($event)"
+            (dragenter)="onDragEnter($event)"
+            (dragleave)="onDropZoneDragLeave($event)"
+            (drop)="onFilesDropped($event)">
+            <p class="text-sm text-gray-600 mb-3">Arrastra aquí imágenes o videos, o selecciona varios archivos.</p>
+            <input type="file" multiple (change)="onFileSelected($event)"
+              accept="image/*,video/*"
+              class="w-full border-2 border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
+          </div>
+          @if (newMediaItem().files.length > 0) {
+            <p class="mt-2 text-sm text-green-600">✓ Archivos seleccionados: {{ newMediaItem().files.length }}</p>
           }
         </div>
 
@@ -69,11 +79,14 @@
 
       <!-- Lista de media pendiente -->
       <div class="mb-6">
-        <h4 class="text-lg font-bold text-slate-900 mb-4">
-          Media del proyecto ({{ pendingMediaList().length }} items pendientes)
+        <h4 class="text-lg font-bold text-slate-900 mb-2">
+          Media del proyecto ({{ mediaQueue().length }} items)
         </h4>
+        <p class="text-sm text-gray-600 mb-4">
+          💡 <strong>Organiza:</strong> Arrastra para reorganizar o usa Arriba/Abajo. <strong>Cambia tipo:</strong> Haz clic en el badge rojo/verde o en el botón para cambiar entre ANTES y DESPUÉS.
+        </p>
 
-        @if (pendingMediaList().length === 0) {
+        @if (mediaQueue().length === 0) {
           <div class="text-center py-8 text-gray-500">
             <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -84,8 +97,18 @@
         }
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          @for (item of pendingMediaList(); track $index; let i = $index) {
-            <div class="relative bg-white rounded-xl overflow-hidden border-2 border-gray-200 hover:border-cyan-400 transition-all">
+          @for (item of mediaQueue(); track $index; let i = $index) {
+            <div 
+              draggable="true"
+              (dragstart)="onDragStart($event, i)"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)"
+              class="relative bg-white rounded-xl overflow-hidden border-2 transition-all cursor-move"
+              [class.border-cyan-400]="draggedIndex === i"
+              [class.border-gray-200]="draggedIndex !== i"
+              [class.opacity-50]="draggedIndex === i"
+              [class.hover:border-cyan-400]="draggedIndex !== i">
               <div class="relative h-48">
                 @if (item.media_type === 'image') {
                   <img [src]="item.preview_url" [alt]="item.description" class="w-full h-full object-cover">
@@ -93,34 +116,91 @@
                 @if (item.media_type === 'video') {
                   <video [src]="item.preview_url" class="w-full h-full object-cover" controls></video>
                 }
-                <div class="absolute top-2 left-2 px-3 py-1 rounded-lg text-xs font-bold text-white shadow-lg"
-                  [class.bg-red-500]="item.is_before" [class.bg-green-500]="!item.is_before">
-                  {{ item.is_before ? '🔴 ANTES' : '🟢 DESPUÉS' }}
-                </div>
+                
+                <!-- Estado Badge (Antes/Después) - CLICKEABLE -->
+                <button type="button" (click)="toggleBeforeAfter(i)"
+                  class="absolute top-2 left-2 px-3 py-1 rounded-lg text-xs font-bold text-white shadow-lg hover:shadow-xl transition-all hover:scale-110 cursor-pointer"
+                  [class.bg-red-500]="item.is_before" 
+                  [class.hover:bg-red-600]="item.is_before"
+                  [class.bg-green-500]="!item.is_before"
+                  [class.hover:bg-green-600]="!item.is_before"
+                  title="Haz clic para cambiar entre ANTES y DESPUÉS">
+                  {{ item.is_before ? '� ANTES' : '� DESPUÉS' }}
+                </button>
+                
+                <!-- Tipo de media -->
                 <div class="absolute top-2 right-2 px-3 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-lg">
                   {{ item.media_type === 'image' ? '📷' : '🎥' }}
                 </div>
-              </div>
-              <div class="p-4">
-                <p class="text-sm text-gray-700 mb-2 font-medium">{{ item.file.name }}</p>
-                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ item.description }}</p>
-                <div class="flex space-x-2">
-                  <button type="button" (click)="setPendingMain(i)"
-                    class="px-3 py-2 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-semibold rounded-lg transition-colors flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {{ item.is_main ? 'Principal' : 'Marcar principal' }}
-                  </button>
 
-                  <button type="button" (click)="removeMediaFromList(i)"
-                  class="w-full px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition-colors flex items-center justify-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  Eliminar
-                </button>
+                <!-- Orden visual -->
+                <div class="absolute bottom-2 right-2 px-2 py-1 rounded-lg text-xs font-bold bg-cyan-400 text-slate-900 shadow-lg">
+                  {{ i + 1 }}/{{ mediaQueue().length }}
+                </div>
+              </div>
+
+              <div class="p-4">
+                <p class="text-sm text-gray-700 mb-2 font-medium">{{ item.file?.name || item.description }}</p>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ item.description }}</p>
+                
+                <!-- Botones de control -->
+                <div class="space-y-2">
+                  <!-- Fila 1: Cambiar Antes/Después y Marcar principal -->
+                  <div class="flex space-x-2">
+                    <button type="button" (click)="toggleBeforeAfter(i)"
+                      class="flex-1 px-3 py-2 font-semibold rounded-lg transition-colors flex items-center justify-center"
+                      [class.bg-red-100]="item.is_before"
+                      [class.hover:bg-red-200]="item.is_before"
+                      [class.text-red-700]="item.is_before"
+                      [class.bg-green-100]="!item.is_before"
+                      [class.hover:bg-green-200]="!item.is_before"
+                      [class.text-green-700]="!item.is_before"
+                      title="Cambia entre ANTES y DESPUÉS">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4" />
+                      </svg>
+                      {{ item.is_before ? '🔴 Cambiar a DESPUÉS' : '🟢 Cambiar a ANTES' }}
+                    </button>
+
+                    <button type="button" (click)="setPendingMain(i)"
+                      class="flex-1 px-3 py-2 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-semibold rounded-lg transition-colors flex items-center justify-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {{ item.is_main ? '✓ Principal' : 'Principal' }}
+                    </button>
+                  </div>
+
+                  <!-- Fila 2: Mover arriba/abajo y eliminar -->
+                  <div class="flex space-x-2">
+                    <button type="button" (click)="moveUp(i)" [disabled]="i === 0"
+                      [class.opacity-50]="i === 0"
+                      [class.cursor-not-allowed]="i === 0"
+                      class="flex-1 px-2 py-2 bg-blue-50 hover:bg-blue-100 disabled:hover:bg-blue-50 text-blue-700 font-semibold rounded-lg transition-colors flex items-center justify-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                      </svg>
+                      <span class="hidden sm:inline">Arriba</span>
+                    </button>
+
+                    <button type="button" (click)="moveDown(i)" [disabled]="i === mediaQueue().length - 1"
+                      [class.opacity-50]="i === mediaQueue().length - 1"
+                      [class.cursor-not-allowed]="i === mediaQueue().length - 1"
+                      class="flex-1 px-2 py-2 bg-blue-50 hover:bg-blue-100 disabled:hover:bg-blue-50 text-blue-700 font-semibold rounded-lg transition-colors flex items-center justify-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                      <span class="hidden sm:inline">Abajo</span>
+                    </button>
+
+                    <button type="button" (click)="removeMediaFromList(i)"
+                      class="flex-1 px-2 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-lg transition-colors flex items-center justify-center">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -135,11 +215,11 @@
           Cancelar
         </button>
         <button type="button" (click)="saveMediaList()"
-          [disabled]="pendingMediaList().length === 0"
-          [class.opacity-50]="pendingMediaList().length === 0"
-          [class.cursor-not-allowed]="pendingMediaList().length === 0"
+          [disabled]="mediaQueue().length === 0 && deletedMediaIds().length === 0"
+          [class.opacity-50]="mediaQueue().length === 0 && deletedMediaIds().length === 0"
+          [class.cursor-not-allowed]="mediaQueue().length === 0 && deletedMediaIds().length === 0"
           class="px-6 py-3 bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-          Guardar cambios ({{ pendingMediaList().length }})
+          Guardar cambios ({{ mediaQueue().length }})
         </button>
       </div>
     </div>

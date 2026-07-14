@@ -29,17 +29,40 @@ export class ProjectDetail implements OnInit {
   project: IProject | null = null;
   loading: boolean = true;
 
-  viewMode: 'carousel' | 'comparison' | 'video-comparison' = 'comparison';
+  viewMode: 'carousel' | 'comparison' | 'video-comparison' | 'gallery' = 'gallery';
   currentIndex = 0;
   comparisonIndex = 0;
   videoComparisonIndex = 0;
   sliderPosition = 50;
   isDragging = false;
+  selectedMediaTab: 'images' | 'videos' = 'images';
+  currentImageIndex = 0;
+  currentVideoIndex = 0;
 
   // Media organizada
   allMedia: Media[] = [];
   imagePairs: MediaPair[] = [];
   videoPairs: MediaPair[] = [];
+
+  get imageGallery(): Media[] {
+    return this.allMedia.filter(m => m.media_type === 'image');
+  }
+
+  get videoGallery(): Media[] {
+    return this.allMedia.filter(m => m.media_type === 'video');
+  }
+
+  get currentGallery(): Media[] {
+    return this.selectedMediaTab === 'images' ? this.imageGallery : this.videoGallery;
+  }
+
+  get currentGalleryIndex(): number {
+    return this.selectedMediaTab === 'images' ? this.currentImageIndex : this.currentVideoIndex;
+  }
+
+  get currentGalleryItem(): Media | null {
+    return this.currentGallery[this.currentGalleryIndex] || null;
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -91,7 +114,13 @@ export class ProjectDetail implements OnInit {
         this.project = project;
         this.loadServiceByProject();
         this.allMedia = project.media || [];
-        this.organizePairs();
+        // La galería ahora se muestra por tipo de contenido. El orden original del backend se mantiene.
+        // this.allMedia.sort((a, b) => {
+        //   if (a.is_before && !b.is_before) return -1;
+        //   if (!a.is_before && b.is_before) return 1;
+        //   return 0;
+        // });
+        // this.organizePairs(); // Comentado: comparación no se emplea en la vista actual.
         this.loading = false;
       },
       error: (err) => {
@@ -165,6 +194,35 @@ export class ProjectDetail implements OnInit {
 
   nextImage(): void {
     this.currentIndex = this.currentIndex < this.allMedia.length - 1 ? this.currentIndex + 1 : 0;
+  }
+
+  setMediaTab(tab: 'images' | 'videos'): void {
+    this.selectedMediaTab = tab;
+    if (tab === 'images') {
+      this.currentImageIndex = Math.min(this.currentImageIndex, this.imageGallery.length - 1);
+      if (this.currentImageIndex < 0) this.currentImageIndex = 0;
+    } else {
+      this.currentVideoIndex = Math.min(this.currentVideoIndex, this.videoGallery.length - 1);
+      if (this.currentVideoIndex < 0) this.currentVideoIndex = 0;
+    }
+  }
+
+  prevGalleryItem(): void {
+    if (this.selectedMediaTab === 'images' && this.currentImageIndex > 0) {
+      this.currentImageIndex--;
+    }
+    if (this.selectedMediaTab === 'videos' && this.currentVideoIndex > 0) {
+      this.currentVideoIndex--;
+    }
+  }
+
+  nextGalleryItem(): void {
+    if (this.selectedMediaTab === 'images' && this.currentImageIndex < this.imageGallery.length - 1) {
+      this.currentImageIndex++;
+    }
+    if (this.selectedMediaTab === 'videos' && this.currentVideoIndex < this.videoGallery.length - 1) {
+      this.currentVideoIndex++;
+    }
   }
 
   // ==================== MÉTODOS DE COMPARACIÓN DE IMÁGENES ====================
@@ -291,7 +349,7 @@ export class ProjectDetail implements OnInit {
 
   // ==================== MÉTODO PARA CAMBIAR DE MODO ====================
 
-  changeViewMode(mode: 'carousel' | 'comparison' | 'video-comparison'): void {
+  changeViewMode(mode: 'carousel' | 'comparison' | 'video-comparison' | 'gallery'): void {
     if (this.viewMode === 'video-comparison') {
       this.pauseAllVideos();
     }

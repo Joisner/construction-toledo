@@ -1,0 +1,101 @@
+<section class="admin-page">
+
+  <div class="adm-header">
+    <div>
+      <div class="eyebrow">Panel de Control</div>
+      <h2 class="adm-title">Asistencia<br><span>Toledo</span></h2>
+      <p class="adm-sub">Registros en tiempo real · Evidencia fotográfica</p>
+    </div>
+    <!-- <button class="btn-danger" (click)="clearAll()">🗑 Limpiar</button> -->
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total registros</div>
+      <div class="stat-value cyan">{{ attendance.totalCount() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Entradas hoy</div>
+      <div class="stat-value green">{{ attendance.entryCount() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Salidas hoy</div>
+      <div class="stat-value orange">{{ attendance.exitCount() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Última acción</div>
+      <div class="stat-value purple small">{{ attendance.lastRecord()?.time ?? '—' }}</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-row">
+      <input class="f-input" [(ngModel)]="filterName" (ngModelChange)="applyFilters()"
+        placeholder="🔍 Buscar trabajador…" />
+      <select class="f-select" [(ngModel)]="filterType" (ngModelChange)="applyFilters()">
+        <option value="">Todos</option>
+        <option value="ENTRADA">Entradas</option>
+        <option value="SALIDA">Salidas</option>
+      </select>
+      <input class="f-input date" type="date" [(ngModel)]="filterDate" (ngModelChange)="applyFilters()" />
+    </div>
+    <button class="btn-clear" (click)="clearFilters()">× Limpiar filtros</button>
+  </div>
+
+  <div class="rec-list">
+
+    <div class="rec-list-head">
+      <div></div>
+      <div>Trabajador</div>
+      <div style="text-align:center">Tipo</div>
+      <div style="text-align:right">Hora</div>
+      <div style="text-align:center">Foto</div>
+    </div>
+
+    <div class="empty-state" *ngIf="filtered().length === 0">
+      <span class="empty-icon">📋</span>
+      <div class="empty-title">Sin registros{{ hasFilters() ? ' con esos filtros' : ' aún' }}</div>
+      <div class="empty-sub">{{ hasFilters() ? 'Prueba ajustando los filtros' : 'Usa el módulo Registrar para capturar asistencia' }}</div>
+    </div>
+
+    <div class="rec-item" *ngFor="let r of filtered(); trackBy: trackById">
+      <div class="rec-avatar">{{ r.workerId.slice(-3) }}</div>
+      <div class="rec-info">
+        <div class="rec-name">{{ r.worker }}</div>
+        <div class="rec-sub">{{ r.workerId }}</div>
+      </div>
+      <div style="text-align:center">
+        <span class="badge" [class.be]="r.type === 'ENTRADA'" [class.bs]="r.type === 'SALIDA'">
+          {{ r.type === 'ENTRADA' ? '▲' : '▼' }} {{ r.type }}
+        </span>
+      </div>
+      <div class="rec-time-col">
+        <div class="rec-time">{{ r.time }}</div>
+        <div class="rec-date">{{ r.date }}</div>
+      </div>
+      <div class="rec-photo">
+        <img *ngIf="r.photo" [src]="r.photo" alt="Evidencia" (click)="openModal(r)" title="Ver evidencia" />
+        <div class="no-photo" *ngIf="!r.photo">—</div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<div class="modal" [class.open]="modalRecord() !== null" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()" *ngIf="modalRecord() as r">
+    <img [src]="r.photo" alt="Evidencia fotográfica" />
+    <div class="modal-info">
+      <strong>{{ r.worker }}</strong><br />
+      ID: <strong>{{ r.workerId }}</strong><br />
+      Tipo: <strong>{{ r.type }}</strong><br />
+      Hora: <strong>{{ r.time }}</strong><br />
+      Fecha: <strong>{{ r.date }}</strong>
+    </div>
+    <div class="modal-actions">
+      <!-- <button class="modal-btn modal-delete" (click)="deleteRecord(r)">🗑 Eliminar</button> -->
+      <button class="modal-close" (click)="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>

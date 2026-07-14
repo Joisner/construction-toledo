@@ -46,7 +46,7 @@ export class Invoice {
     city: '03780 PEGO (ALICANTE)',
     nif: 'Z 0305882 X',
     phone: '614 648 123',
-    email: 'iconstruccionestoledo38@gmail.com'
+    email: 'construccionestoledo38@gmail.com'
   };
 
   constructor() { }

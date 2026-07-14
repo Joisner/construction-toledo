@@ -188,24 +188,66 @@
                     Permisos y Estado
                 </h3>
 
-                <div class="space-y-4">
+                <div class="space-y-3">
+
                     <!-- Is Admin -->
-                    <div class="flex items-start space-x-3 p-4 bg-white rounded-lg border-2 border-gray-200">
+                    <div class="flex items-start space-x-3 p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-purple-200 transition-colors"
+                        [class.border-purple-300]="formData().is_admin"
+                        [class.bg-purple-50]="formData().is_admin">
                         <input type="checkbox" [(ngModel)]="formData().is_admin" name="is_admin" id="is_admin"
                             [disabled]="formData().id === 1"
                             class="w-5 h-5 text-purple-500 border-gray-300 rounded focus:ring-purple-400 mt-0.5">
                         <div class="flex-1">
-                            <label for="is_admin" class="block text-sm font-semibold text-gray-700 cursor-pointer">
+                            <label for="is_admin"
+                                class="block text-sm font-semibold text-gray-700 cursor-pointer flex items-center gap-2">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Contabilidad
+                                </span>
                                 Administrador
                             </label>
                             <p class="text-xs text-gray-500 mt-1">
-                                Los administradores tienen acceso completo al panel de gestión
+                                Acceso completo al panel de gestión y contabilidad
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Has Attendance (NUEVO) -->
+                    <div class="flex items-start space-x-3 p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-teal-200 transition-colors"
+                        [class.border-teal-300]="formData().has_attendance"
+                        [class.bg-teal-50]="formData().has_attendance">
+                        <input type="checkbox" [(ngModel)]="formData().has_attendance" name="has_attendance"
+                            id="has_attendance"
+                            class="w-5 h-5 text-teal-500 border-gray-300 rounded focus:ring-teal-400 mt-0.5">
+                        <div class="flex-1">
+                            <label for="has_attendance"
+                                class="block text-sm font-semibold text-gray-700 cursor-pointer flex items-center gap-2">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-700">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Asistencia
+                                </span>
+                                Control de Asistencia
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Acceso al módulo de registro y control de asistencia de trabajadores
                             </p>
                         </div>
                     </div>
 
                     <!-- Is Active -->
-                    <div class="flex items-start space-x-3 p-4 bg-white rounded-lg border-2 border-gray-200">
+                    <div class="flex items-start space-x-3 p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-green-200 transition-colors"
+                        [class.border-green-300]="formData().is_active"
+                        [class.bg-green-50]="formData().is_active">
                         <input type="checkbox" [(ngModel)]="formData().is_active" name="is_active" id="is_active"
                             [disabled]="formData().id === 1"
                             class="w-5 h-5 text-green-500 border-gray-300 rounded focus:ring-green-400 mt-0.5">
@@ -218,6 +260,21 @@
                             </p>
                         </div>
                     </div>
+
+                    <!-- Aviso si activo sin módulo -->
+                    @if (formData().is_active && !formData().is_admin && !formData().has_attendance) {
+                    <div class="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p class="text-xs text-amber-700 font-medium">
+                            El usuario está activo pero no tiene acceso a ningún módulo. Activa al menos uno.
+                        </p>
+                    </div>
+                    }
                 </div>
             </div>
 
@@ -233,6 +290,7 @@
                     {{ formData().id ? 'Actualizar' : 'Crear' }} Usuario
                 </button>
             </div>
+
             <!-- Validation summary -->
             @if (getValidationErrors().length) {
             <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-md">

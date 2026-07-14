@@ -13,6 +13,8 @@ import { InvoiceEditor } from './shared/components/invoice-creator/invoice-creat
 import { Budget } from './shared/components/budget/budget';
 import { DocumentsList } from './shared/components/documents-list/documents-list';
 import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
+import { RegisterAssistant } from './shared/components/register-assistant/register-assistant';
+import { RegisterModal } from './admin/register-modal/register-modal';
 
 // ✅ Simple Auth Guard
 const authGuard = () => {
@@ -50,6 +52,8 @@ export const routes: Routes = [
   { path: 'about', component: About },
   { path: 'contact', component: Contact },
   { path: 'testimonials', component: Testimonials },
+  { path: 'register', component: RegisterAssistant},
+  { path: 'records', component: RegisterModal},
   { path: 'login', component: Login },
   { 
     path: 'admin', 

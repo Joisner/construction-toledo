@@ -6,4 +6,6 @@ export interface IAdmin {
   password?: string; // Solo para crear/editar
   is_admin: boolean;
   is_active: boolean;
+  has_attendance: boolean;
 }
+

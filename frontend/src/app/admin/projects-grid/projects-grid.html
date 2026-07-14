@@ -326,7 +326,7 @@
 
 <!-- Modal de Media Management -->
 @if (showMediaModal()) {
-<app-media-management [isOpen]="showMediaModal()" [mediaList]="currentMediaList()" (close)="closeMediaModal()"
+<app-media-management [isOpen]="showMediaModal()" [mediaList]="currentMediaList()" [mainImageUrl]="editingItem()?.main_image" (close)="closeMediaModal()"
     (save)="onMediaSaved($event)">
 </app-media-management>
 }

@@ -1,0 +1,79 @@
+<section class="registro-page">
+    <div class="wrapper">
+
+        <!-- Barra de usuario -->
+        <div class="user-bar">
+            <div class="user-info">
+                <div class="avatar">{{ userInitials() }}</div>
+                <div class="user-text">
+                    <span class="user-name">{{ userInfo().name }}</span>
+                    <!-- <span class="user-role">{{ userRole() }}</span> -->
+                </div>
+            </div>
+            <button class="logout-btn" (click)="logout()">
+                <span class="logout-icon">⏻</span>
+                <span class="logout-label">Cerrar sesión</span>
+            </button>
+        </div>
+
+        <div class="trust-pill">
+            <span class="pulse-dot"></span>
+            Sistema de asistencia activo
+        </div>
+
+        <h1 class="title">Registro<br><span>de Turno</span></h1>
+        <p class="subtitle">Tu visión, nuestra experiencia.</p>
+
+        <!-- Reloj -->
+        <div class="clock-card">
+            <div class="clock-left">
+                <span class="clock-label">Hora actual</span>
+                <span class="clock-date">{{ currentDate() }}</span>
+            </div>
+            <span class="clock-time">{{ currentTime() }}</span>
+        </div>
+
+        <div class="shift-pill" [class]="shiftClass()">
+            {{ shiftLabel() }}
+        </div>
+
+        <div class="cam-card">
+            <span class="cc tl"></span><span class="cc tr"></span>
+            <span class="cc bl"></span><span class="cc br"></span>
+            <div class="flash" [class.on]="flashOn()"></div>
+
+            <video #videoEl autoplay playsinline [class.hidden]="cameraState() === 'captured'"></video>
+
+            <img *ngIf="capturedPhoto()" [src]="capturedPhoto()!" alt="Foto capturada" class="captured-img"
+                [class.visible]="cameraState() === 'captured'" />
+
+            <div class="cam-overlay" *ngIf="cameraState() !== 'ready' && cameraState() !== 'captured'">
+                <span class="ov-icon">{{ cameraState() === 'loading' ? '📷' : '⚠️' }}</span>
+                <span class="ov-text">{{ cameraState() === 'loading' ? 'Activando cámara…' : 'Sin acceso a la cámara'
+                    }}</span>
+            </div>
+        </div>
+
+        <button class="btn-primary" (click)="capture()" [disabled]="cameraState() !== 'ready'"
+            *ngIf="cameraState() !== 'captured'">
+            📸 &nbsp;Capturar y Registrar
+        </button>
+
+        <button class="btn-ghost" (click)="retry()" *ngIf="cameraState() === 'captured'">
+            ↺ &nbsp;Tomar otra foto
+        </button>
+
+        <div class="result-card" *ngIf="lastResult()" [class.ok]="lastResult()?.type === 'ENTRADA'"
+            [class.out]="lastResult()?.type === 'SALIDA'">
+            <div class="res-top">
+                <span class="res-label">
+                    {{ lastResult()?.type === 'ENTRADA' ? '✔ Entrada registrada' : '✔ Salida registrada' }}
+                </span>
+                <span>✅</span>
+            </div>
+            <div class="res-time">{{ lastResult()?.time }}</div>
+            <div class="res-meta">{{ lastResult()?.date }} · {{ lastResult()?.workerId }}</div>
+        </div>
+
+    </div>
+</section>

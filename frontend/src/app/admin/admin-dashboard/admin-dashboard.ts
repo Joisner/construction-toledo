@@ -10,8 +10,10 @@ import { Quotes } from '../../../core/services/quotes';
 import { Subscription } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
 import { Router } from '@angular/router';
+import { RegisterAssistant } from '../../shared/components/register-assistant/register-assistant';
+import { RegisterModal } from '../register-modal/register-modal';
 type TabType = 'quotes' | 'projects' | 'services' | 'accounting' | 'admins'
-  | 'budgets' | 'invoice' | 'documents';
+  | 'budgets' | 'invoice' | 'documents' | 'register' | 'records';
 
 interface MenuItem {
   id: TabType;
@@ -29,7 +31,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [ProjectsGrid, ServicesList, QuotesList, DocumentsList, Budget, InvoiceEditor, AdminsList],
+  imports: [ProjectsGrid, ServicesList, QuotesList, DocumentsList, Budget, InvoiceEditor, AdminsList, RegisterAssistant, RegisterModal],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
@@ -77,10 +79,15 @@ export class AdminDashboard {
       id: 'admins',
       label: 'Administradores',
       icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
+    },
+    {
+      id: 'records',
+      label: 'Ver marcaciones',
+      icon: 'M13 2H6a2 2 0 00-2 2v16l4-4h9a2 2 0 002-2V8l-6-6zM8 9h6M8 13h6'
     }
   ];
 
-  constructor(private quotesService: Quotes, private authService: Auth, private router: Router){}
+  constructor(private quotesService: Quotes, private authService: Auth, private router: Router) { }
 
   toggleSidebar() {
     this.sidebarCollapsed.update(v => !v);
@@ -99,7 +106,9 @@ export class AdminDashboard {
       admins: 'Administradores',
       'budgets': 'Presupuestos',
       'invoice': 'Facturas',
-      'documents': 'Documentos'
+      'documents': 'Documentos',
+      register: 'Register',
+      records: 'Records'
     };
     return titles[this.currentTab()];
   }
@@ -113,7 +122,9 @@ export class AdminDashboard {
       admins: 'Gestión de usuarios administradores',
       'budgets': 'Crear y editar presupuestos',
       'invoice': 'Crear y editar facturas',
-      'documents': 'Listado y exportación de documentos'
+      'documents': 'Listado y exportación de documentos',
+      register: '',
+      records: '',
     };
     return descriptions[this.currentTab()];
   }
@@ -136,21 +147,27 @@ export class AdminDashboard {
   }
 
   ngOnInit(): void {
-    // Listen to embedded edit/view events from lists
-    try {
-      window.addEventListener('open-document', this._openDocumentHandler as EventListener);
-      this.loadAllData();
-    } catch (e) {
-      // ignore
+    this.loadUser()
+    if (this.userInfo.has_attendance === true && this.userInfo.is_admin === false) {
+      this.loadUser();
+    } else {
+      // Listen to embedded edit/view events from lists
+      try {
+        window.addEventListener('open-document', this._openDocumentHandler as EventListener);
+        this.loadAllData();
+      } catch (e) {
+        // ignore
+      }
     }
+
   }
 
-  loadAllData(){
+  loadAllData() {
     this.loadQuotes();
     this.loadUser();
   }
 
-ngOnDestroy(): void {
+  ngOnDestroy(): void {
     window.removeEventListener('open-document', this._openDocumentHandler as EventListener);
     this.subscriptions.unsubscribe();
   }
@@ -168,13 +185,13 @@ ngOnDestroy(): void {
     this.subscriptions.add(sub);
   }
 
-  loadUser(){
+  loadUser() {
     const userData = localStorage.getItem('user');
     if (userData) {
-        const user = JSON.parse(userData);
-        if(user){
-          this.userInfo = user;
-        }
+      const user = JSON.parse(userData);
+      if (user) {
+        this.userInfo = user;
+      }
     }
   }
 
@@ -205,7 +222,7 @@ ngOnDestroy(): void {
 
   async logout() {
     const logout = this.authService.clearToken();
-    if(logout === null){
+    if (logout === null) {
       localStorage.clear();
       await this.router.navigate(['/login']);
     }

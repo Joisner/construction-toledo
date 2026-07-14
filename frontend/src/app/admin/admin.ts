@@ -39,6 +39,13 @@ interface IAdmin {
 
 type AdminTab = 'quotes' | 'projects' | 'services' | 'admins';
 
+type MediaSaveResult = {
+  pendingMedia: PendingMediaItem[];
+  deletedMediaIds: string[];
+  previewMedia: Media[];
+  mainMediaUrl?: string;
+};
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -112,32 +119,23 @@ export class Admin implements OnInit {
   }
   // --------------------------------------------------------------------
 
-  onMediaSaved(pendingMedia: PendingMediaItem[]) {
+  onMediaSaved(result: MediaSaveResult) {
     console.log('=== onMediaSaved called ===');
-    console.log('Received pending media:', pendingMedia.length, 'files');
+    console.log('Received pending media:', result.pendingMedia.length, 'files');
+    console.log('Deleted media IDs:', result.deletedMediaIds.length);
 
     // Guardar los archivos pendientes (para subir luego)
-    this.pendingMediaFiles.set(pendingMedia);
+    this.pendingMediaFiles.set(result.pendingMedia);
 
-    // Crear media "mock" solo para mostrar el contador y preview
-    const mockMedia: Media[] = pendingMedia.map((item, index) => ({
-      id: `pending-${Date.now()}-${index}`,
-      file_url: item.preview_url, // URL temporal para preview
-      mime: item.file.type,
-      media_type: item.media_type,
-      description: item.description,
-      is_before: item.is_before,
-      is_pending: true,
-      project_id: '',
-      created_at: new Date().toISOString()
-    }));
+    // Usar el preview generado por el componente hijo para mostrar la preview.
+    this.previewMedia.set(result.previewMedia || []);
 
-    // Merge into previewMedia so we don't mutate editingItem.media directly
-    const existingPreview = this.previewMedia() || (this.editingItem()?.media || []);
-    const merged = [...existingPreview, ...mockMedia];
-    this.previewMedia.set(merged);
-
-    console.log('Preview media updated with pending mocks. Added:', mockMedia.length, 'Preview total:', merged.length);
+    if (result.mainMediaUrl) {
+      const current = this.editingItem() || {};
+      (current as any).main_image = result.mainMediaUrl;
+      this.editingItem.set(current);
+      console.log('Main image preserved:', result.mainMediaUrl);
+    }
 
     // Cerrar el modal
     this.showMediaModal.set(false);

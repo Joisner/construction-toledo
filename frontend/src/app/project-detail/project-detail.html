@@ -87,8 +87,8 @@
                   <span class="block text-sm font-semibold text-gray-500 mb-1">Multimedia</span>
                   <span class="text-lg font-bold text-slate-900">
                     {{ project.media.length }} archivos
-                    <span *ngIf="hasImagePairs()" class="text-sm text-gray-600">({{ imagePairs.length }} fotos)</span>
-                    <span *ngIf="hasVideoPairs()" class="text-sm text-gray-600">({{ videoPairs.length }} videos)</span>
+                    <span *ngIf="imageGallery.length > 0" class="text-sm text-gray-600">({{ imageGallery.length }} fotos)</span>
+                    <span *ngIf="videoGallery.length > 0" class="text-sm text-gray-600">({{ videoGallery.length }} videos)</span>
                   </span>
                 </div>
               </div>
@@ -111,32 +111,13 @@
       <!-- Media Gallery -->
       <div class="order-1 lg:order-2">
         <div class="bg-white rounded-2xl shadow-xl p-4 sticky top-8">
-          <!-- Tab Selector -->
-          <div class="flex bg-gray-100 rounded-xl p-1 mb-4">
-          <!--   <button (click)="changeViewMode('carousel')" 
-              [class.bg-white]="viewMode === 'carousel'"
-              [class.shadow-md]="viewMode === 'carousel'" 
-              [class.text-cyan-400]="viewMode === 'carousel'"
-              [class.font-semibold]="viewMode === 'carousel'"
-              class="flex-1 px-4 py-3 rounded-lg transition-all duration-300 text-sm">
-              Galería
-            </button> -->
-            <button *ngIf="hasImagePairs()" (click)="changeViewMode('comparison')" 
-              [class.bg-white]="viewMode === 'comparison'"
-              [class.shadow-md]="viewMode === 'comparison'" 
-              [class.text-cyan-400]="viewMode === 'comparison'"
-              [class.font-semibold]="viewMode === 'comparison'"
-              class="flex-1 px-4 py-3 rounded-lg transition-all duration-300 text-sm">
-              Antes/Después
-            </button>
-            <button *ngIf="hasVideoPairs()" (click)="changeViewMode('video-comparison')" 
-              [class.bg-white]="viewMode === 'video-comparison'"
-              [class.shadow-md]="viewMode === 'video-comparison'" 
-              [class.text-cyan-400]="viewMode === 'video-comparison'"
-              [class.font-semibold]="viewMode === 'video-comparison'"
-              class="flex-1 px-4 py-3 rounded-lg transition-all duration-300 text-sm">
-              Videos
-            </button>
+          <!-- Galería principal -->
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-xl font-bold text-slate-900">Galería</h3>
+              <p class="text-sm text-gray-500">Fotos y videos organizados por tipo de contenido.</p>
+            </div>
+            <span class="text-sm font-semibold text-gray-600">{{ allMedia.length }} elementos</span>
           </div>
 
           <!-- CAROUSEL VIEW -->
@@ -184,8 +165,89 @@
             </div>
           </div>
 
-          <!-- IMAGE COMPARISON VIEW -->
-          <div *ngIf="viewMode === 'comparison' && hasImagePairs()" class="space-y-4">
+          <!-- GALLERY VIEW -->
+          <div *ngIf="viewMode === 'gallery'" class="gallery space-y-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="setMediaTab('images')"
+                  class="px-4 py-2 rounded-full transition-all duration-200 text-sm font-semibold"
+                  [class.bg-cyan-500]="selectedMediaTab === 'images'"
+                  [class.text-white]="selectedMediaTab === 'images'"
+                  [class.bg-gray-100]="selectedMediaTab !== 'images'"
+                  [class.text-slate-800]="selectedMediaTab !== 'images'">
+                  Fotos
+                </button>
+                <button type="button" (click)="setMediaTab('videos')"
+                  class="px-4 py-2 rounded-full transition-all duration-200 text-sm font-semibold"
+                  [class.bg-cyan-500]="selectedMediaTab === 'videos'"
+                  [class.text-white]="selectedMediaTab === 'videos'"
+                  [class.bg-gray-100]="selectedMediaTab !== 'videos'"
+                  [class.text-slate-800]="selectedMediaTab !== 'videos'">
+                  Videos
+                </button>
+              </div>
+              <div class="text-sm text-gray-600">
+                {{ currentGallery.length }} {{ selectedMediaTab === 'images' ? 'elementos' : 'videos' }} disponibles
+              </div>
+            </div>
+
+            <div *ngIf="currentGallery.length > 0" class="rounded-3xl bg-slate-100 shadow-lg overflow-hidden">
+              <div class="relative">
+                <img *ngIf="selectedMediaTab === 'images' && currentGalleryItem"
+                  [src]="currentGalleryItem.file_url"
+                  [alt]="currentGalleryItem.description"
+                  class="w-full h-[420px] object-cover">
+                <video *ngIf="selectedMediaTab === 'videos' && currentGalleryItem"
+                  [src]="currentGalleryItem.file_url"
+                  class="w-full h-[420px] object-cover"
+                  controls muted>
+                </video>
+
+                <div class="absolute inset-y-0 left-0 flex items-center">
+                  <button type="button" (click)="prevGalleryItem()"
+                    [disabled]="currentGalleryIndex === 0"
+                    class="mx-4 rounded-full bg-white/80 p-3 text-slate-800 shadow-lg transition hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="absolute inset-y-0 right-0 flex items-center">
+                  <button type="button" (click)="nextGalleryItem()"
+                    [disabled]="currentGalleryIndex === currentGallery.length - 1"
+                    class="mx-4 rounded-full bg-white/80 p-3 text-slate-800 shadow-lg transition hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="absolute bottom-4 left-4 bg-slate-900/80 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  {{ currentGalleryIndex + 1 }} / {{ currentGallery.length }}
+                </div>
+              </div>
+
+              <div class="p-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-lg font-semibold text-slate-900">{{ currentGalleryItem?.description || 'Sin descripción' }}</p>
+                    <p class="text-sm text-gray-500">{{ selectedMediaTab === 'images' ? 'Imagen' : 'Video' }} seleccionada</p>
+                  </div>
+                  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white"
+                    [class.bg-red-500]="currentGalleryItem?.is_before"
+                    [class.bg-green-500]="!currentGalleryItem?.is_before">
+                    {{ currentGalleryItem?.is_before ? 'ANTES' : 'DESPUÉS' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="currentGallery.length === 0" class="rounded-3xl bg-slate-100 shadow-lg p-8 text-center text-gray-500">
+              No hay {{ selectedMediaTab === 'images' ? 'fotos' : 'videos' }} disponibles para este proyecto.
+            </div>
+          </div>
+
+          <!-- IMAGE COMPARISON VIEW (comentado) -->
+          <div *ngIf="false" class="space-y-4">
             <!-- Comparison Selector -->
             <div class="flex justify-between items-center mb-4">
               <span class="text-sm font-semibold text-gray-600">
@@ -265,8 +327,8 @@
             </div>
           </div>
 
-          <!-- VIDEO COMPARISON VIEW -->
-          <div *ngIf="viewMode === 'video-comparison' && hasVideoPairs()" class="space-y-4">
+          <!-- VIDEO COMPARISON VIEW (comentado) -->
+          <div *ngIf="false" class="space-y-4">
             <!-- Video Selector -->
             <div class="flex justify-between items-center mb-4">
               <span class="text-sm font-semibold text-gray-600">

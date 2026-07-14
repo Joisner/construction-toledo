@@ -1,0 +1,143 @@
+<nav>
+    <div class="nav-logo">
+        <div class="logo-icon">🏗</div>
+        <div class="logo-text">
+            <span class="logo-main">CONSTRUCCIONES</span>
+            <span class="logo-sub">TOLEDO</span>
+        </div>
+        <span class="logo-divider">/</span>
+        <span class="logo-module">ASISTENCIA</span>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showPage('worker')">REGISTRAR</button>
+        <button class="nav-tab" onclick="showPage('admin')">ADMINISTRAR</button>
+    </div>
+
+    <div class="clock-display">
+        <div class="clock-time" id="navClock">--:--:--</div>
+        <div class="clock-date" id="navDate">---</div>
+    </div>
+</nav>
+
+<!-- ═══════════ PÁGINA TRABAJADOR ═══════════ -->
+<div class="page worker-page active" id="page-worker">
+    <div class="worker-container">
+
+        <div class="worker-header">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                Sistema activo
+            </div>
+            <h1 class="worker-title">REGISTRO<br>DE TURNO</h1>
+            <div class="shift-indicator shift-entry" id="shiftLabel">◆ ENTRADA</div>
+        </div>
+
+        <div class="camera-wrapper">
+            <div class="camera-corner tl"></div>
+            <div class="camera-corner tr"></div>
+            <div class="camera-corner bl"></div>
+            <div class="camera-corner br"></div>
+            <div class="capture-flash" id="flash"></div>
+            <video id="videoFeed" autoplay playsinline></video>
+            <img id="capturedPhoto" alt="Foto capturada">
+            <div class="camera-overlay" id="cameraOverlay">
+                <div class="cam-icon">📷</div>
+                <div class="cam-label">Activando cámara...</div>
+            </div>
+        </div>
+
+        <button class="btn-capture" id="btnCapture" onclick="capturePhoto()" disabled>
+            📸 &nbsp;CAPTURAR Y REGISTRAR
+        </button>
+        <button class="btn-retry" id="btnRetry" onclick="retryCamera()">↺ &nbsp;Tomar otra foto</button>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-icon" id="resultIcon">▲</div>
+            <div>
+                <div class="result-type" id="resultType">ENTRADA REGISTRADA</div>
+                <div class="result-time" id="resultTime">--:--:--</div>
+                <div class="result-date" id="resultDate">---</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══════════ PÁGINA ADMIN ═══════════ -->
+<div class="page admin-page" id="page-admin">
+
+    <div class="admin-header">
+        <div>
+            <div class="header-eyebrow">CONSTRUCCIONES TOLEDO</div>
+            <h2 class="admin-title">PANEL DE CONTROL</h2>
+            <div class="admin-subtitle">Registro de asistencia · Actualización en tiempo real</div>
+        </div>
+        <button class="btn-danger-outline" onclick="clearAllRecords()">🗑 Limpiar registros</button>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Total registros</div>
+            <div class="stat-value stat-cyan" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Entradas hoy</div>
+            <div class="stat-value stat-green" id="statEntries">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Salidas hoy</div>
+            <div class="stat-value stat-red" id="statExits">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Última acción</div>
+            <div class="stat-value stat-cyan stat-small" id="statLast">—</div>
+        </div>
+    </div>
+
+    <div class="filters-row">
+        <input class="filter-input" id="filterName" placeholder="Buscar trabajador..." oninput="renderTable()">
+        <select class="filter-select" id="filterType" onchange="renderTable()">
+            <option value="">Todos los tipos</option>
+            <option value="ENTRADA">Entradas</option>
+            <option value="SALIDA">Salidas</option>
+        </select>
+        <input class="filter-input" id="filterDate" type="date" onchange="renderTable()" style="color-scheme:dark;">
+        <button class="btn-clear-filters" onclick="clearFilters()">× Limpiar filtros</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Trabajador</th>
+                    <th>Tipo</th>
+                    <th>Hora</th>
+                    <th>Fecha</th>
+                    <th>Foto</th>
+                </tr>
+            </thead>
+            <tbody id="recordsBody">
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            Sin registros aún. Use el módulo REGISTRAR para capturar asistencia.
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Modal foto -->
+<div class="photo-modal" id="photoModal" onclick="closeModal()">
+    <div class="photo-modal-inner" onclick="event.stopPropagation()">
+        <img id="modalImg" src="" alt="Evidencia">
+        <div class="modal-info" id="modalInfo"></div>
+        <button class="btn-modal-close" onclick="closeModal()">CERRAR</button>
+    </div>
+</div>

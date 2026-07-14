@@ -1,0 +1,273 @@
+/* ─── PAGE ─── */
+.admin-page {
+  padding: 28px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ─── HEADER ─── */
+.adm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #00bcd4;
+  margin-bottom: 4px;
+}
+.adm-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a2233;
+  line-height: 1.2;
+}
+.adm-title span { color: #00bcd4; }
+.adm-sub {
+  font-size: 13px;
+  color: #7a8fa6;
+  margin-top: 5px;
+}
+
+/* ─── BUTTONS ─── */
+.btn-danger {
+  background: #fff;
+  color: #e53935;
+  border: 1.5px solid #e53935;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-danger:hover { background: #e53935; color: #fff; }
+
+.btn-clear {
+  background: none;
+  border: 1.5px solid #e2e8f0;
+  color: #94a3b8;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-clear:hover { border-color: #00bcd4; color: #00bcd4; }
+
+/* ─── STATS ─── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  border: 1px solid #eef2f7;
+  border-top: 3px solid transparent;
+}
+.stat-card:nth-child(1) { border-top-color: #00bcd4; }
+.stat-card:nth-child(2) { border-top-color: #43a047; }
+.stat-card:nth-child(3) { border-top-color: #fb8c00; }
+.stat-card:nth-child(4) { border-top-color: #7b1fa2; }
+.stat-label {
+  font-size: 11px;
+  color: #7a8fa6;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.stat-value { font-size: 32px; font-weight: 700; }
+.stat-value.cyan   { color: #00bcd4; }
+.stat-value.green  { color: #43a047; }
+.stat-value.orange { color: #fb8c00; }
+.stat-value.purple { color: #7b1fa2; }
+.stat-value.small  { font-size: 20px; }
+
+/* ─── FILTERS ─── */
+.filters {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  border: 1px solid #eef2f7;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filter-row {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.f-input, .f-select {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #1a2233;
+  outline: none;
+  background: #f8fafc;
+}
+.f-input { flex: 1; min-width: 160px; }
+.f-select { min-width: 120px; }
+.f-input.date { min-width: 136px; flex: 0; }
+.f-input:focus, .f-select:focus { border-color: #00bcd4; background: #fff; }
+
+/* ─── RECORD LIST ─── */
+.rec-list {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eef2f7;
+  overflow: hidden;
+}
+
+.rec-list-head {
+  display: grid;
+  grid-template-columns: 48px 1fr 80px 90px 60px;
+  background: linear-gradient(90deg, #00bcd4, #1565c0);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  padding: 11px 20px;
+  align-items: center;
+}
+
+.rec-item {
+  display: grid;
+  grid-template-columns: 48px 1fr 80px 90px 60px;
+  align-items: center;
+  padding: 13px 20px;
+  border-bottom: 1px solid #f0f4f8;
+  transition: background .12s;
+}
+.rec-item:last-child { border-bottom: none; }
+.rec-item:hover { background: #f5faff; }
+
+.rec-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00bcd4, #1565c0);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rec-info { padding-left: 6px; }
+.rec-name { font-size: 14px; font-weight: 600; color: #1a2233; }
+.rec-sub  { font-size: 11px; color: #aab8c8; margin-top: 1px; }
+
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.be { background: #e8f5e9; color: #2e7d32; }
+.bs { background: #fff3e0; color: #e65100; }
+
+.rec-time-col { text-align: right; }
+.rec-time { font-size: 14px; font-weight: 700; color: #1a2233; }
+.rec-date { font-size: 11px; color: #aab8c8; margin-top: 2px; }
+
+.rec-photo { display: flex; justify-content: center; }
+.rec-photo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid #eef2f7;
+}
+.rec-photo img:hover { border-color: #00bcd4; }
+.no-photo { color: #d1dbe6; font-size: 16px; text-align: center; }
+
+/* ─── EMPTY STATE ─── */
+.empty-state { padding: 56px 20px; text-align: center; }
+.empty-icon  { font-size: 36px; display: block; margin-bottom: 10px; }
+.empty-title { font-size: 15px; font-weight: 600; color: #4a5568; }
+.empty-sub   { font-size: 13px; color: #aab8c8; margin-top: 5px; }
+
+/* ─── MODAL ─── */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal.open { display: flex; }
+.modal-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 12px 40px rgba(0,0,0,.2);
+}
+.modal-card img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  max-height: 260px;
+  object-fit: cover;
+}
+.modal-info {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #4a5568;
+  margin-bottom: 16px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+.modal-btn {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-delete {
+  background: #ffebee;
+  color: #e53935;
+  border: 1.5px solid #e53935;
+}
+.modal-delete:hover { background: #e53935; color: #fff; }
+.modal-close {
+  flex: 1;
+  background: linear-gradient(90deg, #00bcd4, #1565c0);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
